@@ -1,0 +1,442 @@
+Luvly Command System
+
+Make commands feel:
+
+fast
+
+aesthetic
+
+memorable
+
+easy to type
+
+
+Use:
+
+luv
+
+Luv
+
+u
+
+
+as universal prefixes/shortcuts.
+
+Example:
+
+luv profile
+
+u crush
+
+Luv match
+
+
+
+---
+
+❤️ Social Core
+
+Profile System
+
+luv profile
+
+u p
+
+luv aura
+
+u bio
+
+Luv badge
+
+u status
+
+
+Features:
+
+bio
+
+interests
+
+pronouns
+
+badges
+
+aura identity
+
+themes
+
+
+
+---
+
+💌 Matchmaking Core
+
+Matching Commands
+
+luv match
+
+u match
+
+luv crush
+
+u c
+
+Luv ship
+
+u soulmate
+
+luv daily
+
+
+Features:
+
+compatibility %
+
+smart matching
+
+crush reveals
+
+soulmate pairing
+
+daily recommendations
+
+
+
+---
+
+🌙 Midnight Core
+
+Night Engagement
+
+luv midnight
+
+u night
+
+luv comfort
+
+u comfort
+
+Luv vibe
+
+u lonely
+
+
+Features:
+
+late-night prompts
+
+emotional pairing
+
+comfort AI
+
+mood matching
+
+midnight confessions
+
+
+
+---
+
+🎭 Confession Core
+
+Anonymous System
+
+luv confess
+
+u secret
+
+luv admire
+
+u anon
+
+Luv reveal
+
+
+Features:
+
+anonymous confessions
+
+hidden crushes
+
+secret compliments
+
+emotional posts
+
+
+
+---
+
+💬 Chemistry Core
+
+Interaction Tracking
+
+luv chemistry
+
+u chem
+
+luv streak
+
+u streak
+
+luv admirer
+
+u duo
+
+
+Features:
+
+typing chemistry
+
+message sync
+
+top admirer
+
+interaction levels
+
+duo energy
+
+
+
+---
+
+🎮 Engagement Core
+
+Gamification
+
+luv rank
+
+u xp
+
+luv inventory
+
+u inv
+
+luv dailyheart
+
+u level
+
+
+Features:
+
+XP
+
+aura leveling
+
+collectibles
+
+seasonal rewards
+
+heart economy
+
+
+
+---
+
+🎧 Voice Core
+
+VC Matching
+
+luv vc
+
+u vc
+
+luv listen
+
+u room
+
+Luv together
+
+
+Features:
+
+lonely VC detection
+
+shared music vibes
+
+voice pairing
+
+chill room suggestions
+
+
+
+---
+
+🤖 AI Core
+
+AI Features
+
+luv rizz
+
+u rizz
+
+luv analyze
+
+u vibecheck
+
+luv starter
+
+u flirt
+
+
+Features:
+
+AI pickup lines
+
+conversation starters
+
+mood analysis
+
+compatibility AI
+
+flirting assistant
+
+
+
+---
+
+🛡️ Safety Core
+
+Protection System
+
+luv report
+
+u block
+
+luv safety
+
+u trust
+
+luv verify
+
+
+Features:
+
+anti-harassment
+
+block system
+
+catfish alerts
+
+age verification
+
+trust scoring
+
+
+
+---
+
+💎 Premium Core
+
+Premium Features
+
+luv premium
+
+u vip
+
+luv theme
+
+u glow
+
+Luv elite
+
+
+Features:
+
+profile themes
+
+animated cards
+
+premium aura
+
+advanced analytics
+
+VIP matchmaking
+
+
+
+---
+
+🔥 Ultra Clean Shortcut Style
+
+Examples users will spam:
+
+u c @user
+u chem @user
+u vibe
+u lonely
+u rizz
+u p
+u streak
+
+This is important because: short commands = more engagement.
+
+
+---
+
+BEST COMMAND STYLE
+
+Instead of: ❌ /compatibilitycheck
+
+Use: ✅ u chem
+
+Instead of: ❌ /anonymousconfession
+
+Use: ✅ u confess
+
+Minimal = modern.
+
+
+---
+
+Hidden Viral Commands
+
+“u miss”
+
+Bot asks:
+
+> “who’s on your mind tonight?”
+
+
+
+
+---
+
+“u overthink”
+
+Generates emotional late-night thoughts.
+
+
+---
+
+“u playlist”
+
+Creates shared Spotify vibe playlists.
+
+
+---
+
+“u ghost”
+
+Tracks ghosting behavior jokingly.
+
+Example:
+
+> “You disappeared for 3 days.” “Ghost aura increased.”
+
+
+
+
+---
+
+Branding Rule
+
+Always keep:
+
+lowercase aesthetic
+
+soft emotional wording
+
+short command names
+
+
+Because Gen-Z users LOVE minimalist interaction systems.
