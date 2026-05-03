@@ -20,10 +20,13 @@ import {
   getChemistry, addChemistry,
   revealConfession, getConfession, addConfession,
   claimDaily, blockUser,
+  setUserTheme, buyTheme, getOwnedThemes,
 } from '../utils/database.js';
 import { unlock } from '../utils/achievements.js';
 import { checkLevelUp } from '../utils/levelUp.js';
 import { SHOP_ITEMS } from '../commands/engagement/shop.js';
+import { buildThemeListPage } from '../utils/themeListPage.js';
+import { THEME_LIST } from '../themes/index.js';
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -33,6 +36,78 @@ export function buildHandlers(client) {
 
     // ── BUTTONS ──────────────────────────────────────────────────────────────
     buttons: {
+
+      // ── Theme gallery pagination ──────────────────────────────────────────
+      // tlg:{pageIdx}:{userId}  — navigate
+      // tlb:{themeId}:{userId}  — buy
+      // tls:{themeId}:{userId}  — set/equip
+
+      tlg: async (i, [pageStr, userId]) => {
+        // Only the original user may click
+        if (i.user.id !== userId) {
+          return i.reply({ embeds: [errorEmbed('these controls aren\'t for you ✦')], ephemeral: true });
+        }
+        await i.deferUpdate();
+        try {
+          const page = await buildThemeListPage(userId, parseInt(pageStr, 10), client, i.user);
+          await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
+        } catch (err) {
+          console.error('[THEME NAV]', err);
+          await i.editReply({ embeds: [errorEmbed('failed to load page ✦')], components: [] });
+        }
+      },
+
+      tlb: async (i, [themeId, userId]) => {
+        if (i.user.id !== userId) {
+          return i.reply({ embeds: [errorEmbed('these controls aren\'t for you ✦')], ephemeral: true });
+        }
+        const theme = THEME_LIST.find(t => t.id === themeId);
+        if (!theme) return i.reply({ embeds: [errorEmbed('theme not found ✦')], ephemeral: true });
+
+        const result = buyTheme(userId, themeId, theme.cost);
+        if (!result.success) {
+          return i.reply({
+            embeds: [errorEmbed(`not enough hearts! need **${theme.cost}** 💗, you have **${result.balance}** ✦`)],
+            ephemeral: true,
+          });
+        }
+        // Refresh the current page so the button updates to "equip"
+        await i.deferUpdate();
+        const currentPage = THEME_LIST.findIndex(t => t.id === themeId);
+        try {
+          const page = await buildThemeListPage(userId, currentPage, client, i.user);
+          await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
+        } catch (err) {
+          await i.editReply({ embeds: [errorEmbed('bought! use `u theme set ' + themeId + '` to equip ✦')], components: [] });
+        }
+      },
+
+      tls: async (i, [themeId, userId]) => {
+        if (i.user.id !== userId) {
+          return i.reply({ embeds: [errorEmbed('these controls aren\'t for you ✦')], ephemeral: true });
+        }
+        const theme  = THEME_LIST.find(t => t.id === themeId);
+        if (!theme) return i.reply({ embeds: [errorEmbed('theme not found ✦')], ephemeral: true });
+
+        const owned = getOwnedThemes(userId);
+        // Auto-grant free themes
+        if (theme.cost === 0 && !owned.includes(themeId)) {
+          buyTheme(userId, themeId, 0);
+        }
+        const ok = setUserTheme(userId, themeId);
+        if (!ok) {
+          return i.reply({ embeds: [errorEmbed(`you don't own **${theme.name}** yet ✦`)], ephemeral: true });
+        }
+
+        await i.deferUpdate();
+        const currentPage = THEME_LIST.findIndex(t => t.id === themeId);
+        try {
+          const page = await buildThemeListPage(userId, currentPage, client, i.user);
+          await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
+        } catch (err) {
+          await i.editReply({ embeds: [errorEmbed(`equipped **${theme.name}**! ✦`)], components: [] });
+        }
+      },
 
       // ── Profile ────────────────────────────────────────────────────────────
       profile_edit: async (i) => {

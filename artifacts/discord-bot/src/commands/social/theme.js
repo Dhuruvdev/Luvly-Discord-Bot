@@ -21,17 +21,20 @@ function formatThemeList(owned) {
 
 // ── Sub-command handlers ──────────────────────────────────────────────────────
 async function handleList(message, client) {
-  const user  = getUser(message.author.id);
-  const owned = getOwnedThemes(message.author.id);
+  const { buildThemeListPage } = await import('../../utils/themeListPage.js');
 
-  const embed = luvEmbed(COLORS.primary)
-    .setTitle(`${EMOJIS.sparkle} luvly card themes`)
-    .setDescription(formatThemeList(owned))
-    .addFields({ name: '💗 your hearts', value: `\`${getHearts(message.author.id)}\``, inline: true },
-               { name: `${EMOJIS.sparkle} current theme`, value: `\`${user.theme ?? 'lavender'}\``, inline: true })
-    .setFooter(footer(client));
+  // Show loading state, then update with first page
+  const loading = await message.reply({
+    embeds: [luvEmbed(COLORS.primary).setDescription(`${EMOJIS.sparkle} loading theme gallery...`)],
+  });
 
-  await message.reply({ embeds: [embed] });
+  try {
+    const page = await buildThemeListPage(message.author.id, 0, client, message.author);
+    await loading.edit({ embeds: [page.embed], files: page.files, components: page.components });
+  } catch (err) {
+    console.error('[THEME LIST]', err);
+    await loading.edit({ embeds: [errorEmbed('failed to load themes ✦')], components: [] });
+  }
 }
 
 async function handleSet(message, args, client) {
