@@ -1,74 +1,74 @@
 import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
-import { getUser } from '../../utils/database.js';
+import { getUser, getHearts, saveUser } from '../../utils/database.js';
+import { getUserAchievements } from '../../utils/achievements.js';
+import { unlock } from '../../utils/achievements.js';
 
 export default {
   name: 'profile',
   aliases: ['p'],
-  description: 'view yours or someone else\'s profile',
+  description: 'view yours or someone\'s profile',
   category: 'social',
   usage: 'profile [@user]',
+  cooldown: 3_000,
 
   async execute(message, args, client) {
-    const target = message.mentions.users.first() || message.author;
-    const user = getUser(target.id);
-    const member = message.guild.members.cache.get(target.id);
-    const { current, next } = getLevelData(user.xp || 0);
-    const xpBar = getXpBar(user.xp || 0, current, next);
+    const target    = message.mentions.users.first() ?? message.author;
+    const user      = getUser(target.id);
+    const hearts    = getHearts(target.id);
+    const unlocked  = getUserAchievements(target.id);
+    const isSelf    = target.id === message.author.id;
+    const { current, next } = getLevelData(user.xp ?? 0);
+    const xpBar = getXpBar(user.xp ?? 0, current, next);
+
     const auraColors = {
-      soft: COLORS.soft, ethereal: COLORS.purple, magnetic: COLORS.primary,
-      chaotic: COLORS.rose, midnight: COLORS.midnight, golden: COLORS.gold,
+      soft:      COLORS.soft,
+      ethereal:  COLORS.purple,
+      magnetic:  COLORS.primary,
+      chaotic:   COLORS.rose,
+      midnight:  COLORS.midnight,
+      golden:    COLORS.gold,
     };
 
-    const embed = luvEmbed(auraColors[user.aura] || COLORS.primary)
+    // bump profile view count (others viewing your profile)
+    if (!isSelf) {
+      saveUser(target.id, { profileViews: (user.profileViews ?? 0) + 1 });
+    }
+
+    // achievement: first_profile for self on first edit, profile_viewer for viewer
+    if (!isSelf) {
+      await unlock(message.author.id, 'profile_viewer', client).catch(() => {});
+    }
+
+    const recentAch = unlocked.slice(-3).map(a => a.emoji).join(' ') || '—';
+    const badgeStr  = user.badges?.length ? user.badges.join(' ') : '';
+
+    const embed = luvEmbed(auraColors[user.aura] ?? COLORS.primary)
       .setAuthor({ name: `${target.username} ✦`, iconURL: target.displayAvatarURL({ dynamic: true }) })
       .setThumbnail(target.displayAvatarURL({ size: 256, dynamic: true }))
-      .setDescription(user.bio ? `*"${user.bio}"*` : '*no bio set yet...*')
+      .setDescription(user.bio ? `*"${user.bio}"*` : '*no bio yet...*')
       .addFields(
-        {
-          name: `${EMOJIS.star} aura`,
-          value: `**${user.aura || 'soft'}**`,
-          inline: true,
-        },
-        {
-          name: `${EMOJIS.sparkle} pronouns`,
-          value: user.pronouns || '*not set*',
-          inline: true,
-        },
-        {
-          name: `${EMOJIS.rank} level`,
-          value: `**${current.level}** — *${current.title}*`,
-          inline: true,
-        },
-        {
-          name: `${EMOJIS.fire} xp progress`,
-          value: `\`${xpBar}\``,
-        },
-        {
-          name: `${EMOJIS.heart} interests`,
-          value: user.interests?.length ? user.interests.map(i => `\`${i}\``).join(' ') : '*none listed*',
-        },
-        {
-          name: `${EMOJIS.streak} streak`,
-          value: `**${user.streak || 0}** days`,
-          inline: true,
-        },
-        {
-          name: `${EMOJIS.chemistry} total xp`,
-          value: `**${user.xp || 0}**`,
-          inline: true,
-        },
+        { name: `${EMOJIS.star} aura`,       value: `**${user.aura ?? 'soft'}**`,           inline: true },
+        { name: `${EMOJIS.sparkle} pronouns`,value: user.pronouns ?? '*not set*',            inline: true },
+        { name: `${EMOJIS.rank} level`,      value: `**${current.level}** — *${current.title}*`, inline: true },
+        { name: `${EMOJIS.fire} xp`,         value: `\`${xpBar}\``,                          inline: false },
+        { name: `${EMOJIS.heart} hearts`,    value: `**${hearts} 💗**`,                       inline: true },
+        { name: `${EMOJIS.streak} streak`,   value: `**${user.streak ?? 0}** days 🔥`,        inline: true },
+        { name: '👀 profile views',           value: `**${user.profileViews ?? 0}**`,          inline: true },
+        { name: `${EMOJIS.heart} interests`, value: user.interests?.length ? user.interests.map(i => `\`${i}\``).join(' ') : '*none listed*', inline: false },
+        { name: '🏅 recent achievements',    value: recentAch + (unlocked.length ? `  *(${unlocked.length} total)*` : ''), inline: false },
       )
       .setFooter(footer(client));
 
-    const isSelf = target.id === message.author.id;
-    const rows = [];
+    if (badgeStr) embed.addFields({ name: '🏷️ badges', value: badgeStr, inline: false });
 
+    const rows = [];
     if (isSelf) {
       rows.push(buildButtons(
-        { id: 'profile_edit', label: 'edit profile', emoji: '✏️', style: ButtonStyle.Primary },
-        { id: 'profile_aura', label: 'change aura', emoji: '🌸', style: ButtonStyle.Secondary },
+        { id: 'profile_edit',  label: 'edit profile', emoji: '✏️',  style: ButtonStyle.Primary },
+        { id: 'profile_aura',  label: 'change aura',  emoji: '🌸',  style: ButtonStyle.Secondary },
+        { id: 'daily_claim',   label: 'claim daily',  emoji: '🎁',  style: ButtonStyle.Success },
       ));
     }
 
