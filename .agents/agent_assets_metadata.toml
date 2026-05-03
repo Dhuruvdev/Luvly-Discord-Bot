@@ -6,3 +6,63 @@ id = "3g2g6TmoWj3bGnauARx0A"
 uri = "file://artifacts/discord-bot/test-card.png"
 type = "image"
 title = "Luvly Profile Card — Test Output"
+
+[[outputs]]
+id = "bpwDfq5F5DALT39Qc6cJ2"
+uri = "file://artifacts/discord-bot/test-cards/lavender.png"
+type = "image"
+title = "🌸 Lavender Dream (free / default)"
+
+[[outputs]]
+id = "mTvEIPXgD07UI9VAXO43J"
+uri = "file://artifacts/discord-bot/test-cards/sakura.png"
+type = "image"
+title = "🌺 Sakura Kiss (150 💗)"
+
+[[outputs]]
+id = "CKOJdcJpp9VxHc4BPwwL0"
+uri = "file://artifacts/discord-bot/test-cards/cotton.png"
+type = "image"
+title = "🍬 Cotton Candy (100 💗)"
+
+[[outputs]]
+id = "L5cjjRRkmdcYgtoWSuCLs"
+uri = "file://artifacts/discord-bot/test-cards/mint.png"
+type = "image"
+title = "🍃 Mint Cloud (150 💗)"
+
+[[outputs]]
+id = "sWHA5PvlRZLAWzSHUW3jX"
+uri = "file://artifacts/discord-bot/test-cards/ocean.png"
+type = "image"
+title = "🌊 Ocean Mist (250 💗)"
+
+[[outputs]]
+id = "N4946jaPnAJfkMjOxvVNj"
+uri = "file://artifacts/discord-bot/test-cards/sunset.png"
+type = "image"
+title = "🌅 Golden Sunset (280 💗)"
+
+[[outputs]]
+id = "QS6wFLZzTy6iMqhkJ7oCw"
+uri = "file://artifacts/discord-bot/test-cards/rose.png"
+type = "image"
+title = "🥀 Rose Garden (320 💗)"
+
+[[outputs]]
+id = "vIu2ek3xiQlFfmQeTBpTZ"
+uri = "file://artifacts/discord-bot/test-cards/midnight.png"
+type = "image"
+title = "🌙 Midnight Bloom (400 💗)"
+
+[[outputs]]
+id = "4r3VQ0_LQob4DcpDMPgWr"
+uri = "file://artifacts/discord-bot/test-cards/galaxy.png"
+type = "image"
+title = "✨ Galaxy Dust (600 💗)"
+
+[[outputs]]
+id = "FfHBHLRNomsLN6fYLzaw4"
+uri = "file://artifacts/discord-bot/test-cards/aurora.png"
+type = "image"
+title = "🌌 Aurora Borealis (700 💗)"

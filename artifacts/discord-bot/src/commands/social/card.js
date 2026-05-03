@@ -1,7 +1,7 @@
 import { AttachmentBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
-import { getUser, getHearts } from '../../utils/database.js';
+import { getUser, getHearts, getUserTheme } from '../../utils/database.js';
 import { generateCard } from '../../utils/cardGenerator.js';
 
 export default {
@@ -26,6 +26,7 @@ export default {
     const loadMsg = await message.reply({ embeds: [loadingEmbed] });
 
     try {
+      const themeId = getUserTheme(target.id);
       const buffer = await generateCard({
         username:   target.username,
         avatarURL:  target.displayAvatarURL({ extension: 'png', size: 256 }),
@@ -36,7 +37,7 @@ export default {
         streak:     user.streak    ?? 0,
         hearts,
         aura:       user.aura      ?? 'soft',
-      });
+      }, themeId);
 
       const attachment = new AttachmentBuilder(buffer, { name: `${target.username}-card.png` });
 

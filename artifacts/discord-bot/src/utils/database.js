@@ -14,7 +14,8 @@ function defaultUser(userId) {
     bio: null,
     pronouns: null,
     interests: [],
-    theme: 'default',
+    theme: 'lavender',
+    ownedThemes: ['lavender'],
     badges: [],
     xp: 0,
     hearts: 0,
@@ -230,4 +231,35 @@ export function isBlocked(userId, targetId) {
   const db = getTable('blocks');
   return (db[userId] ?? []).includes(targetId) ||
          (db[targetId] ?? []).includes(userId);
+}
+
+// ── Themes ────────────────────────────────────────────────────────────────────
+export function getUserTheme(userId) {
+  return getUser(userId).theme ?? 'lavender';
+}
+
+export function setUserTheme(userId, themeId) {
+  const user = getUser(userId);
+  const owned = user.ownedThemes ?? ['lavender'];
+  if (!owned.includes(themeId)) return false;
+  saveUser(userId, { theme: themeId });
+  return true;
+}
+
+export function getOwnedThemes(userId) {
+  const user = getUser(userId);
+  const owned = user.ownedThemes ?? ['lavender'];
+  // Always ensure lavender is owned
+  if (!owned.includes('lavender')) owned.unshift('lavender');
+  return owned;
+}
+
+export function buyTheme(userId, themeId, cost) {
+  const balance = getHearts(userId);
+  if (balance < cost) return { success: false, balance };
+  const owned = getOwnedThemes(userId);
+  if (owned.includes(themeId)) return { success: true, balance, alreadyOwned: true };
+  spendHearts(userId, cost);
+  saveUser(userId, { ownedThemes: [...owned, themeId] });
+  return { success: true, balance: balance - cost };
 }

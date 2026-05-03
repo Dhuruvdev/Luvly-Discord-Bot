@@ -1,22 +1,23 @@
 /**
- * Standalone test script — generates a sample profile card and saves it.
- * Run with:  node generate-test-card.mjs
+ * Generates a test card for every theme and saves them to test-cards/
+ * Run: node generate-test-card.mjs
  */
-
-import { writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { writeFileSync, mkdirSync } from 'fs';
+import { join, dirname }            from 'path';
+import { fileURLToPath }            from 'url';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-
-// Bootstrap the config path so cardGenerator resolves correctly
 process.chdir(__dir);
 
-const { generateCard } = await import('./src/utils/cardGenerator.js');
+const { generateCard }  = await import('./src/utils/cardGenerator.js');
+const { THEME_LIST }    = await import('./src/themes/index.js');
 
-const testData = {
+const OUT = join(__dir, 'test-cards');
+mkdirSync(OUT, { recursive: true });
+
+const DATA = {
   username:   'Lylac',
-  avatarURL:  null,          // no real URL — placeholder will be drawn
+  avatarURL:  null,
   pronouns:   'she/her',
   bio:        'artist • animator',
   interests:  ['swiftie', 'travel', 'libra'],
@@ -26,9 +27,12 @@ const testData = {
   aura:       'soft',
 };
 
-console.log('✦ generating test card...');
-const buffer = await generateCard(testData);
+for (const theme of THEME_LIST) {
+  process.stdout.write(`✦ generating ${theme.name.padEnd(22)}`);
+  const buf  = await generateCard(DATA, theme.id);
+  const path = join(OUT, `${theme.id}.png`);
+  writeFileSync(path, buf);
+  console.log(`→ test-cards/${theme.id}.png`);
+}
 
-const outPath = join(__dir, 'test-card.png');
-writeFileSync(outPath, buffer);
-console.log(`✦ saved → ${outPath}`);
+console.log('\n✦ all themes done!');
