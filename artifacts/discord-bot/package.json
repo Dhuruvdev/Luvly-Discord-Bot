@@ -9,6 +9,8 @@
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
+    "@fontsource/nunito": "^5.2.7",
+    "@napi-rs/canvas": "^0.1.100",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5"
   }

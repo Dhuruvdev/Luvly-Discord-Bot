@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "3g2g6TmoWj3bGnauARx0A"
+uri = "file://artifacts/discord-bot/test-card.png"
+type = "image"
+title = "Luvly Profile Card — Test Output"
