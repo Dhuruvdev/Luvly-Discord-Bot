@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Luvly Status"
+version = "1.0.0"
+id = "artifacts/luvly-status"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18746
+
+[services.development]
+run = "pnpm --filter @workspace/luvly-status run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/luvly-status", "run", "build" ]
+publicDir = "artifacts/luvly-status/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18746"
+BASE_PATH = "/"
