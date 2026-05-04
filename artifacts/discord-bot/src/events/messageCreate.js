@@ -19,9 +19,10 @@ export default {
       updateLastSeen(message.author.id);
     }
 
-    // prefix detection
     let content = message.content;
     let matched  = false;
+
+    // ── Standard prefix detection ─────────────────────────────────────────────
     for (const prefix of PREFIXES) {
       if (content.startsWith(prefix)) {
         content = content.slice(prefix.length).trim();
@@ -29,6 +30,23 @@ export default {
         break;
       }
     }
+
+    // ── @mention prefix — e.g. @Luvly card, @Luvly card @user ───────────────
+    if (!matched && client.user) {
+      const botId         = client.user.id;
+      const mentionForms  = [`<@${botId}>`, `<@!${botId}>`];
+      for (const mp of mentionForms) {
+        if (content.startsWith(mp)) {
+          const rest = content.slice(mp.length).trim();
+          if (rest.length > 0) {
+            content = rest;
+            matched = true;
+          }
+          break;
+        }
+      }
+    }
+
     if (!matched) return;
 
     const args        = content.split(/\s+/);

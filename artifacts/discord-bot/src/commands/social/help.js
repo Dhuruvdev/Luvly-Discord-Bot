@@ -3,7 +3,7 @@ import { COLORS, EMOJIS, PREFIXES } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 
 const CATEGORIES = {
-  social:      { emoji: '❤️',  label: 'social',      desc: 'profile · aura · bio · badges' },
+  social:      { emoji: '❤️',  label: 'social',      desc: 'profile · card · aura · bio · themes' },
   matchmaking: { emoji: '💌',  label: 'matchmaking', desc: 'match · crush · soulmate · daily' },
   midnight:    { emoji: '🌙',  label: 'midnight',     desc: 'midnight · comfort · vibe · lonely' },
   confession:  { emoji: '🎭',  label: 'confession',   desc: 'confess · secret · admire · reveal' },
@@ -11,7 +11,6 @@ const CATEGORIES = {
   engagement:  { emoji: '🎮',  label: 'engagement',   desc: 'rank · xp · level · leaderboard' },
   ai:          { emoji: '🤖',  label: 'ai',           desc: 'rizz · flirt · vibecheck · starter' },
   safety:      { emoji: '🛡️',  label: 'safety',       desc: 'report · block · verify · trust' },
-  premium:     { emoji: '💎',  label: 'premium',      desc: 'vip · glow · theme · elite' },
   hidden:      { emoji: '🔥',  label: 'hidden',       desc: 'miss · overthink · ghost · playlist' },
 };
 
