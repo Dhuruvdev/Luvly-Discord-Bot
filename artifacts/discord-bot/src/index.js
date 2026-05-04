@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { loadCommands } from './handlers/commandHandler.js';
 import { loadEvents }   from './handlers/eventHandler.js';
 import { forceFlush }   from './utils/store.js';
+import { startKeepAliveServer } from './utils/keepAlive.js';
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) {
@@ -21,11 +22,14 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
   ],
   partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-  // Reduce memory: don't cache messages we don't need
   sweepers: {
     messages: { interval: 300, lifetime: 300 },
   },
 });
+
+// Start keep-alive HTTP server immediately (before Discord login)
+// so uptime monitors can reach it even during reconnects
+startKeepAliveServer(client, parseInt(process.env.BOT_PORT ?? '3000', 10));
 
 await loadCommands(client);
 await loadEvents(client);
