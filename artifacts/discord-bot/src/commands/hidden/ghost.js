@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, errorEmbed, footer } from '../../utils/embeds.js';
 import { getGhostDays, getUser, saveUser } from '../../utils/database.js';
@@ -17,13 +16,6 @@ export default {
   category: 'hidden',
   usage: 'ghost [@user]',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('ghost')
-    .setDescription('Check how long someone has been ghosting the server')
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to check (defaults to yourself)')
-    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first() ?? message.author;

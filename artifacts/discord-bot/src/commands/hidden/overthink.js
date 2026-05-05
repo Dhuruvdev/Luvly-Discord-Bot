@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, OVERTHINK_MESSAGES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -9,10 +9,6 @@ export default {
   description: 'emotional late-night thoughts generator',
   category: 'hidden',
   usage: 'overthink',
-
-  data: new SlashCommandBuilder()
-    .setName('overthink')
-    .setDescription('Get a late-night thought to sit with'),
 
   async execute(message, args, client) {
     const thought = OVERTHINK_MESSAGES[Math.floor(Math.random() * OVERTHINK_MESSAGES.length)];

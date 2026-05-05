@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 
@@ -16,10 +16,6 @@ export default {
   description: 'get a shared vibe playlist for your mood',
   category: 'hidden',
   usage: 'playlist',
-
-  data: new SlashCommandBuilder()
-    .setName('playlist')
-    .setDescription('Get a curated vibe playlist for your current mood'),
 
   async execute(message, args, client) {
     const pl = PLAYLISTS[Math.floor(Math.random() * PLAYLISTS.length)];

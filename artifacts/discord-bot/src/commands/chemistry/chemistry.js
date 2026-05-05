@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { getChemistry, addChemistry, getTopAdmirer, addXP, isBlocked } from '../../utils/database.js';
@@ -26,13 +26,6 @@ export default {
   category: 'chemistry',
   usage: 'chemistry @user',
   cooldown: 8_000,
-
-  data: new SlashCommandBuilder()
-    .setName('chemistry')
-    .setDescription('Check your chemistry score with someone')
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to check chemistry with (leave empty to see your top connection)')
-    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first();

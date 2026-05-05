@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 import { getUserAchievements, ACHIEVEMENTS } from '../../utils/achievements.js';
@@ -11,13 +10,6 @@ export default {
   category: 'engagement',
   usage: 'achievements [@user]',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('achievements')
-    .setDescription('View your unlocked achievements and progress')
-    .addUserOption(o =>
-      o.setName('user').setDescription("User to view (defaults to yourself)")
-    ),
 
   async execute(message, args, client) {
     const target   = message.mentions.users.first() ?? message.author;

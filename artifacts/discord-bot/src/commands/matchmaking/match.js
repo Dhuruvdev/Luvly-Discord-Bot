@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -24,10 +24,6 @@ export default {
   description: 'get a daily match recommendation',
   category: 'matchmaking',
   usage: 'match',
-
-  data: new SlashCommandBuilder()
-    .setName('match')
-    .setDescription('Get your daily match recommendation'),
 
   async execute(message, args, client) {
     const matched = randomMatch(message.guild);

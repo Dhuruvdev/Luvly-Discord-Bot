@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { getUser, getHearts, saveUser } from '../../utils/database.js';
@@ -11,13 +11,6 @@ export default {
   category: 'social',
   usage: 'profile [@user]',
   cooldown: 3_000,
-
-  data: new SlashCommandBuilder()
-    .setName('profile')
-    .setDescription("View your or someone else's Luvly profile")
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to view (defaults to yourself)')
-    ),
 
   async execute(message, args, client) {
     const target   = message.mentions.users.first() ?? message.author;

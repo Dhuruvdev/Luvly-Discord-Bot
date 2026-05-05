@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
+import { StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
 import { COLORS, EMOJIS, PREFIXES } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 
@@ -20,25 +20,6 @@ export default {
   description: 'show all commands',
   category: 'social',
   usage: 'help [category]',
-
-  data: new SlashCommandBuilder()
-    .setName('help')
-    .setDescription('Show all Luvly commands and categories')
-    .addStringOption(o =>
-      o.setName('category')
-        .setDescription('Explore a specific category')
-        .addChoices(
-          { name: '❤️ social',      value: 'social' },
-          { name: '💌 matchmaking', value: 'matchmaking' },
-          { name: '🌙 midnight',    value: 'midnight' },
-          { name: '🎭 confession',  value: 'confession' },
-          { name: '⚗️ chemistry',   value: 'chemistry' },
-          { name: '🎮 engagement',  value: 'engagement' },
-          { name: '🤖 ai',          value: 'ai' },
-          { name: '🛡️ safety',      value: 'safety' },
-          { name: '🔥 hidden',      value: 'hidden' },
-        )
-    ),
 
   async execute(message, args, client) {
     const catArg = args[0]?.toLowerCase();

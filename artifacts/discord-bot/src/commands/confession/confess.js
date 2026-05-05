@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -12,10 +12,6 @@ export default {
   category: 'confession',
   usage: 'confess',
   cooldown: 10_000,
-
-  data: new SlashCommandBuilder()
-    .setName('confess')
-    .setDescription('Post an anonymous confession — your identity stays hidden'),
 
   async execute(message, args, client) {
     const embed = luvEmbed(COLORS.purple)

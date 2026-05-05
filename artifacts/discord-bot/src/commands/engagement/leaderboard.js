@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 import { getLeaderboard } from '../../utils/database.js';
@@ -13,10 +12,6 @@ export default {
   category: 'engagement',
   usage: 'leaderboard',
   cooldown: 10_000,
-
-  data: new SlashCommandBuilder()
-    .setName('leaderboard')
-    .setDescription('See the top aura holders on the server'),
 
   async execute(message, args, client) {
     const top = getLeaderboard(5);

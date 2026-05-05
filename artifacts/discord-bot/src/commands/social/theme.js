@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, AttachmentBuilder, ButtonStyle } from 'discord.js';
+import { AttachmentBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { getUser, getUserTheme, setUserTheme, buyTheme, getOwnedThemes, getHearts } from '../../utils/database.js';
@@ -139,23 +139,6 @@ export default {
   category: 'social',
   usage: 'theme [list | set <id> | buy <id> | preview <id>]',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('theme')
-    .setDescription('Manage your Luvly profile card theme')
-    .addSubcommand(s => s.setName('list').setDescription('Browse all available themes'))
-    .addSubcommand(s =>
-      s.setName('set').setDescription('Equip a theme you own')
-        .addStringOption(o => o.setName('id').setDescription('Theme ID (e.g. lavender, neon)').setRequired(true))
-    )
-    .addSubcommand(s =>
-      s.setName('buy').setDescription('Purchase a theme with hearts')
-        .addStringOption(o => o.setName('id').setDescription('Theme ID to buy').setRequired(true))
-    )
-    .addSubcommand(s =>
-      s.setName('preview').setDescription('Preview a theme on your card')
-        .addStringOption(o => o.setName('id').setDescription('Theme ID to preview').setRequired(true))
-    ),
 
   async execute(message, args, client) {
     const sub = args[0]?.toLowerCase();

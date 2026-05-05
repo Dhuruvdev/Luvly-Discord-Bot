@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP, getUser, saveUser } from '../../utils/database.js';
@@ -12,13 +12,6 @@ export default {
   category: 'ai',
   usage: 'rizz [@user]',
   cooldown: 4_000,
-
-  data: new SlashCommandBuilder()
-    .setName('rizz')
-    .setDescription('Generate a smooth pickup line (optionally aimed at someone)')
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to send the line to (optional)')
-    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first();

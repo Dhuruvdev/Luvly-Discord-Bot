@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -9,10 +9,6 @@ export default {
   description: "who's on your mind tonight?",
   category: 'hidden',
   usage: 'miss',
-
-  data: new SlashCommandBuilder()
-    .setName('miss')
-    .setDescription("A space for when someone is on your mind tonight"),
 
   async execute(message, args, client) {
     addXP(message.author.id, 5);

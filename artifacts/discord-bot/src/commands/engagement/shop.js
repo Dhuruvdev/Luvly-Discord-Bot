@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { getHearts, spendHearts, addItem, saveUser } from '../../utils/database.js';
@@ -53,22 +53,6 @@ export default {
   category: 'engagement',
   usage: 'shop [buy <item>]',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('shop')
-    .setDescription('Browse and buy items with your hearts')
-    .addSubcommand(s => s.setName('browse').setDescription('Browse all available items'))
-    .addSubcommand(s =>
-      s.setName('buy').setDescription('Purchase an item')
-        .addStringOption(o =>
-          o.setName('id')
-            .setDescription('Item ID to purchase')
-            .setRequired(true)
-            .addChoices(
-              ...Object.values(SHOP_ITEMS).map(i => ({ name: `${i.name} (${i.price} 💗)`, value: i.id }))
-            )
-        )
-    ),
 
   async execute(message, args, client) {
     const sub = args[0]?.toLowerCase();

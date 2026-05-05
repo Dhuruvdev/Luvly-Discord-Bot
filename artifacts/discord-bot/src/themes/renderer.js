@@ -1,9 +1,9 @@
 /**
  * Theme background renderers.
- * Each function draws the full 580×900 background for its pattern type.
+ * Each function draws the full 800×600 background for its pattern type.
  */
 
-const W = 580, H = 900;
+const W = 800, H = 600;
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 function rrect(ctx, x, y, w, h, r) {

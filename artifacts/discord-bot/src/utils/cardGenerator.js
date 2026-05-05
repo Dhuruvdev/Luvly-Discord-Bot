@@ -1,5 +1,5 @@
 /**
- * Luvly Profile Card Generator
+ * Luvly Profile Card Generator — 800 × 600 landscape format
  * Uses @napi-rs/canvas (Skia-based, no system deps required).
  * Accepts a theme object from src/themes/index.js for full visual customisation.
  */
@@ -14,7 +14,7 @@ import { getTheme } from '../themes/index.js';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 
-// ── Load Nunito from @fontsource/nunito (bundled woff2 files) ─────────────────
+// ── Load Nunito from @fontsource/nunito ────────────────────────────────────────
 const FSRC = join(__dir, '../../node_modules/@fontsource/nunito/files');
 let FONT = 'sans-serif';
 try {
@@ -35,8 +35,8 @@ try {
   if (existsSync(LOGO_PATH)) logoImg = await loadImage(LOGO_PATH);
 } catch {}
 
-// ── Canvas dimensions ─────────────────────────────────────────────────────────
-const W = 580, H = 900;
+// ── Canvas dimensions — 800 × 600 landscape ───────────────────────────────────
+const W = 800, H = 600;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function rrect(ctx, x, y, w, h, r) {
@@ -53,24 +53,62 @@ function rrect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function wrapText(ctx, text, x, y, maxW, lh) {
-  const words = text.split(' ');
+function clampFont(ctx, text, maxW, startPx) {
+  let size = startPx;
+  ctx.font = `800 ${size}px '${FONT}', sans-serif`;
+  while (ctx.measureText(text).width > maxW && size > 16) {
+    size -= 2;
+    ctx.font = `800 ${size}px '${FONT}', sans-serif`;
+  }
+}
+
+function wrapText(ctx, text, x, y, maxW, lh, maxLines = 2) {
+  const words = (text ?? '').split(' ');
   let line = '', row = 0;
   for (const w of words) {
+    if (row >= maxLines) break;
     const test = line ? `${line} ${w}` : w;
     if (ctx.measureText(test).width > maxW && line) {
       ctx.fillText(line, x, y + row * lh);
       line = w; row++;
     } else { line = test; }
   }
-  if (line) ctx.fillText(line, x, y + row * lh);
-  return row + 1;
+  if (line && row < maxLines) ctx.fillText(line, x, y + row * lh);
+}
+
+// ── XP bar ────────────────────────────────────────────────────────────────────
+function drawXpBar(ctx, xp, current, next, x, y, barW, theme) {
+  const filled = next
+    ? Math.min((xp - current.xp) / (next.xp - current.xp), 1)
+    : 1;
+
+  // Track
+  const BH = 12, R = 6;
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  rrect(ctx, x, y, barW, BH, R);
+  ctx.fill();
+
+  // Fill
+  if (filled > 0) {
+    ctx.fillStyle = theme.nameColor ?? '#8B5CF6';
+    rrect(ctx, x, y, Math.max(barW * filled, R * 2), BH, R);
+    ctx.fill();
+  }
+
+  // XP label
+  ctx.fillStyle   = 'rgba(0,0,0,0.5)';
+  ctx.font        = `600 10px '${FONT}', sans-serif`;
+  ctx.textAlign   = 'right';
+  ctx.textBaseline = 'middle';
+  const xpLabel   = next ? `${xp} / ${next.xp} xp` : `${xp} xp · max level`;
+  ctx.fillText(xpLabel, x + barW, y + BH / 2);
+  ctx.textAlign = 'left';
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
 async function drawAvatar(ctx, avatarURL, x, y, size) {
   ctx.save();
-  rrect(ctx, x, y, size, size, 9);
+  rrect(ctx, x, y, size, size, 16);
   ctx.clip();
   if (avatarURL) {
     try {
@@ -90,48 +128,57 @@ function drawFallbackAvatar(ctx, x, y, size) {
 }
 
 // ── Stat pills ────────────────────────────────────────────────────────────────
-function drawPills(ctx, stats, theme, startX, startY) {
-  const PW = 178, PH = 34, GAP = 9;
+function drawStatPills(ctx, stats, theme, startX, startY) {
+  const PW = 134, PH = 34, GAP = 8;
+
   stats.forEach((stat, i) => {
-    const py    = startY + i * (PH + GAP);
+    const px    = startX + i * (PW + GAP);
     const style = (theme.pills ?? [])[i] ?? { bg: '#E0D4FF', text: '#5A36A0' };
 
     ctx.fillStyle = style.bg;
-    rrect(ctx, startX, py, PW, PH, PH / 2);
+    rrect(ctx, px, startY, PW, PH, PH / 2);
     ctx.fill();
 
     ctx.fillStyle    = style.text;
-    ctx.font         = `600 12.5px '${FONT}', sans-serif`;
+    ctx.font         = `600 11.5px '${FONT}', sans-serif`;
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(stat.label, startX + 14, py + PH / 2);
+    ctx.fillText(stat.label, px + 12, startY + PH / 2);
 
-    ctx.font      = '14px serif';
+    ctx.font      = '13px serif';
     ctx.textAlign = 'right';
-    ctx.fillText(stat.icon, startX + PW - 10, py + PH / 2);
+    ctx.fillText(stat.icon, px + PW - 10, startY + PH / 2);
 
-    ctx.textAlign = 'left';
+    ctx.textAlign    = 'left';
     ctx.textBaseline = 'alphabetic';
   });
 }
 
-// ── Watermark — real Luvly logo ───────────────────────────────────────────────
+// ── Divider ───────────────────────────────────────────────────────────────────
+function drawDivider(ctx, x, y, w) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+}
+
+// ── Watermark ─────────────────────────────────────────────────────────────────
 function drawWatermark(ctx, cx, y) {
   const LABEL = 'luvly cards';
   ctx.font = `600 10px '${FONT}', sans-serif`;
   const tw   = ctx.measureText(LABEL).width;
-  const LOGO = 20;           // logo icon size inside badge
+  const LOGO = 18;
   const PAD  = { x: 10, y: 5 };
   const GAP  = logoImg ? 6 : 0;
   const bw   = PAD.x * 2 + (logoImg ? LOGO + GAP : 0) + tw;
   const bh   = LOGO + PAD.y * 2;
 
-  // Pill background
   rrect(ctx, cx - bw / 2, y - bh / 2, bw, bh, bh / 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillStyle = 'rgba(0,0,0,0.22)';
   ctx.fill();
 
-  // Logo icon
   let textX = cx - bw / 2 + PAD.x;
   if (logoImg) {
     const lx = cx - bw / 2 + PAD.x;
@@ -145,7 +192,6 @@ function drawWatermark(ctx, cx, y) {
     textX = lx + LOGO + GAP;
   }
 
-  // Label
   ctx.fillStyle    = '#FFFFFF';
   ctx.textAlign    = 'left';
   ctx.textBaseline = 'middle';
@@ -155,71 +201,90 @@ function drawWatermark(ctx, cx, y) {
   ctx.textBaseline = 'alphabetic';
 }
 
-// ── White card ────────────────────────────────────────────────────────────────
+// ── Main card layout (800 × 600 landscape) ────────────────────────────────────
 async function drawCard(ctx, data, theme) {
-  const CX = 57, CY = 360, CW = 466, CH = 258, CR = 22;
+  // ── Card panel ──────────────────────────────────────────────────────────────
+  const MARGIN = 24;
+  const CX = MARGIN, CY = MARGIN, CW = W - MARGIN * 2, CH = H - MARGIN * 2;
 
-  // Card shadow
   ctx.save();
-  ctx.shadowColor   = 'rgba(0,0,0,0.18)';
-  ctx.shadowBlur    = 24;
+  ctx.shadowColor   = 'rgba(0,0,0,0.16)';
+  ctx.shadowBlur    = 28;
   ctx.shadowOffsetY = 6;
   ctx.fillStyle     = theme.cardBg ?? '#FFFFFF';
-  rrect(ctx, CX, CY, CW, CH, CR);
+  rrect(ctx, CX, CY, CW, CH, 22);
   ctx.fill();
   ctx.restore();
 
-  // Avatar
-  await drawAvatar(ctx, data.avatarURL, CX + 26, CY + 28, 64);
+  // ── Left column: avatar ─────────────────────────────────────────────────────
+  const AV_SIZE = 176;
+  const AV_X   = CX + 28;
+  const AV_Y   = CY + 28;
+  await drawAvatar(ctx, data.avatarURL, AV_X, AV_Y, AV_SIZE);
+
+  // Thin vertical divider between columns
+  const DIV_X = AV_X + AV_SIZE + 24;
+  ctx.beginPath();
+  ctx.moveTo(DIV_X, CY + 20);
+  ctx.lineTo(DIV_X, CY + CH - 20);
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+
+  // ── Right column ────────────────────────────────────────────────────────────
+  const TEXT_X = DIV_X + 22;
+  const TEXT_W = CX + CW - TEXT_X - 20;
 
   // Username
-  ctx.fillStyle    = theme.nameColor ?? '#8B5CF6';
-  ctx.font         = `800 44px '${FONT}', sans-serif`;
-  ctx.textBaseline = 'alphabetic';
   const uname = data.username ?? 'unknown';
-  // Clamp width
-  while (ctx.measureText(uname).width > 185 && ctx.font.includes('44')) {
-    ctx.font = ctx.font.replace(/\d+px/, m => `${parseInt(m) - 2}px`);
-  }
-  ctx.fillText(uname, CX + 26, CY + 127);
+  clampFont(ctx, uname, TEXT_W, 40);
+  ctx.fillStyle    = theme.nameColor ?? '#8B5CF6';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(uname, TEXT_X, CY + 64);
 
-  // Tags
+  // Level / title
+  const { current, next } = getLevelData(data.xp ?? 0);
   ctx.fillStyle = theme.tagColor ?? '#C4A3DF';
-  ctx.font      = `400 12.5px '${FONT}', sans-serif`;
-  const tagStr  = buildTags(data);
-  wrapText(ctx, tagStr, CX + 26, CY + 149, 188, 18);
+  ctx.font      = `600 14px '${FONT}', sans-serif`;
+  ctx.fillText(`lv${current.level}  ·  ${current.title}`, TEXT_X, CY + 92);
 
-  // Stat pills
-  const stats = buildStats(data);
-  drawPills(ctx, stats, theme, CX + 264, CY + 25);
+  // XP bar
+  drawXpBar(ctx, data.xp ?? 0, current, next, TEXT_X, CY + 106, TEXT_W, theme);
 
-  // Watermark
-  drawWatermark(ctx, W / 2, CY + CH + 14);
-}
+  // Pronouns + bio
+  ctx.fillStyle = theme.tagColor ?? '#A78BFA';
+  ctx.font      = `400 13px '${FONT}', sans-serif`;
+  const pronStr = [data.pronouns, data.bio].filter(Boolean).join('  ·  ');
+  if (pronStr) wrapText(ctx, pronStr, TEXT_X, CY + 138, TEXT_W, 18);
 
-// ── Data helpers ──────────────────────────────────────────────────────────────
-function buildTags(data) {
-  const parts = [];
-  if (data.pronouns) parts.push(data.pronouns);
-  if (data.bio)      parts.push(data.bio);
-  if (data.interests?.length) parts.push(...data.interests.slice(0, 4));
-  return parts.length ? '• ' + parts.join(' • ') + ' •' : '• no tags yet •';
-}
+  // Interests tags
+  if (data.interests?.length) {
+    ctx.fillStyle = theme.tagColor ?? '#C4A3DF';
+    ctx.font      = `400 12px '${FONT}', sans-serif`;
+    wrapText(ctx, data.interests.slice(0, 5).map(i => `• ${i}`).join('  '), TEXT_X, CY + 178, TEXT_W, 18);
+  }
 
-function buildStats(data) {
-  const { current } = getLevelData(data.xp ?? 0);
-  return [
+  // ── Divider ─────────────────────────────────────────────────────────────────
+  const PILL_Y = CY + CH - 90;
+  drawDivider(ctx, CX + 20, PILL_Y - 16, CW - 40);
+
+  // ── Stat pills row ──────────────────────────────────────────────────────────
+  const stats = [
     { label: `Level ${current.level}`,        icon: '✨' },
     { label: `${data.xp ?? 0} XP`,            icon: '⭐' },
-    { label: `${data.streak ?? 0} day streak`, icon: '🔥' },
-    { label: `${data.hearts ?? 0} hearts`,    icon: '💗' },
-    { label: data.aura ?? 'soft',             icon: '🌸' },
+    { label: `${data.streak ?? 0}d streak`,    icon: '🔥' },
+    { label: `${data.hearts ?? 0} hearts`,     icon: '💗' },
+    { label: data.aura ?? 'soft',              icon: '🌸' },
   ];
+  drawStatPills(ctx, stats, theme, CX + 24, PILL_Y);
+
+  // ── Watermark ───────────────────────────────────────────────────────────────
+  drawWatermark(ctx, W / 2, H - 14);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
 /**
- * Generate a profile card PNG buffer.
+ * Generate a profile card PNG buffer at 800 × 600 (landscape).
  * @param {object} data    — user data ({ username, avatarURL, pronouns, bio, interests, xp, streak, hearts, aura })
  * @param {string} themeId — theme ID from src/themes/index.js (default: 'lavender')
  * @returns {Promise<Buffer>} PNG buffer
@@ -231,7 +296,7 @@ export async function generateCard(data, themeId = 'lavender') {
 
   ctx.imageSmoothingEnabled = true;
 
-  renderBackground(ctx, theme);
+  renderBackground(ctx, theme, W, H);
   await drawCard(ctx, data, theme);
 
   return canvas.toBuffer('image/png');

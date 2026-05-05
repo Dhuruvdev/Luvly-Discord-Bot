@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 import { getTable } from '../../utils/store.js';
@@ -10,10 +9,6 @@ export default {
   category: 'engagement',
   usage: 'stats',
   cooldown: 15_000,
-
-  data: new SlashCommandBuilder()
-    .setName('stats')
-    .setDescription('View Luvly bot statistics and system info'),
 
   async execute(message, args, client) {
     const users       = Object.keys(getTable('users')).length;

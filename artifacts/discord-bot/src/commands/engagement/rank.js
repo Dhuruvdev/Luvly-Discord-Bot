@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { getUser, getHearts } from '../../utils/database.js';
@@ -10,13 +10,6 @@ export default {
   category: 'engagement',
   usage: 'rank [@user]',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('rank')
-    .setDescription('Check your rank, XP, level, and progress')
-    .addUserOption(o =>
-      o.setName('user').setDescription("User to check (defaults to yourself)")
-    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first() ?? message.author;

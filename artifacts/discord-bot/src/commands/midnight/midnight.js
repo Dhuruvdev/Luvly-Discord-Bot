@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, COMFORT_MESSAGES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -23,10 +23,6 @@ export default {
   category: 'midnight',
   usage: 'midnight',
   cooldown: 4_000,
-
-  data: new SlashCommandBuilder()
-    .setName('midnight')
-    .setDescription('Enter midnight mode — emotional late-night space'),
 
   async execute(message, args, client) {
     const hour       = new Date().getHours();

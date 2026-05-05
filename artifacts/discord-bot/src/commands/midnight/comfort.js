@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, COMFORT_MESSAGES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 
@@ -8,10 +8,6 @@ export default {
   description: 'receive comfort when you need it',
   category: 'midnight',
   usage: 'comfort',
-
-  data: new SlashCommandBuilder()
-    .setName('comfort')
-    .setDescription('Receive soft comfort when you need it most'),
 
   async execute(message, args, client) {
     const msg = COMFORT_MESSAGES[Math.floor(Math.random() * COMFORT_MESSAGES.length)];

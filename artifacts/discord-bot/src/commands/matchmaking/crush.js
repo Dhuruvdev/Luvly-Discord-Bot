@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { setCrush, getCrush, checkMutualCrush, isBlocked, addXP } from '../../utils/database.js';
@@ -12,13 +12,6 @@ export default {
   category: 'matchmaking',
   usage: 'crush @user',
   cooldown: 5_000,
-
-  data: new SlashCommandBuilder()
-    .setName('crush')
-    .setDescription('Set your secret crush or check your current one')
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to set as your crush (leave empty to check your current crush)')
-    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first();

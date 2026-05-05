@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, errorEmbed, footer } from '../../utils/embeds.js';
 import { blockUser } from '../../utils/database.js';
@@ -10,25 +10,6 @@ export default {
   category: 'safety',
   usage: 'report @user [reason] | block @user',
   cooldown: 10_000,
-
-  data: new SlashCommandBuilder()
-    .setName('report')
-    .setDescription('Report or block a user in Luvly')
-    .addStringOption(o =>
-      o.setName('action')
-        .setDescription('What to do')
-        .setRequired(true)
-        .addChoices(
-          { name: 'report — flag this user for review', value: 'report' },
-          { name: 'block — stop all Luvly interactions', value: 'block' },
-        )
-    )
-    .addUserOption(o =>
-      o.setName('user').setDescription('User to report or block').setRequired(true)
-    )
-    .addStringOption(o =>
-      o.setName('reason').setDescription('Reason (for reports)')
-    ),
 
   async execute(message, args, client) {
     const sub    = args[0]?.toLowerCase();
