@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 import { getLeaderboard } from '../../utils/database.js';
@@ -13,11 +14,15 @@ export default {
   usage: 'leaderboard',
   cooldown: 10_000,
 
+  data: new SlashCommandBuilder()
+    .setName('leaderboard')
+    .setDescription('See the top aura holders on the server'),
+
   async execute(message, args, client) {
     const top = getLeaderboard(5);
     if (!top.length) {
       const embed = luvEmbed(COLORS.neutral)
-        .setDescription('no data yet — be the first to claim daily xp ✦')
+        .setDescription('> *no data yet — be the first to claim daily xp ✦*')
         .setFooter(footer(client));
       return await message.reply({ embeds: [embed] });
     }
@@ -30,7 +35,7 @@ export default {
         try { const usr = await client.users.fetch(u.id); name = usr.username; } catch {}
         return (
           `${MEDALS[i]}  **${name}**\n` +
-          `  lv${current.level} *${current.title}* · **${u.xp ?? 0} xp** · ${u.hearts ?? 0} 💗 · ${achCount} 🏅`
+          `  lv${current.level} *${current.title}*  ·  **${u.xp ?? 0} xp**  ·  ${u.hearts ?? 0} 💗  ·  ${achCount} 🏅`
         );
       })
     );

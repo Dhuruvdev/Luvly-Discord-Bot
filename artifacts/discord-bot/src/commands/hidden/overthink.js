@@ -1,6 +1,6 @@
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, OVERTHINK_MESSAGES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
-import { ButtonStyle } from 'discord.js';
 import { addXP } from '../../utils/database.js';
 
 export default {
@@ -10,18 +10,22 @@ export default {
   category: 'hidden',
   usage: 'overthink',
 
+  data: new SlashCommandBuilder()
+    .setName('overthink')
+    .setDescription('Get a late-night thought to sit with'),
+
   async execute(message, args, client) {
     const thought = OVERTHINK_MESSAGES[Math.floor(Math.random() * OVERTHINK_MESSAGES.length)];
     addXP(message.author.id, 5);
 
     const embed = luvEmbed(COLORS.midnight)
       .setTitle(`${EMOJIS.moon} late night thought ✦`)
-      .setDescription(`*"${thought}"*`)
+      .setDescription(`> *"${thought}"*`)
       .setFooter(footer(client));
 
     const row = buildButtons(
       { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
-      { id: 'midnight_vibe', label: 'vibe check', emoji: '✨', style: ButtonStyle.Secondary },
+      { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ embeds: [embed], components: [row] });

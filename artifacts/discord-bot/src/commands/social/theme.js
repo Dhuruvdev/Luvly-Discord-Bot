@@ -1,33 +1,20 @@
-import { AttachmentBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, AttachmentBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { getUser, getUserTheme, setUserTheme, buyTheme, getOwnedThemes, getHearts } from '../../utils/database.js';
 import { generateCard } from '../../utils/cardGenerator.js';
 import { THEME_LIST, getTheme, RARITY_COLORS } from '../../themes/index.js';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function rarityBadge(r) {
   const map = { common: '⬜ Common', rare: '🟦 Rare', legendary: '🟨 Legendary' };
   return map[r] ?? r;
 }
 
-function formatThemeList(owned) {
-  return THEME_LIST.map(t => {
-    const isOwned = owned.includes(t.id);
-    const mark    = isOwned ? '✅' : (t.cost === 0 ? '🆓' : `💗 ${t.cost}`);
-    return `${t.emoji} **${t.name}** \`${t.id}\` — ${rarityBadge(t.rarity)} — ${mark}`;
-  }).join('\n');
-}
-
-// ── Sub-command handlers ──────────────────────────────────────────────────────
 async function handleList(message, client) {
   const { buildThemeListPage } = await import('../../utils/themeListPage.js');
-
-  // Show loading state, then update with first page
   const loading = await message.reply({
     embeds: [luvEmbed(COLORS.primary).setDescription(`${EMOJIS.sparkle} loading theme gallery...`)],
   });
-
   try {
     const page = await buildThemeListPage(message.author.id, 0, client, message.author);
     await loading.edit({ embeds: [page.embed], files: page.files, components: page.components });
@@ -39,55 +26,45 @@ async function handleList(message, client) {
 
 async function handleSet(message, args, client) {
   const id    = args[1]?.toLowerCase();
-  const theme = getTheme(id);
-
-  if (!id || theme.id === 'lavender' && id !== 'lavender' && !THEME_LIST.find(t => t.id === id)) {
-    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to see all themes ✦')] });
+  const theme = THEME_LIST.find(t => t.id === id);
+  if (!id || !theme) {
+    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to browse ✦')] });
   }
-
   const owned = getOwnedThemes(message.author.id);
   if (!owned.includes(theme.id)) {
     return message.reply({
       embeds: [errorEmbed(`you don't own **${theme.name}** yet! buy it with \`u theme buy ${theme.id}\` ✦`)]
     });
   }
-
   setUserTheme(message.author.id, theme.id);
-
   const embed = luvEmbed(COLORS.success)
     .setDescription(`${EMOJIS.sparkle} theme set to ${theme.emoji} **${theme.name}**! view it with \`u card\``)
     .setFooter(footer(client));
-
   await message.reply({ embeds: [embed] });
 }
 
 async function handleBuy(message, args, client) {
   const id    = args[1]?.toLowerCase();
   const theme = THEME_LIST.find(t => t.id === id);
-
   if (!theme) {
-    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to see all themes ✦')] });
+    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to browse ✦')] });
   }
   if (theme.cost === 0) {
     return message.reply({ embeds: [errorEmbed(`**${theme.name}** is free — use \`u theme set ${theme.id}\` to equip it ✦`)] });
   }
-
   const owned = getOwnedThemes(message.author.id);
   if (owned.includes(theme.id)) {
     return message.reply({ embeds: [errorEmbed(`you already own **${theme.name}** ✦`)] });
   }
-
   const result = buyTheme(message.author.id, theme.id, theme.cost);
   if (!result.success) {
     return message.reply({
-      embeds: [errorEmbed(`not enough hearts! you need **${theme.cost}** 💗 but only have **${result.balance}** ✦`)]
+      embeds: [errorEmbed(`not enough hearts! need **${theme.cost}** 💗, you have **${result.balance}** ✦`)]
     });
   }
-
   const embed = luvEmbed(COLORS.success)
     .setDescription(`${EMOJIS.sparkle} purchased ${theme.emoji} **${theme.name}**! (-${theme.cost} 💗)\nuse \`u theme set ${theme.id}\` to equip it ✦`)
     .setFooter(footer(client));
-
   await message.reply({ embeds: [embed] });
 }
 
@@ -95,15 +72,12 @@ async function handlePreview(message, args, client) {
   const id    = args[1]?.toLowerCase() ?? 'lavender';
   const theme = THEME_LIST.find(t => t.id === id);
   if (!theme) {
-    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to see all themes ✦')] });
+    return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to browse ✦')] });
   }
-
   await message.channel.sendTyping().catch(() => {});
-
   const loadMsg = await message.reply({
     embeds: [luvEmbed(COLORS.primary).setDescription(`${EMOJIS.sparkle} previewing **${theme.name}** theme...`)]
   });
-
   try {
     const user   = getUser(message.author.id);
     const hearts = getHearts(message.author.id);
@@ -118,25 +92,21 @@ async function handlePreview(message, args, client) {
       hearts,
       aura:      user.aura      ?? 'soft',
     }, theme.id);
-
     const attachment = new AttachmentBuilder(buffer, { name: `preview-${theme.id}.png` });
     const owned      = getOwnedThemes(message.author.id);
-
     const embed = luvEmbed(COLORS.primary)
       .setTitle(`${theme.emoji} ${theme.name} preview`)
       .setDescription(`*${theme.description}*\n${rarityBadge(theme.rarity)} · ${theme.cost === 0 ? 'free' : `💗 ${theme.cost} hearts`}`)
       .setImage(`attachment://preview-${theme.id}.png`)
       .setFooter(footer(client));
-
     const buttons = [];
     if (!owned.includes(theme.id) && theme.cost > 0) {
-      buttons.push({ id: `theme_buy_${theme.id}`, label: `buy (${theme.cost} 💗)`, style: ButtonStyle.Success });
+      buttons.push({ id: `tlb:${theme.id}:${message.author.id}`, label: `buy (${theme.cost} 💗)`, style: ButtonStyle.Success, emoji: theme.emoji });
     }
     if (owned.includes(theme.id)) {
-      buttons.push({ id: `theme_set_${theme.id}`, label: 'equip this theme', style: ButtonStyle.Primary });
+      buttons.push({ id: `tls:${theme.id}:${message.author.id}`, label: 'equip this theme', style: ButtonStyle.Primary, emoji: theme.emoji });
     }
-
-    const components = buttons.length ? [buildButtons(...buttons.map(b => ({ ...b, emoji: theme.emoji })))] : [];
+    const components = buttons.length ? [buildButtons(...buttons)] : [];
     await loadMsg.edit({ embeds: [embed], files: [attachment], components });
   } catch (err) {
     console.error('[THEME PREVIEW]', err);
@@ -148,23 +118,20 @@ async function handleInfo(message, args, client) {
   const user  = getUser(message.author.id);
   const owned = getOwnedThemes(message.author.id);
   const curr  = getTheme(user.theme ?? 'lavender');
-
   const embed = luvEmbed(COLORS.primary)
     .setTitle(`${EMOJIS.sparkle} your theme`)
-    .setDescription(`current: ${curr.emoji} **${curr.name}**\n*${curr.description}*`)
+    .setDescription(`current: ${curr.emoji} **${curr.name}**\n> *${curr.description}*`)
     .addFields(
-      { name: 'owned themes', value: owned.map(id => getTheme(id).emoji + ' `' + id + '`').join('  ') || 'none', inline: false },
-      { name: '💗 hearts',   value: `\`${getHearts(message.author.id)}\``, inline: true },
+      { name: 'owned themes', value: owned.map(id => getTheme(id).emoji + ' `' + id + '`').join('  ') || 'none' },
+      { name: '💗 hearts',   value: `**${getHearts(message.author.id)}**`, inline: true },
     )
     .setFooter(footer(client));
-
   const row = buildButtons(
     { id: 'theme_list', label: 'browse themes', emoji: '🎨', style: ButtonStyle.Primary },
   );
   await message.reply({ embeds: [embed], components: [row] });
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
 export default {
   name: 'theme',
   aliases: ['themes'],
@@ -172,6 +139,23 @@ export default {
   category: 'social',
   usage: 'theme [list | set <id> | buy <id> | preview <id>]',
   cooldown: 5_000,
+
+  data: new SlashCommandBuilder()
+    .setName('theme')
+    .setDescription('Manage your Luvly profile card theme')
+    .addSubcommand(s => s.setName('list').setDescription('Browse all available themes'))
+    .addSubcommand(s =>
+      s.setName('set').setDescription('Equip a theme you own')
+        .addStringOption(o => o.setName('id').setDescription('Theme ID (e.g. lavender, neon)').setRequired(true))
+    )
+    .addSubcommand(s =>
+      s.setName('buy').setDescription('Purchase a theme with hearts')
+        .addStringOption(o => o.setName('id').setDescription('Theme ID to buy').setRequired(true))
+    )
+    .addSubcommand(s =>
+      s.setName('preview').setDescription('Preview a theme on your card')
+        .addStringOption(o => o.setName('id').setDescription('Theme ID to preview').setRequired(true))
+    ),
 
   async execute(message, args, client) {
     const sub = args[0]?.toLowerCase();

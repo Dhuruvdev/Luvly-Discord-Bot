@@ -1,9 +1,7 @@
-import { ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
-import { getUser, getHearts, claimDaily } from '../../utils/database.js';
-import { checkLevelUp } from '../../utils/levelUp.js';
-import { unlock } from '../../utils/achievements.js';
+import { getUser, getHearts } from '../../utils/database.js';
 
 export default {
   name: 'rank',
@@ -12,6 +10,13 @@ export default {
   category: 'engagement',
   usage: 'rank [@user]',
   cooldown: 5_000,
+
+  data: new SlashCommandBuilder()
+    .setName('rank')
+    .setDescription('Check your rank, XP, level, and progress')
+    .addUserOption(o =>
+      o.setName('user').setDescription("User to check (defaults to yourself)")
+    ),
 
   async execute(message, args, client) {
     const target = message.mentions.users.first() ?? message.author;
@@ -24,19 +29,25 @@ export default {
       .setAuthor({ name: `${target.username}'s rank ✦`, iconURL: target.displayAvatarURL({ dynamic: true }) })
       .setThumbnail(target.displayAvatarURL({ size: 256, dynamic: true }))
       .addFields(
-        { name: `${EMOJIS.rank} level`,   value: `**${current.level}**`,                    inline: true },
-        { name: `${EMOJIS.sparkle} title`,value: `*${current.title}*`,                       inline: true },
-        { name: `${EMOJIS.streak} streak`,value: `**${user.streak ?? 0}** days 🔥`,           inline: true },
-        { name: `${EMOJIS.fire} xp`,      value: `\`${xpBar}\``,                             inline: false },
-        { name: `${EMOJIS.heart} hearts`, value: `**${hearts} 💗**`,                          inline: true },
-        { name: 'total xp',               value: `**${user.xp ?? 0}**`,                      inline: true },
-        { name: next ? 'next level' : 'status', value: next ? `**${next.title}** at ${next.xp} xp` : '**max level** 👑', inline: true },
+        { name: `${EMOJIS.rank} level`,    value: `**${current.level}**`,                   inline: true },
+        { name: `${EMOJIS.sparkle} title`, value: `*${current.title}*`,                     inline: true },
+        { name: `${EMOJIS.streak} streak`, value: `**${user.streak ?? 0}** days 🔥`,         inline: true },
+        { name: `${EMOJIS.fire} progress`, value: `\`${xpBar}\``,                           inline: false },
+        { name: `${EMOJIS.heart} hearts`,  value: `**${hearts}** 💗`,                        inline: true },
+        { name: 'total xp',               value: `**${user.xp ?? 0}**`,                     inline: true },
+        {
+          name:  next ? 'next level' : 'status',
+          value: next
+            ? `**${next.title}** at ${next.xp.toLocaleString()} xp`
+            : '**max level** 👑',
+          inline: true,
+        },
       )
       .setFooter(footer(client));
 
     const row = buildButtons(
-      { id: 'daily_claim',   label: 'claim daily',     emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'shop_open',     label: 'open shop',       emoji: '💗', style: ButtonStyle.Secondary },
+      { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
+      { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ embeds: [embed], components: [row] });

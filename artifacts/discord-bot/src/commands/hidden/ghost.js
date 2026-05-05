@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, errorEmbed, footer } from '../../utils/embeds.js';
 import { getGhostDays, getUser, saveUser } from '../../utils/database.js';
@@ -17,6 +18,13 @@ export default {
   usage: 'ghost [@user]',
   cooldown: 5_000,
 
+  data: new SlashCommandBuilder()
+    .setName('ghost')
+    .setDescription('Check how long someone has been ghosting the server')
+    .addUserOption(o =>
+      o.setName('user').setDescription('User to check (defaults to yourself)')
+    ),
+
   async execute(message, args, client) {
     const target = message.mentions.users.first() ?? message.author;
     const days   = getGhostDays(target.id);
@@ -28,7 +36,6 @@ export default {
       return await message.reply({ embeds: [embed] });
     }
 
-    // increment the caller's ghost-hunter counter
     if (target.id !== message.author.id) {
       const caller = getUser(message.author.id);
       const count  = (caller.ghostCalls ?? 0) + 1;

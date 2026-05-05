@@ -6,10 +6,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export async function loadCommands(client) {
   client.commands = new Map();
-  client.aliases = new Map();
+  client.aliases  = new Map();
 
   const commandsDir = join(__dirname, '../commands');
-  const categories = readdirSync(commandsDir).filter(f =>
+  const categories  = readdirSync(commandsDir).filter(f =>
     statSync(join(commandsDir, f)).isDirectory()
   );
 
@@ -29,5 +29,9 @@ export async function loadCommands(client) {
     }
   }
 
-  console.log(`✦ loaded ${client.commands.size} commands across ${categories.length} categories`);
+  const slashCount = [...client.commands.values()].filter(c => c.data).length;
+  console.log(
+    `✦ loaded ${client.commands.size} commands across ${categories.length} categories` +
+    ` (${slashCount} with slash support)`
+  );
 }

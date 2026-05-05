@@ -1,4 +1,4 @@
-import { ButtonStyle, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
+import { SlashCommandBuilder, StringSelectMenuBuilder, ActionRowBuilder } from 'discord.js';
 import { COLORS, EMOJIS, PREFIXES } from '../../config.js';
 import { luvEmbed, footer } from '../../utils/embeds.js';
 
@@ -21,9 +21,28 @@ export default {
   category: 'social',
   usage: 'help [category]',
 
+  data: new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Show all Luvly commands and categories')
+    .addStringOption(o =>
+      o.setName('category')
+        .setDescription('Explore a specific category')
+        .addChoices(
+          { name: '❤️ social',      value: 'social' },
+          { name: '💌 matchmaking', value: 'matchmaking' },
+          { name: '🌙 midnight',    value: 'midnight' },
+          { name: '🎭 confession',  value: 'confession' },
+          { name: '⚗️ chemistry',   value: 'chemistry' },
+          { name: '🎮 engagement',  value: 'engagement' },
+          { name: '🤖 ai',          value: 'ai' },
+          { name: '🛡️ safety',      value: 'safety' },
+          { name: '🔥 hidden',      value: 'hidden' },
+        )
+    ),
+
   async execute(message, args, client) {
     const catArg = args[0]?.toLowerCase();
-    const cat = CATEGORIES[catArg];
+    const cat    = CATEGORIES[catArg];
 
     if (catArg && cat) {
       const cmds = [...client.commands.values()].filter(c => c.category === catArg);
@@ -31,8 +50,8 @@ export default {
         .setTitle(`${cat.emoji} ${cat.label} commands ✦`)
         .setDescription(
           cmds.map(c =>
-            `**u ${c.name}** ${c.aliases?.map(a => `· **u ${a}**`).join(' ') || ''}\n*${c.description}*  ·  \`${c.usage}\``
-          ).join('\n\n') || '*no commands found*'
+            `**u ${c.name}**${c.aliases?.length ? '  ·  ' + c.aliases.map(a => `**u ${a}**`).join('  ·  ') : ''}\n> *${c.description}*  ·  \`${c.usage}\``
+          ).join('\n\n') || '*no commands in this category*'
         )
         .setFooter(footer(client));
       return await message.reply({ embeds: [embed] });
@@ -41,25 +60,24 @@ export default {
     const embed = luvEmbed(COLORS.primary)
       .setTitle(`${EMOJIS.sparkle} luvly command system ✦`)
       .setDescription(
-        '**prefixes:** `luv` · `Luv` · `u`\n' +
-        '*any prefix works — mix and match freely*\n\n' +
-        '**quick commands:**\n' +
+        '**prefixes:** `luv` · `u`  ·  **or use slash commands** `/command`\n\n' +
+        '**quick start:**\n' +
         '`u p` — your profile\n' +
-        '`u c @user` — set crush\n' +
+        '`u c @user` — set your crush\n' +
         '`u chem @user` — chemistry check\n' +
-        '`u rizz` — get pickup line\n' +
-        '`u midnight` — midnight mode\n' +
-        '`u rank` — your xp + level\n' +
+        '`u rizz` — get a line\n' +
+        '`u midnight` — late night mode\n' +
+        '`u rank` — your xp & level\n' +
         '`u confess` — anonymous post\n' +
         '`u miss` — late night feelings\n' +
         '`u ghost` — ghost tracker\n' +
         '`u overthink` — midnight thoughts\n\n' +
-        '*use `u help [category]` for details*'
+        '*use the menu below to explore categories ↓*'
       )
       .addFields(
         Object.entries(CATEGORIES).map(([key, c]) => ({
-          name: `${c.emoji} ${c.label}`,
-          value: c.desc,
+          name:   `${c.emoji} ${c.label}`,
+          value:  c.desc,
           inline: true,
         }))
       )
@@ -70,10 +88,10 @@ export default {
       .setPlaceholder('explore a category...')
       .addOptions(
         Object.entries(CATEGORIES).map(([key, c]) => ({
-          label: c.label,
+          label:       c.label,
           description: c.desc,
-          value: key,
-          emoji: c.emoji,
+          value:       key,
+          emoji:       c.emoji,
         }))
       );
 

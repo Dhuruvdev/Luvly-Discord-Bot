@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js"
   },
   "dependencies": {
     "@fontsource/nunito": "^5.2.7",

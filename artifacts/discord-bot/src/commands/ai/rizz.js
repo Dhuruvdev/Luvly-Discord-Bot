@@ -1,4 +1,4 @@
-import { ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP, getUser, saveUser } from '../../utils/database.js';
@@ -13,6 +13,13 @@ export default {
   usage: 'rizz [@user]',
   cooldown: 4_000,
 
+  data: new SlashCommandBuilder()
+    .setName('rizz')
+    .setDescription('Generate a smooth pickup line (optionally aimed at someone)')
+    .addUserOption(o =>
+      o.setName('user').setDescription('User to send the line to (optional)')
+    ),
+
   async execute(message, args, client) {
     const target = message.mentions.users.first();
     const line   = RIZZ_LINES[Math.floor(Math.random() * RIZZ_LINES.length)];
@@ -20,23 +27,23 @@ export default {
     const { oldXP, newXP } = addXP(message.author.id, 3);
     await checkLevelUp(message.author.id, oldXP, newXP, message.channel, client);
 
-    // track rizz count for achievement
     const user  = getUser(message.author.id);
     const count = (user.rizzCount ?? 0) + 1;
     saveUser(message.author.id, { rizzCount: count });
     if (count >= 25) await unlock(message.author.id, 'rizz_master', client);
 
+    const desc = target
+      ? `*sending this to **${target.username}** ✦*\n\n> *"${line}"*`
+      : `> *"${line}"*`;
+
     const embed = luvEmbed(COLORS.aura)
       .setTitle(`${EMOJIS.rizz} rizz generator ✦`)
-      .setDescription(target
-        ? `sending this to **${target.username}** ✦\n\n*"${line}"*`
-        : `*"${line}"*`
-      )
+      .setDescription(desc)
       .setFooter(footer(client));
 
     const row = buildButtons(
-      { id: 'rizz_new',  label: 'new line',   emoji: '🔄', style: ButtonStyle.Secondary },
-      { id: 'rizz_copy', label: 'use this',   emoji: '💌', style: ButtonStyle.Primary },
+      { id: 'rizz_new',  label: 'new line', emoji: '🔄', style: ButtonStyle.Secondary },
+      { id: 'rizz_copy', label: 'use this', emoji: '💌', style: ButtonStyle.Primary },
     );
 
     await message.reply({ embeds: [embed], components: [row] });

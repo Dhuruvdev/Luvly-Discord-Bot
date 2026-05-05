@@ -1,4 +1,4 @@
-import { ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
@@ -13,13 +13,17 @@ export default {
   usage: 'confess',
   cooldown: 10_000,
 
+  data: new SlashCommandBuilder()
+    .setName('confess')
+    .setDescription('Post an anonymous confession — your identity stays hidden'),
+
   async execute(message, args, client) {
     const embed = luvEmbed(COLORS.purple)
       .setTitle(`${EMOJIS.confession} anonymous confessions ✦`)
       .setDescription(
-        'say the thing you\'ve been keeping inside.\n\n' +
-        'your identity is hidden. your words are safe.\n' +
-        'only you can choose to reveal yourself ✦'
+        "say the thing you've been keeping inside.\n\n" +
+        '> *your identity is hidden. your words are safe.*\n' +
+        '> *only you can choose to reveal yourself ✦*'
       )
       .setFooter(footer(client));
 

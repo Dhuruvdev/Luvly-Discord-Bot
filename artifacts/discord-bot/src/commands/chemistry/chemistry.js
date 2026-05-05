@@ -1,4 +1,4 @@
-import { ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
 import { getChemistry, addChemistry, getTopAdmirer, addXP, isBlocked } from '../../utils/database.js';
@@ -27,6 +27,13 @@ export default {
   usage: 'chemistry @user',
   cooldown: 8_000,
 
+  data: new SlashCommandBuilder()
+    .setName('chemistry')
+    .setDescription('Check your chemistry score with someone')
+    .addUserOption(o =>
+      o.setName('user').setDescription('User to check chemistry with (leave empty to see your top connection)')
+    ),
+
   async execute(message, args, client) {
     const target = message.mentions.users.first();
 
@@ -35,7 +42,7 @@ export default {
       if (!top.userId) {
         const embed = luvEmbed(COLORS.aura)
           .setTitle(`${EMOJIS.chemistry} chemistry radar`)
-          .setDescription('no data yet. use **u chem @user** to track a connection ✦')
+          .setDescription('> *no data yet. use **u chem @user** to track a connection ✦*')
           .setFooter(footer(client));
         return await message.reply({ embeds: [embed] });
       }
@@ -44,25 +51,23 @@ export default {
         .setTitle(`${EMOJIS.chemistry} your top connection`)
         .addFields(
           { name: 'highest chemistry with', value: `**${topUser?.username ?? 'unknown'}**`, inline: true },
-          { name: 'score', value: `**${top.score}**/200`, inline: true },
-          { name: 'connection type', value: chemLabel(top.score) },
-          { name: 'meter', value: `\`${chemBar(top.score)}\`` },
+          { name: 'score',                  value: `**${top.score}**/200`,                  inline: true },
+          { name: 'connection type',        value: chemLabel(top.score) },
+          { name: 'meter',                  value: `\`${chemBar(top.score)}\`` },
         )
         .setFooter(footer(client));
       return await message.reply({ embeds: [embed] });
     }
 
     if (target.id === message.author.id) return await message.reply({ embeds: [errorEmbed('self-chemistry? only you can decide that one 💀')] });
-    if (target.bot)                       return await message.reply({ embeds: [errorEmbed('you can\'t have chemistry with a bot 🤖')] });
-    if (isBlocked(message.author.id, target.id)) return await message.reply({ embeds: [errorEmbed('you can\'t interact with this user ✦')] });
+    if (target.bot)                       return await message.reply({ embeds: [errorEmbed("you can't have chemistry with a bot 🤖")] });
+    if (isBlocked(message.author.id, target.id)) return await message.reply({ embeds: [errorEmbed("you can't interact with this user ✦")] });
 
     addChemistry(message.author.id, target.id, 1);
     const { oldXP, newXP } = addXP(message.author.id, 10);
     await checkLevelUp(message.author.id, oldXP, newXP, message.channel, client);
 
     const score = getChemistry(message.author.id, target.id);
-
-    // chemistry achievements
     if (score >= 50)  await unlock(message.author.id, 'chem_50',  client);
     if (score >= 100) await unlock(message.author.id, 'chem_100', client);
     if (score >= 200) await unlock(message.author.id, 'chem_200', client);
@@ -74,7 +79,12 @@ export default {
       .addFields(
         { name: 'connection', value: `**${chemLabel(score)}**` },
         { name: 'meter',      value: `\`${chemBar(score)}\`  **${score}**/200` },
-        { name: 'tip',        value: score < 20 ? 'keep interacting to build your chemistry ✦' : 'you two have something real ✦' },
+        {
+          name:  'insight',
+          value: score < 20
+            ? '> *keep interacting to build your chemistry ✦*'
+            : '> *you two have something real ✦*',
+        },
       )
       .setFooter(footer(client));
 
