@@ -13,7 +13,7 @@ export default {
   cooldown: 3_000,
 
   async execute(message, args, client) {
-    const target   = message.mentions.users.first() ?? message.author;
+    const target   = message.mentions.users.filter(u => !u.bot).first() ?? message.author;
     const user     = getUser(target.id);
     const hearts   = getHearts(target.id);
     const unlocked = getUserAchievements(target.id);

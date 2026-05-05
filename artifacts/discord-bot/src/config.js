@@ -1,4 +1,4 @@
-export const PREFIXES = ['luv ', 'Luv ', 'u '];
+export const PREFIXES = ['luv ', 'Luv ', 'LUV ', 'luv', 'Luv', 'LUV', 'u ', 'U ', 'u', 'U'];
 
 export const COLORS = {
   primary:   0xFF6B9D,
