@@ -1,5 +1,6 @@
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, footer } from '../../utils/embeds.js';
+import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { getTable } from '../../utils/store.js';
 
 export default {
@@ -24,17 +25,23 @@ export default {
     const embed = luvEmbed(COLORS.primary)
       .setAuthor({ name: 'luvly bot stats ✦', iconURL: client.user.displayAvatarURL() })
       .addFields(
-        { name: `${EMOJIS.heart} users`,            value: `**${users.toLocaleString()}**`,       inline: true },
-        { name: `${EMOJIS.match} crushes`,           value: `**${crushes.toLocaleString()}**`,     inline: true },
-        { name: `${EMOJIS.chemistry} pairs`,         value: `**${chemPairs.toLocaleString()}**`,   inline: true },
-        { name: `${EMOJIS.confession} confessions`,  value: `**${confessions.toLocaleString()}**`, inline: true },
-        { name: `${EMOJIS.sparkle} servers`,         value: `**${client.guilds.cache.size}**`,     inline: true },
-        { name: '⚡ uptime',                          value: `**${days}d ${hours}h ${minutes}m**`,  inline: true },
-        { name: '🧠 memory',                          value: `**${memMB} MB**`,                     inline: true },
-        { name: '📦 node',                            value: `**${process.version}**`,              inline: true },
+        { name: `${EMOJIS.heart} users`,           value: `**${users.toLocaleString()}**`,       inline: true },
+        { name: `${EMOJIS.match} crushes`,          value: `**${crushes.toLocaleString()}**`,     inline: true },
+        { name: `${EMOJIS.chemistry} pairs`,        value: `**${chemPairs.toLocaleString()}**`,   inline: true },
+        { name: `${EMOJIS.confession} confessions`, value: `**${confessions.toLocaleString()}**`, inline: true },
+        { name: `${EMOJIS.sparkle} servers`,        value: `**${client.guilds.cache.size}**`,     inline: true },
+        { name: '⚡ uptime',                         value: `**${days}d ${hours}h ${minutes}m**`,  inline: true },
+        { name: '🧠 memory',                         value: `**${memMB} MB**`,                     inline: true },
+        { name: '📦 node',                           value: `**${process.version}**`,              inline: true },
       )
       .setFooter(footer(client));
 
-    await message.reply({ embeds: [embed] });
+    const row = buildButtons(
+      { id: 'daily_claim',  label: 'claim daily',    emoji: '🎁', style: ButtonStyle.Primary },
+      { id: 'lb_view',      label: 'leaderboard',    emoji: '🏆', style: ButtonStyle.Secondary },
+      { id: 'profile_view', label: 'my profile',     emoji: '💫', style: ButtonStyle.Secondary },
+    );
+
+    await message.reply({ embeds: [embed], components: [row] });
   },
 };

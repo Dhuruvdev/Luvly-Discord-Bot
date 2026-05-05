@@ -20,7 +20,7 @@ function randomMatch(guild) {
 
 export default {
   name: 'match',
-  aliases: ['daily'],
+  aliases: ['findmatch'],
   description: 'get a daily match recommendation',
   category: 'matchmaking',
   usage: 'match',

@@ -25,7 +25,11 @@ export default {
         )
         .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
         .setFooter(footer(client));
-      return message.reply({ embeds: [embed] });
+      const waitRow = buildButtons(
+        { id: 'profile_view', label: 'my profile', emoji: '💫', style: ButtonStyle.Secondary },
+        { id: 'rank_view',    label: 'my rank',    emoji: '🏆', style: ButtonStyle.Secondary },
+      );
+      return message.reply({ embeds: [embed], components: [waitRow] });
     }
 
     // Achievement check

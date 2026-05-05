@@ -1,5 +1,6 @@
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS, getLevelData } from '../../config.js';
-import { luvEmbed, footer } from '../../utils/embeds.js';
+import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { getLeaderboard } from '../../utils/database.js';
 import { getAchievementCount } from '../../utils/achievements.js';
 
@@ -14,12 +15,17 @@ export default {
   cooldown: 10_000,
 
   async execute(message, args, client) {
+    const row = buildButtons(
+      { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
+      { id: 'rank_view',   label: 'my rank',     emoji: '🏆', style: ButtonStyle.Secondary },
+    );
+
     const top = getLeaderboard(5);
     if (!top.length) {
       const embed = luvEmbed(COLORS.neutral)
         .setDescription('> *no data yet — be the first to claim daily xp ✦*')
         .setFooter(footer(client));
-      return await message.reply({ embeds: [embed] });
+      return await message.reply({ embeds: [embed], components: [row] });
     }
 
     const lines = await Promise.all(
@@ -40,6 +46,6 @@ export default {
       .setDescription(lines.join('\n\n'))
       .setFooter(footer(client));
 
-    await message.reply({ embeds: [embed] });
+    await message.reply({ embeds: [embed], components: [row] });
   },
 };

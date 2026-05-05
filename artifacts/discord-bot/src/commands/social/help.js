@@ -35,13 +35,23 @@ export default {
           ).join('\n\n') || '*no commands in this category*'
         )
         .setFooter(footer(client));
-      return await message.reply({ embeds: [embed] });
+      const { ActionRowBuilder, StringSelectMenuBuilder: SMB } = await import('discord.js');
+      const backSelect = new SMB()
+        .setCustomId('help_category')
+        .setPlaceholder('browse another category...')
+        .addOptions(
+          Object.entries(CATEGORIES).map(([key, c]) => ({
+            label: c.label, description: c.desc, value: key, emoji: c.emoji,
+          }))
+        );
+      const catRow = new ActionRowBuilder().addComponents(backSelect);
+      return await message.reply({ embeds: [embed], components: [catRow] });
     }
 
     const embed = luvEmbed(COLORS.primary)
       .setTitle(`${EMOJIS.sparkle} luvly command system ✦`)
       .setDescription(
-        '**prefixes:** `luv` · `u`  ·  **or use slash commands** `/command`\n\n' +
+        '**prefixes:** `luv` · `Luv` · `u` · `U`  (with or without space)\n\n' +
         '**quick start:**\n' +
         '`u p` — your profile\n' +
         '`u c @user` — set your crush\n' +

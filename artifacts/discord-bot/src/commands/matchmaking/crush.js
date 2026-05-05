@@ -26,7 +26,10 @@ export default {
             "> *they won't be notified — it stays between you and the stars ✦*"
           )
           .setFooter(footer(client));
-        return await message.reply({ embeds: [embed] });
+        const noRow = buildButtons(
+          { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
+        );
+        return await message.reply({ embeds: [embed], components: [noRow] });
       }
       const crushUser = await client.users.fetch(existing.targetId).catch(() => null);
       const isMutual  = checkMutualCrush(message.author.id, existing.targetId);

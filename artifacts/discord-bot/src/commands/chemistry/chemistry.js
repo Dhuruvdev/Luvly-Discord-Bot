@@ -37,7 +37,10 @@ export default {
           .setTitle(`${EMOJIS.chemistry} chemistry radar`)
           .setDescription('> *no data yet. use **u chem @user** to track a connection ✦*')
           .setFooter(footer(client));
-        return await message.reply({ embeds: [embed] });
+        const noDataRow = buildButtons(
+          { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
+        );
+        return await message.reply({ embeds: [embed], components: [noDataRow] });
       }
       const topUser = await client.users.fetch(top.userId).catch(() => null);
       const embed = luvEmbed(COLORS.aura)
@@ -49,7 +52,11 @@ export default {
           { name: 'meter',                  value: `\`${chemBar(top.score)}\`` },
         )
         .setFooter(footer(client));
-      return await message.reply({ embeds: [embed] });
+      const topRow = buildButtons(
+        { id: `chem_boost:${top.userId}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
+        { id: 'daily_claim',              label: 'claim daily',     emoji: '🎁', style: ButtonStyle.Secondary },
+      );
+      return await message.reply({ embeds: [embed], components: [topRow] });
     }
 
     if (target.id === message.author.id) return await message.reply({ embeds: [errorEmbed('self-chemistry? only you can decide that one 💀')] });

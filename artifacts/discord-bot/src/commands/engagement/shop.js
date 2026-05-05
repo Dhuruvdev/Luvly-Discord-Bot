@@ -87,7 +87,11 @@ export default {
         .setDescription(`you bought **${item.name}** for **${item.price} 💗**\n> *${item.desc.replace(/\*\*/g, '')}*`)
         .addFields({ name: 'hearts remaining', value: `**${getHearts(message.author.id)} 💗**` })
         .setFooter(footer(client));
-      return await message.reply({ embeds: [embed] });
+      const buyRow = buildButtons(
+        { id: 'shop_open',   label: 'shop more',   emoji: '💎', style: ButtonStyle.Secondary },
+        { id: 'daily_claim', label: 'earn hearts', emoji: '💗', style: ButtonStyle.Primary },
+      );
+      return await message.reply({ embeds: [embed], components: [buyRow] });
     }
 
     const hearts     = getHearts(message.author.id);

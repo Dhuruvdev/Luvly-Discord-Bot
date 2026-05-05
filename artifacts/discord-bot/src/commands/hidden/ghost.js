@@ -1,5 +1,6 @@
+import { ButtonStyle } from 'discord.js';
 import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, errorEmbed, footer } from '../../utils/embeds.js';
+import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
 import { getGhostDays, getUser, saveUser } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
 
@@ -18,14 +19,19 @@ export default {
   cooldown: 5_000,
 
   async execute(message, args, client) {
-    const target = message.mentions.users.first() ?? message.author;
+    const target = message.mentions.users.filter(u => !u.bot).first() ?? message.author;
     const days   = getGhostDays(target.id);
+
+    const baseRow = buildButtons(
+      { id: 'midnight_confess', label: 'say something', emoji: '💌', style: ButtonStyle.Primary },
+      { id: 'comfort_more',     label: 'comfort me',    emoji: '🌙', style: ButtonStyle.Secondary },
+    );
 
     if (days === 0) {
       const embed = luvEmbed(COLORS.success)
         .setDescription(`${EMOJIS.ghost} **${target.username}** is not a ghost. they're right here 💀`)
         .setFooter(footer(client));
-      return await message.reply({ embeds: [embed] });
+      return await message.reply({ embeds: [embed], components: [baseRow] });
     }
 
     if (target.id !== message.author.id) {
@@ -50,6 +56,6 @@ export default {
       )
       .setFooter(footer(client));
 
-    await message.reply({ embeds: [embed] });
+    await message.reply({ embeds: [embed], components: [baseRow] });
   },
 };
