@@ -1,7 +1,7 @@
 /**
- * Luvly Profile Card Generator — 800 × 600 landscape
- * Redesigned layout: compact white card, avatar with themed bg box,
- * clean right column, stat pills row at bottom.
+ * Luvly Profile Card Generator — 900 × 380 horizontal banner
+ * Redesigned: full-bleed theme background, frosted-glass overlay,
+ * avatar left column, info right column, stat pills row at bottom.
  */
 
 import { createCanvas, loadImage, GlobalFonts } from '@napi-rs/canvas';
@@ -36,7 +36,7 @@ try {
 } catch {}
 
 // ── Canvas size ───────────────────────────────────────────────────────────────
-const W = 800, H = 600;
+const W = 900, H = 380;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function rrect(ctx, x, y, w, h, r) {
@@ -53,10 +53,18 @@ function rrect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+function isColorDark(hex) {
+  if (!hex || !hex.startsWith('#')) return false;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 < 100;
+}
+
 function clampFont(ctx, text, maxW, startPx) {
   let size = startPx;
   ctx.font = `800 ${size}px '${FONT}', sans-serif`;
-  while (ctx.measureText(text).width > maxW && size > 18) {
+  while (ctx.measureText(text).width > maxW && size > 16) {
     size -= 2;
     ctx.font = `800 ${size}px '${FONT}', sans-serif`;
   }
@@ -77,17 +85,19 @@ function wrapText(ctx, text, x, y, maxW, lh, maxLines = 2) {
 }
 
 // ── XP bar ────────────────────────────────────────────────────────────────────
-function drawXpBar(ctx, xp, current, next, x, y, barW, theme) {
+function drawXpBar(ctx, xp, current, next, x, y, barW, theme, isDark) {
   const filled = next
     ? Math.min((xp - current.xp) / (next.xp - current.xp), 1)
     : 1;
 
-  const BH = 10, R = 5;
+  const BH = 9, R = 4;
 
-  ctx.fillStyle = 'rgba(0,0,0,0.10)';
+  // Track
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
   rrect(ctx, x, y, barW, BH, R);
   ctx.fill();
 
+  // Fill
   if (filled > 0) {
     ctx.fillStyle = theme.nameColor ?? '#8B5CF6';
     rrect(ctx, x, y, Math.max(barW * filled, R * 2), BH, R);
@@ -95,7 +105,7 @@ function drawXpBar(ctx, xp, current, next, x, y, barW, theme) {
   }
 
   const xpLabel = next ? `${xp} / ${next.xp} xp` : `${xp} xp · max`;
-  ctx.fillStyle    = 'rgba(0,0,0,0.40)';
+  ctx.fillStyle    = isDark ? 'rgba(255,255,255,0.50)' : 'rgba(0,0,0,0.40)';
   ctx.font         = `600 10px '${FONT}', sans-serif`;
   ctx.textAlign    = 'right';
   ctx.textBaseline = 'middle';
@@ -103,19 +113,17 @@ function drawXpBar(ctx, xp, current, next, x, y, barW, theme) {
   ctx.textAlign = 'left';
 }
 
-// ── Avatar with themed background box ────────────────────────────────────────
-async function drawAvatarBox(ctx, avatarURL, x, y, size, theme) {
-  const PAD  = 10;
-  const BOX  = size + PAD * 2;
-  const bx   = x - PAD;
-  const by   = y - PAD;
+// ── Avatar ────────────────────────────────────────────────────────────────────
+async function drawAvatar(ctx, avatarURL, x, y, size, theme) {
+  const PAD = 8;
+  const BOX = size + PAD * 2;
 
-  // Colored bg box
-  ctx.fillStyle = theme.avatarBg ?? 'rgba(180,160,210,0.45)';
-  rrect(ctx, bx, by, BOX, BOX, 18);
+  // Colored bg box behind avatar
+  ctx.fillStyle = theme.avatarBg ?? (theme.nameColor ? theme.nameColor + '55' : 'rgba(180,160,210,0.45)');
+  rrect(ctx, x - PAD, y - PAD, BOX, BOX, 16);
   ctx.fill();
 
-  // Avatar image clipped to rounded rect
+  // Clip & draw avatar
   ctx.save();
   rrect(ctx, x, y, size, size, 12);
   ctx.clip();
@@ -137,32 +145,33 @@ function drawFallback(ctx, x, y, size) {
 }
 
 // ── Stat pills ────────────────────────────────────────────────────────────────
-function drawStatPills(ctx, stats, theme, startX, startY, cardW) {
-  const count  = stats.length;
-  const GAP    = 8;
-  const PH     = 36;
-  const PW     = Math.floor((cardW - GAP * (count - 1)) / count);
+function drawStatPills(ctx, stats, theme, startX, startY, cardW, isDark) {
+  const count = stats.length;
+  const GAP   = 6;
+  const PH    = 30;
+  const PW    = Math.floor((cardW - GAP * (count - 1)) / count);
 
   stats.forEach((stat, i) => {
     const px    = startX + i * (PW + GAP);
     const style = (theme.pills ?? [])[i] ?? { bg: '#EDE9FE', text: '#6D28D9' };
 
-    ctx.fillStyle = style.bg;
+    // Pill bg - use theme color with transparency on dark themes
+    ctx.fillStyle = isDark
+      ? `rgba(255,255,255,0.10)`
+      : style.bg;
     rrect(ctx, px, startY, PW, PH, PH / 2);
     ctx.fill();
 
-    // icon right-aligned
-    ctx.font      = '14px serif';
+    ctx.font      = '13px serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText(stat.icon, px + PW - 11, startY + PH / 2);
+    ctx.fillText(stat.icon, px + PW - 10, startY + PH / 2);
 
-    // label left-aligned
-    ctx.fillStyle    = style.text;
-    ctx.font         = `600 11px '${FONT}', sans-serif`;
+    ctx.fillStyle    = isDark ? 'rgba(255,255,255,0.85)' : style.text;
+    ctx.font         = `600 10px '${FONT}', sans-serif`;
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(stat.label, px + 12, startY + PH / 2);
+    ctx.fillText(stat.label, px + 10, startY + PH / 2);
 
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'alphabetic';
@@ -174,14 +183,14 @@ function drawWatermark(ctx, cx, y) {
   const LABEL = 'luvly cards';
   ctx.font     = `600 10px '${FONT}', sans-serif`;
   const tw     = ctx.measureText(LABEL).width;
-  const LOGO   = 18;
-  const PAD    = { x: 10, y: 5 };
-  const GAP    = logoImg ? 6 : 0;
+  const LOGO   = 16;
+  const PAD    = { x: 8, y: 4 };
+  const GAP    = logoImg ? 5 : 0;
   const bw     = PAD.x * 2 + (logoImg ? LOGO + GAP : 0) + tw;
   const bh     = LOGO + PAD.y * 2;
 
   rrect(ctx, cx - bw / 2, y - bh / 2, bw, bh, bh / 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
   ctx.fill();
 
   let textX = cx - bw / 2 + PAD.x;
@@ -208,81 +217,112 @@ function drawWatermark(ctx, cx, y) {
 
 // ── Main draw ─────────────────────────────────────────────────────────────────
 async function drawCard(ctx, data, theme) {
-  // White card panel — 36px margin gives visible background breathing room
-  const M  = 36;
+  const isDark = isColorDark(theme.bg ?? '#ffffff');
+
+  // ── Glass overlay panel ───────────────────────────────────────────────────
+  // Sits over the background so it shows through on all edges
+  const M  = 20;
   const CX = M, CY = M, CW = W - M * 2, CH = H - M * 2;
 
   ctx.save();
-  ctx.shadowColor   = 'rgba(0,0,0,0.18)';
-  ctx.shadowBlur    = 32;
-  ctx.shadowOffsetY = 8;
-  ctx.fillStyle     = theme.cardBg ?? '#FFFFFF';
-  rrect(ctx, CX, CY, CW, CH, 24);
+  ctx.shadowColor   = 'rgba(0,0,0,0.22)';
+  ctx.shadowBlur    = 28;
+  ctx.shadowOffsetY = 6;
+  // Semi-transparent so background theme is visible
+  ctx.fillStyle = isDark
+    ? 'rgba(10,5,20,0.62)'
+    : 'rgba(255,255,255,0.68)';
+  rrect(ctx, CX, CY, CW, CH, 22);
   ctx.fill();
   ctx.restore();
 
-  // ── Left: avatar box ───────────────────────────────────────────────────────
-  const AV_SIZE = 160;
-  const AV_PAD  = 12;
-  const AV_X    = CX + 32 + AV_PAD;
-  const AV_Y    = CY + 32 + AV_PAD;
-  await drawAvatarBox(ctx, data.avatarURL, AV_X, AV_Y, AV_SIZE, theme);
+  // Subtle inner border for glass feel
+  ctx.save();
+  rrect(ctx, CX, CY, CW, CH, 22);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.80)';
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+  ctx.restore();
 
-  // Vertical divider
-  const DIV_X = AV_X + AV_SIZE + AV_PAD + 28;
+  // ── Left column: avatar ───────────────────────────────────────────────────
+  const AV_SIZE = 150;
+  const AV_PAD  = 10;
+  const AV_X    = CX + 28 + AV_PAD;
+  const AV_Y    = CY + (CH - AV_SIZE) / 2 - 16;
+  await drawAvatar(ctx, data.avatarURL, AV_X, AV_Y, AV_SIZE, theme);
+
+  // Username below avatar
+  const uname = data.username ?? 'unknown';
+  ctx.font      = `800 12px '${FONT}', sans-serif`;
+  ctx.fillStyle = theme.tagColor ?? '#C4A3DF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(uname, AV_X + AV_SIZE / 2, AV_Y + AV_SIZE + AV_PAD + 18);
+  ctx.textAlign = 'left';
+
+  // ── Vertical divider ──────────────────────────────────────────────────────
+  const DIV_X = AV_X + AV_SIZE + AV_PAD + 22;
   ctx.beginPath();
-  ctx.moveTo(DIV_X, CY + 24);
-  ctx.lineTo(DIV_X, CY + CH - 24);
-  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.moveTo(DIV_X, CY + 20);
+  ctx.lineTo(DIV_X, CY + CH - 20);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
   ctx.lineWidth   = 1;
   ctx.stroke();
 
-  // ── Right: text column ─────────────────────────────────────────────────────
-  const TX  = DIV_X + 24;
-  const TW  = CX + CW - TX - 24;
+  // ── Right column: info ────────────────────────────────────────────────────
+  const TX = DIV_X + 22;
+  const TW = CX + CW - TX - 22;
 
   const { current, next } = getLevelData(data.xp ?? 0);
 
-  // Username — large, bold, themed colour
-  const uname = data.username ?? 'unknown';
-  clampFont(ctx, uname, TW, 42);
+  // Display name — large, bold, themed colour
+  clampFont(ctx, uname, TW, 36);
   ctx.fillStyle    = theme.nameColor ?? '#8B5CF6';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText(uname, TX, CY + 68);
+  ctx.fillText(uname, TX, CY + 52);
 
-  // Level / title line
-  ctx.fillStyle = theme.tagColor ?? '#C4A3DF';
-  ctx.font      = `600 13px '${FONT}', sans-serif`;
-  ctx.fillText(`lv${current.level}  ·  ${current.title}`, TX, CY + 92);
+  // Level / title
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.65)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.font      = `600 12px '${FONT}', sans-serif`;
+  ctx.fillText(`lv${current.level}  ·  ${current.title}`, TX, CY + 72);
 
   // XP bar
-  drawXpBar(ctx, data.xp ?? 0, current, next, TX, CY + 106, TW, theme);
+  drawXpBar(ctx, data.xp ?? 0, current, next, TX, CY + 82, TW, theme, isDark);
+
+  // Thin divider
+  ctx.beginPath();
+  ctx.moveTo(TX, CY + 104);
+  ctx.lineTo(TX + TW, CY + 104);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
 
   // Pronouns / bio
-  ctx.fillStyle = theme.tagColor ?? '#A78BFA';
-  ctx.font      = `400 12.5px '${FONT}', sans-serif`;
+  const textColor = isDark ? 'rgba(255,255,255,0.80)' : (theme.tagColor ?? '#A78BFA');
+  ctx.fillStyle = textColor;
+  ctx.font      = `400 12px '${FONT}', sans-serif`;
   const sub = [data.pronouns, data.bio].filter(Boolean).join('  ·  ');
-  if (sub) wrapText(ctx, sub, TX, CY + 136, TW, 19);
+  if (sub) wrapText(ctx, sub, TX, CY + 122, TW, 18, 3);
 
   // Interests
   if (data.interests?.length) {
-    ctx.fillStyle = theme.tagColor ?? '#C4A3DF';
-    ctx.font      = `400 12px '${FONT}', sans-serif`;
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.60)' : (theme.tagColor ?? '#C4A3DF');
+    ctx.font      = `400 11px '${FONT}', sans-serif`;
     wrapText(
       ctx,
       data.interests.slice(0, 5).map(i => `• ${i}`).join('  '),
-      TX, CY + 175, TW, 18,
+      TX, CY + 190, TW, 17, 2,
     );
   }
 
-  // ── Bottom: stat pills ─────────────────────────────────────────────────────
-  const PILL_TOP = CY + CH - 62;
+  // ── Stat pills row at bottom ──────────────────────────────────────────────
+  const PILL_TOP = CY + CH - 48;
 
-  // thin separator above pills
+  // Separator above pills
   ctx.beginPath();
-  ctx.moveTo(CX + 18, PILL_TOP - 14);
-  ctx.lineTo(CX + CW - 18, PILL_TOP - 14);
-  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+  ctx.moveTo(CX + 16, PILL_TOP - 12);
+  ctx.lineTo(CX + CW - 16, PILL_TOP - 12);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
   ctx.lineWidth   = 1;
   ctx.stroke();
 
@@ -293,10 +333,10 @@ async function drawCard(ctx, data, theme) {
     { label: `${data.hearts ?? 0} hearts`,  icon: '' },
     { label: data.aura ?? 'soft',           icon: '' },
   ];
-  drawStatPills(ctx, stats, theme, CX + 18, PILL_TOP, CW - 36);
+  drawStatPills(ctx, stats, theme, CX + 16, PILL_TOP, CW - 32, isDark);
 
-  // ── Watermark ──────────────────────────────────────────────────────────────
-  drawWatermark(ctx, W / 2, H - 14);
+  // ── Watermark ─────────────────────────────────────────────────────────────
+  drawWatermark(ctx, W / 2, H - 10);
 }
 
 // ── Export ────────────────────────────────────────────────────────────────────
