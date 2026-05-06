@@ -12,12 +12,14 @@ import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
   ModalBuilder, TextInputBuilder, TextInputStyle,
   ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
+  SeparatorBuilder, SeparatorSpacingSize,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
 import {
   HELP_CATEGORIES, HELP_PAGE_SIZE,
   buildHelpCategoryPage, buildHelpMainContainer, buildQuickStartContainer,
 } from '../commands/social/help.js';
+import { buildTOSContainer, buildProfileFormContainer } from '../commands/social/setup.js';
 import { luvContainer, buildButtons, errorEmbed } from '../utils/embeds.js';
 import {
   getUser, saveUser, addXP, addHearts, getHearts, spendHearts,
@@ -39,10 +41,62 @@ const EPH = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
 function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 export function buildHandlers(client) {
+
+  // Temporary store for pending setup state (gender selected before modal)
+  const pendingSetup = new Map();
+
   return {
 
     // ── BUTTONS ──────────────────────────────────────────────────────────────
     buttons: {
+
+      // ── Setup: accept T&C → show profile form ─────────────────────────────
+      setup_accept: async (i) => {
+        const container = buildProfileFormContainer(null);
+        await i.update({ flags: CV2, components: [container] });
+      },
+
+      // ── Setup: open profile creation modal ────────────────────────────────
+      setup_create: async (i) => {
+        const pending = pendingSetup.get(i.user.id);
+        if (!pending?.gender) {
+          return i.reply({ flags: EPH, components: [luvContainer('>  please select your gender first ✦')] });
+        }
+        const modal = new ModalBuilder()
+          .setCustomId('modal_setup')
+          .setTitle('Create Your Luvly Profile');
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('bio')
+              .setLabel('Bio  (required · max 120 chars)')
+              .setStyle(TextInputStyle.Paragraph)
+              .setMaxLength(120)
+              .setMinLength(5)
+              .setRequired(true)
+              .setPlaceholder('Tell us something about yourself...')
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('pronouns')
+              .setLabel('Pronouns  (required)')
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(30)
+              .setRequired(true)
+              .setPlaceholder('she/her · he/him · they/them · any...')
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('interests')
+              .setLabel('Interests  (optional · comma separated · max 5)')
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(150)
+              .setRequired(false)
+              .setPlaceholder('music, art, late nights, stargazing...')
+          ),
+        );
+        await i.showModal(modal);
+      },
 
       // ── Theme gallery pagination ──────────────────────────────────────────
       tlg: async (i, [pageStr, userId]) => {
@@ -763,6 +817,14 @@ export function buildHandlers(client) {
     // ── SELECTS ──────────────────────────────────────────────────────────────
     selects: {
 
+      // ── Setup: gender selection → enable Create Profile button ───────────
+      setup_gender: async (i) => {
+        const gender = i.values[0];
+        pendingSetup.set(i.user.id, { gender });
+        const container = buildProfileFormContainer(gender);
+        await i.update({ flags: CV2, components: [container] });
+      },
+
       help_category: async (i, _parts) => {
         const catArg = i.values[0];
         const { container } = buildHelpCategoryPage(catArg, 0);
@@ -792,6 +854,78 @@ export function buildHandlers(client) {
 
     // ── MODALS ────────────────────────────────────────────────────────────────
     modals: {
+
+      // ── Setup: profile creation modal submission ──────────────────────────
+      modal_setup: async (i) => {
+        const bio        = i.fields.getTextInputValue('bio')?.trim();
+        const pronouns   = i.fields.getTextInputValue('pronouns')?.trim();
+        const interestsR = i.fields.getTextInputValue('interests')?.trim() || '';
+        const interests  = interestsR
+          ? interestsR.split(',').map(s => s.trim()).filter(Boolean).slice(0, 5)
+          : [];
+
+        if (!bio || bio.length < 5) {
+          return i.reply({ flags: EPH, components: [luvContainer('>  bio must be at least 5 characters ✦')] });
+        }
+        if (!pronouns) {
+          return i.reply({ flags: EPH, components: [luvContainer('>  pronouns are required ✦')] });
+        }
+
+        const gender = pendingSetup.get(i.user.id)?.gender ?? null;
+        pendingSetup.delete(i.user.id);
+
+        saveUser(i.user.id, {
+          bio,
+          pronouns,
+          interests,
+          gender,
+          setupComplete: true,
+        });
+
+        const { oldXP, newXP } = addXP(i.user.id, 50);
+        await unlock(i.user.id, 'first_profile', client);
+        await checkLevelUp(i.user.id, oldXP, newXP, i.channel, client);
+
+        const R = '<:right:1501255316350959858>';
+        const genderLabel = gender
+          ? gender.charAt(0).toUpperCase() + gender.slice(1)
+          : 'Not specified';
+
+        const loadingContainer = luvContainer(
+          `>  creating your profile...\n\n*just a moment ✦*`
+        );
+        await i.reply({ flags: MessageFlags.IsComponentsV2, components: [loadingContainer] });
+
+        await new Promise(r => setTimeout(r, 1500));
+
+        const congratsText =
+          `**﹕ⵌ┆ <:luvly:1501269739324838151> Welcome to Luvly 🎉 ꩜ .**\n\n` +
+          `**Congratulations, ${i.user.username}! Your profile is live.**\n\n` +
+          `${R} **Your Profile:**\n` +
+          `> ⤿  Bio: *"${bio}"*\n` +
+          `> ⤿  Pronouns: **${pronouns}**\n` +
+          `> ⤿  Gender: **${genderLabel}**\n` +
+          (interests.length
+            ? `> ⤿  Interests: ${interests.map(x => `\`${x}\``).join('  ')}\n`
+            : '') +
+          `\n${R} **What's next:**\n` +
+          `> ⤿  \`luv daily\` — claim your first daily reward\n` +
+          `> ⤿  \`luv match\` — find your first match\n` +
+          `> ⤿  \`luv profile\` — view your full profile\n` +
+          `> ⤿  \`luv help\` — explore all commands\n\n` +
+          `*you're part of the luvly family now ✦*`;
+
+        const row = buildButtons(
+          { id: 'daily_claim',  label: 'Claim Daily',  emoji: '', style: ButtonStyle.Success   },
+          { id: 'profile_view', label: 'My Profile',   emoji: '', style: ButtonStyle.Primary   },
+          { id: 'match_again',  label: 'Find a Match', emoji: '', style: ButtonStyle.Secondary },
+        );
+
+        await i.editReply({
+          flags: MessageFlags.IsComponentsV2,
+          components: [luvContainer(congratsText, row)],
+        });
+      },
 
       modal_edit_profile: async (i) => {
         const bio        = i.fields.getTextInputValue('bio')?.trim()       || null;
