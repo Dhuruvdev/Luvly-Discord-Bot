@@ -520,8 +520,7 @@ export function buildHandlers(client) {
       // ── Help: pagination ──────────────────────────────────────────────────
       help_page: async (i, [catArg, pageStr]) => {
         const page = parseInt(pageStr, 10) || 0;
-        const cmds = [...client.commands.values()].filter(c => c.category === catArg);
-        const { container } = buildHelpCategoryPage(catArg, page, cmds);
+        const { container } = buildHelpCategoryPage(catArg, page);
         await i.update({ flags: CV2, components: [container] });
       },
 
@@ -540,9 +539,7 @@ export function buildHandlers(client) {
 
       help_category: async (i, _parts) => {
         const catArg = i.values[0];
-        const cmds   = [...client.commands.values()].filter(c => c.category === catArg);
-        const { container } = buildHelpCategoryPage(catArg, 0, cmds);
-        // All interactions (select + buttons) are already inside container
+        const { container } = buildHelpCategoryPage(catArg, 0);
         await i.update({ flags: CV2, components: [container] });
       },
 
