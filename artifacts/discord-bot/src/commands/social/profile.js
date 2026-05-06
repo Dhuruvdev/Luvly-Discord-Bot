@@ -1,17 +1,50 @@
-import { AttachmentBuilder, ButtonStyle, MessageFlags } from 'discord.js';
+import {
+  AttachmentBuilder, ButtonStyle, MessageFlags,
+  ContainerBuilder, TextDisplayBuilder,
+  MediaGalleryBuilder, MediaGalleryItemBuilder,
+  ActionRowBuilder, ButtonBuilder,
+} from 'discord.js';
 import { EMOJIS, getLevelData } from '../../config.js';
-import { luvEmbed, buildButtons, footer, errorEmbed } from '../../utils/embeds.js';
+import { luvContainer } from '../../utils/embeds.js';
 import { getUser, getHearts, saveUser, getUserTheme } from '../../utils/database.js';
-import { getUserAchievements, unlock } from '../../utils/achievements.js';
+import { unlock } from '../../utils/achievements.js';
 import { generateCard } from '../../utils/cardGenerator.js';
 
+const CV2 = MessageFlags.IsComponentsV2;
+
+function profileContainer(username, filename, color, isSelf) {
+  const c = new ContainerBuilder().setAccentColor(color ?? 0xEDB5F8);
+
+  c.addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(`**﹕ⵌ┆ ${username}'s Profile ꩜ .**`)
+  );
+
+  c.addMediaGalleryComponents(
+    new MediaGalleryBuilder().addItems(
+      new MediaGalleryItemBuilder().setURL(`attachment://${filename}`)
+    )
+  );
+
+  if (isSelf) {
+    c.addActionRowComponents(
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('profile_edit').setLabel('edit profile').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId('profile_aura').setLabel('change aura').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('daily_claim').setLabel('claim daily').setStyle(ButtonStyle.Success),
+      )
+    );
+  }
+
+  return c;
+}
+
 export default {
-  name: 'profile',
-  aliases: ['p'],
+  name:        'profile',
+  aliases:     ['p'],
   description: "view yours or someone's profile card",
-  category: 'social',
-  usage: 'profile [@user]',
-  cooldown: 5_000,
+  category:    'social',
+  usage:       'profile [@user]',
+  cooldown:    5_000,
 
   async execute(message, args, client) {
     const target = message.mentions.users.filter(u => !u.bot).first() ?? message.author;
@@ -27,17 +60,17 @@ export default {
 
     await message.channel.sendTyping().catch(() => {});
 
-    const loadMsg = await message.reply({
-      embeds: [
-        luvEmbed(current.color ?? 0xEDB5F8)
-          .setDescription(`${EMOJIS.sparkle} generating **${target.username}'s** profile card... ✦`)
-          .setFooter(footer(client)),
-      ],
-    });
+    const loadContainer = new ContainerBuilder().setAccentColor(current.color ?? 0xEDB5F8);
+    loadContainer.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `> ${EMOJIS.sparkle} generating **${target.username}'s** profile card... ✦`
+      )
+    );
+    const loadMsg = await message.reply({ flags: CV2, components: [loadContainer] });
 
     try {
-      const themeId = getUserTheme(target.id);
-      const buffer  = await generateCard({
+      const themeId  = getUserTheme(target.id);
+      const buffer   = await generateCard({
         username:  target.username,
         avatarURL: target.displayAvatarURL({ extension: 'png', size: 256 }),
         pronouns:  user.pronouns,
@@ -46,37 +79,19 @@ export default {
         xp:        user.xp       ?? 0,
         streak:    user.streak    ?? 0,
         hearts,
-        aura:      user.aura     ?? 'soft',
+        aura:      user.aura ?? 'soft',
       }, themeId);
 
-      const attachment = new AttachmentBuilder(buffer, { name: `${target.username}-profile.png` });
+      const filename   = `${target.username}-profile.png`;
+      const attachment = new AttachmentBuilder(buffer, { name: filename });
+      const container  = profileContainer(target.username, filename, current.color, isSelf);
 
-      const resultEmbed = luvEmbed(current.color ?? 0xEDB5F8)
-        .setAuthor({
-          name:    `${target.username}'s profile ✦`,
-          iconURL: target.displayAvatarURL({ dynamic: true }),
-        })
-        .setImage(`attachment://${target.username}-profile.png`)
-        .setFooter(footer(client));
-
-      const buttons = isSelf
-        ? buildButtons(
-            { id: 'profile_edit', label: 'edit profile', emoji: '', style: ButtonStyle.Primary   },
-            { id: 'profile_aura', label: 'change aura',  emoji: '', style: ButtonStyle.Secondary },
-            { id: 'daily_claim',  label: 'claim daily',  emoji: '', style: ButtonStyle.Success   },
-          )
-        : null;
-
-      await loadMsg.edit({
-        embeds:     [resultEmbed],
-        files:      [attachment],
-        components: buttons ? [buttons] : [],
-      });
+      await loadMsg.edit({ flags: CV2, files: [attachment], components: [container] });
     } catch (err) {
       console.error('[PROFILE CARD ERROR]', err);
       await loadMsg.edit({
-        embeds:     [errorEmbed('profile card failed to generate. try again ✦')],
-        components: [],
+        flags: CV2,
+        components: [luvContainer('> profile card failed to generate. try again ✦')],
       });
     }
   },

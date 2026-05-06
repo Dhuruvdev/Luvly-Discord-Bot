@@ -13,6 +13,7 @@ import {
   ModalBuilder, TextInputBuilder, TextInputStyle,
   ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
   SeparatorBuilder, SeparatorSpacingSize, ChannelType, AttachmentBuilder,
+  MediaGalleryBuilder, MediaGalleryItemBuilder,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
 import {
@@ -64,7 +65,7 @@ export function buildHandlers(client) {
           return i.reply({ flags: EPH, components: [luvContainer('>  please select your gender first ✦')] });
         }
         const modal = new ModalBuilder()
-          .setCustomId('modal_setup')
+          .setCustomId(`modal_setup:${i.channelId}:${i.message.id}`)
           .setTitle('Create Your Luvly Profile');
         modal.addComponents(
           new ActionRowBuilder().addComponents(
@@ -192,12 +193,11 @@ export function buildHandlers(client) {
         const next  = auras[(auras.indexOf(user.aura ?? 'soft') + 1) % auras.length];
         saveUser(i.user.id, { aura: next });
 
-        // Defer so we have time to regenerate the card
         await i.deferUpdate();
 
         try {
           const hearts   = getHearts(i.user.id);
-          const themeId  = getUserTheme ? getUserTheme(i.user.id) : 'default';
+          const themeId  = getUserTheme(i.user.id);
           const buffer   = await generateCard({
             username:  i.user.username,
             avatarURL: i.user.displayAvatarURL({ extension: 'png', size: 256 }),
@@ -211,30 +211,29 @@ export function buildHandlers(client) {
           }, themeId);
 
           const { current } = getLevelData(user.xp ?? 0);
-          const attachment  = new AttachmentBuilder(buffer, { name: `${i.user.username}-profile.png` });
+          const filename    = `${i.user.username}-profile.png`;
+          const attachment  = new AttachmentBuilder(buffer, { name: filename });
 
-          const resultEmbed = luvEmbed(current.color ?? 0xEDB5F8)
-            .setAuthor({
-              name:    `${i.user.username}'s profile ✦`,
-              iconURL: i.user.displayAvatarURL({ dynamic: true }),
-            })
-            .setImage(`attachment://${i.user.username}-profile.png`)
-            .setFooter(footer(client));
-
-          const buttons = buildButtons(
-            { id: 'profile_edit', label: 'edit profile', emoji: '', style: ButtonStyle.Primary   },
-            { id: 'profile_aura', label: 'change aura',  emoji: '', style: ButtonStyle.Secondary },
-            { id: 'daily_claim',  label: 'claim daily',  emoji: '', style: ButtonStyle.Success   },
+          const container = new ContainerBuilder().setAccentColor(current.color ?? 0xEDB5F8);
+          container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`**﹕ⵌ┆ ${i.user.username}'s Profile ꩜ .**`)
+          );
+          container.addMediaGalleryComponents(
+            new MediaGalleryBuilder().addItems(
+              new MediaGalleryItemBuilder().setURL(`attachment://${filename}`)
+            )
+          );
+          container.addActionRowComponents(
+            new ActionRowBuilder().addComponents(
+              new ButtonBuilder().setCustomId('profile_edit').setLabel('edit profile').setStyle(ButtonStyle.Primary),
+              new ButtonBuilder().setCustomId('profile_aura').setLabel('change aura').setStyle(ButtonStyle.Secondary),
+              new ButtonBuilder().setCustomId('daily_claim').setLabel('claim daily').setStyle(ButtonStyle.Success),
+            )
           );
 
-          await i.editReply({
-            embeds:     [resultEmbed],
-            files:      [attachment],
-            components: [buttons],
-          });
+          await i.editReply({ flags: CV2, files: [attachment], components: [container] });
         } catch (err) {
           console.error('[AURA BTN ERROR]', err);
-          // Fallback: ephemeral confirmation only
           await i.followUp({
             flags: EPH,
             components: [luvContainer(`**aura updated to ${next}** ✦\n\n> run \`luv profile\` to see the change`)],
@@ -954,7 +953,7 @@ export function buildHandlers(client) {
     modals: {
 
       // ── Setup: profile creation modal submission ──────────────────────────
-      modal_setup: async (i) => {
+      modal_setup: async (i, [channelId, messageId]) => {
         const bio        = i.fields.getTextInputValue('bio')?.trim();
         const pronouns   = i.fields.getTextInputValue('pronouns')?.trim();
         const interestsR = i.fields.getTextInputValue('interests')?.trim() || '';
@@ -968,6 +967,9 @@ export function buildHandlers(client) {
         if (!pronouns) {
           return i.reply({ flags: EPH, components: [luvContainer('>  pronouns are required ✦')] });
         }
+
+        // Defer silently so we have time to edit the original message
+        await i.deferReply({ ephemeral: true });
 
         const gender = pendingSetup.get(i.user.id)?.gender ?? null;
         pendingSetup.delete(i.user.id);
@@ -989,40 +991,57 @@ export function buildHandlers(client) {
           ? gender.charAt(0).toUpperCase() + gender.slice(1)
           : 'Not specified';
 
-        const loadingContainer = luvContainer(
-          `>  creating your profile...\n\n*just a moment ✦*`
-        );
-        await i.reply({ flags: MessageFlags.IsComponentsV2, components: [loadingContainer] });
+        // Fetch the original setup message and update it in place
+        try {
+          const origChannel = await client.channels.fetch(channelId).catch(() => null);
+          const origMsg     = origChannel
+            ? await origChannel.messages.fetch(messageId).catch(() => null)
+            : null;
 
-        await new Promise(r => setTimeout(r, 1500));
+          if (origMsg) {
+            // Step 1: loading state
+            await origMsg.edit({
+              flags:      CV2,
+              components: [luvContainer('> creating your profile...\n\n*just a moment ✦*')],
+            });
 
-        const congratsText =
-          `**﹕ⵌ┆ <:luvly:1501269739324838151> Welcome to Luvly 🎉 ꩜ .**\n\n` +
-          `**Congratulations, ${i.user.username}! Your profile is live.**\n\n` +
-          `${R} **Your Profile:**\n` +
-          `> ⤿  Bio: *"${bio}"*\n` +
-          `> ⤿  Pronouns: **${pronouns}**\n` +
-          `> ⤿  Gender: **${genderLabel}**\n` +
-          (interests.length
-            ? `> ⤿  Interests: ${interests.map(x => `\`${x}\``).join('  ')}\n`
-            : '') +
-          `\n${R} **What's next:**\n` +
-          `> ⤿  \`luv daily\` — claim your first daily reward\n` +
-          `> ⤿  \`luv match\` — find your first match\n` +
-          `> ⤿  \`luv profile\` — view your full profile\n` +
-          `> ⤿  \`luv help\` — explore all commands\n\n` +
-          `*you're part of the luvly family now ✦*`;
+            await new Promise(r => setTimeout(r, 1200));
 
-        const row = buildButtons(
-          { id: 'daily_claim',  label: 'Claim Daily',  emoji: '', style: ButtonStyle.Success   },
-          { id: 'profile_view', label: 'My Profile',   emoji: '', style: ButtonStyle.Primary   },
-          { id: 'match_again',  label: 'Find a Match', emoji: '', style: ButtonStyle.Secondary },
-        );
+            // Step 2: congratulations
+            const congratsText =
+              `**﹕ⵌ┆ <:luvly:1501269739324838151> Welcome to Luvly 🎉 ꩜ .**\n\n` +
+              `**Congratulations, ${i.user.username}! Your profile is live.**\n\n` +
+              `${R} **Your Profile:**\n` +
+              `> ⤿  Bio: *"${bio}"*\n` +
+              `> ⤿  Pronouns: **${pronouns}**\n` +
+              `> ⤿  Gender: **${genderLabel}**\n` +
+              (interests.length
+                ? `> ⤿  Interests: ${interests.map(x => `\`${x}\``).join('  ')}\n`
+                : '') +
+              `\n${R} **What's next:**\n` +
+              `> ⤿  \`luv daily\` — claim your first daily reward\n` +
+              `> ⤿  \`luv match\` — find your first match\n` +
+              `> ⤿  \`luv profile\` — view your full profile\n` +
+              `> ⤿  \`luv help\` — explore all commands\n\n` +
+              `*you're part of the luvly family now ✦*`;
 
-        await i.editReply({
-          flags: MessageFlags.IsComponentsV2,
-          components: [luvContainer(congratsText, row)],
-        });
+            const row = buildButtons(
+              { id: 'daily_claim',  label: 'Claim Daily',  emoji: '', style: ButtonStyle.Success   },
+              { id: 'profile_view', label: 'My Profile',   emoji: '', style: ButtonStyle.Primary   },
+              { id: 'match_again',  label: 'Find a Match', emoji: '', style: ButtonStyle.Secondary },
+            );
+
+            await origMsg.edit({
+              flags:      CV2,
+              components: [luvContainer(congratsText, row)],
+            });
+          }
+        } catch (err) {
+          console.error('[SETUP MODAL] failed to update original:', err.message);
+        }
+
+        // Silently dismiss the deferred ephemeral reply
+        await i.deleteReply().catch(() => {});
       },
 
       modal_edit_profile: async (i) => {
