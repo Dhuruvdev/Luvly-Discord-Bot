@@ -14,7 +14,10 @@ import {
   ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
-import { HELP_CATEGORIES, HELP_PAGE_SIZE, buildHelpCategoryPage } from '../commands/social/help.js';
+import {
+  HELP_CATEGORIES, HELP_PAGE_SIZE,
+  buildHelpCategoryPage, buildHelpMainContainer, buildQuickStartContainer,
+} from '../commands/social/help.js';
 import { luvContainer, buildButtons, errorEmbed } from '../utils/embeds.js';
 import {
   getUser, saveUser, addXP, addHearts, getHearts, spendHearts,
@@ -368,27 +371,158 @@ export function buildHandlers(client) {
         await i.reply({ flags: EPH, components: [luvContainer(text)] });
       },
 
-      // ── Help pagination ────────────────────────────────────────────────────
+      // ── Quick navigation shortcuts ────────────────────────────────────────
+      profile_view: async (i) => {
+        const { getUser, getHearts } = await import('../utils/database.js');
+        const { getUserAchievements } = await import('../utils/achievements.js');
+        const { getLevelData, getXpBar } = await import('../config.js');
+        const R = '<:right:1501255316350959858>';
+        const user     = getUser(i.user.id);
+        const hearts   = getHearts(i.user.id);
+        const unlocked = getUserAchievements(i.user.id);
+        const { current, next } = getLevelData(user.xp ?? 0);
+        const xpBar    = getXpBar(user.xp ?? 0, current, next);
+        const interests = user.interests?.length ? user.interests.map(x => `\`${x}\``).join('  ') : '*none*';
+        const bio = user.bio ? `> *"${user.bio}"*` : '> *no bio yet — add one with* `u profile edit`';
+        const text =
+          `**﹕ⵌ┆ ${EMOJIS.star} ${i.user.username} ꩜ .**\n\n${bio}\n\n` +
+          `${R} **Level:** **${current.level}** — *${current.title}*\n` +
+          `> ⤿  \`${xpBar}\`\n\n` +
+          `${R} **Stats:** ❤️ **${hearts}** hearts  ·  🔥 **${user.streak ?? 0}** day streak\n\n` +
+          `${R} **Interests:** ${interests}`;
+        const row = buildButtons(
+          { id: 'profile_edit', label: 'edit profile', emoji: '✏️', style: ButtonStyle.Primary },
+          { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁', style: ButtonStyle.Success },
+        );
+        await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
+      },
+
+      rank_view: async (i) => {
+        const { getUser, getHearts } = await import('../utils/database.js');
+        const { getLevelData, getXpBar } = await import('../config.js');
+        const R = '<:right:1501255316350959858>';
+        const user   = getUser(i.user.id);
+        const hearts = getHearts(i.user.id);
+        const { current, next } = getLevelData(user.xp ?? 0);
+        const xpBar  = getXpBar(user.xp ?? 0, current, next);
+        const nextStr = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** 👑';
+        const text =
+          `**﹕ⵌ┆ ${EMOJIS.rank} ${i.user.username}'s Rank ꩜ .**\n\n` +
+          `${R} **Level & Title:**\n` +
+          `> ⤿  Level: **${current.level}** — *${current.title}*\n` +
+          `> ⤿  Progress: \`${xpBar}\`\n` +
+          `> ⤿  Total XP: **${user.xp ?? 0}**\n` +
+          `> ⤿  Next: ${nextStr}\n\n` +
+          `${R} **Stats:**\n` +
+          `> ⤿  Hearts: **${hearts}** 💗  ·  Streak: **${user.streak ?? 0}** days 🔥`;
+        const row = buildButtons(
+          { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
+          { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
+      },
+
+      lb_view: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.crown} use **u leaderboard** to view the full rankings ✦`)] });
+      },
+
+      daily_card: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.sparkle} use **u card** to generate your profile card ✦`)] });
+      },
+
+      theme_list: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.sparkle} use **u theme list** to browse all themes ✦`)] });
+      },
+
+      // ── Economy button shortcuts ───────────────────────────────────────────
+      eco_bal: async (i) => {
+        const { getEcoUser, getNetWorth, fmt, accrueInterest, getEconomy, trendEmoji, inflationLabel } = await import('../utils/economy.js');
+        const R = '<:right:1501255316350959858>';
+        accrueInterest(i.user.id);
+        const u   = getEcoUser(i.user.id);
+        const eco = getEconomy();
+        const net = getNetWorth(i.user.id);
+        const text =
+          `**﹕ⵌ┆ 👛 ${i.user.username}'s Wallet ꩜ .**\n\n` +
+          `${trendEmoji(eco.marketTrend)} market is **${eco.marketTrend}** · ${inflationLabel(eco.inflation)}\n\n` +
+          `${R} **Balances:**\n` +
+          `> ⤿  👛 Wallet: **${fmt(u.wallet ?? 0)}**\n` +
+          `> ⤿  🏦 Bank: **${fmt(u.bank ?? 0)}**\n` +
+          `> ⤿  Net Worth: **${fmt(net)}**`;
+        const row = buildButtons(
+          { id: 'eco_deposit', label: 'deposit', emoji: '🏦', style: ButtonStyle.Primary },
+          { id: 'eco_work',    label: 'work',    emoji: '💼', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
+      },
+
+      eco_work: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.sparkle} use **u work** to do a shift and earn luv ✦`)] });
+      },
+
+      eco_fish: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`🎣 use **u fish** to go fishing and earn luv ✦`)] });
+      },
+
+      eco_hunt: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`🏹 use **u hunt** to go hunting and earn luv ✦`)] });
+      },
+
+      eco_gamble: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`🎰 use **u gamble <amount>** to spin the slots ✦`)] });
+      },
+
+      eco_deposit: async (i) => {
+        const { deposit, getWallet, getBank, fmt } = await import('../utils/economy.js');
+        const wallet = getWallet(i.user.id);
+        if (wallet <= 0) {
+          return i.reply({ flags: EPH, components: [luvContainer('> ⚠️ nothing in your wallet to deposit ✦')] });
+        }
+        const result = deposit(i.user.id, wallet);
+        const text = result.success
+          ? `🏦 deposited **${fmt(wallet)}** into your bank ✦\n> Bank: **${fmt(result.bank ?? 0)}**`
+          : '> ⚠️ deposit failed ✦';
+        await i.reply({ flags: EPH, components: [luvContainer(text)] });
+      },
+
+      eco_withdraw: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`👛 use **u bank with <amount>** to withdraw from your bank ✦`)] });
+      },
+
+      eco_bank: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`🏦 use **u bank** to view your bank details and rates ✦`)] });
+      },
+
+      eco_market: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`📊 use **u market** to view the live economy dashboard ✦`)] });
+      },
+
+      eco_repay: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`✅ use **u loan repay all** to repay your loan ✦`)] });
+      },
+
+      eco_borrow: async (i) => {
+        await i.reply({ flags: EPH, components: [luvContainer(`💳 use **u loan 1000** to borrow 1000 luv ✦`)] });
+      },
+
+      // ── Help: go home ─────────────────────────────────────────────────────
+      help_home: async (i) => {
+        const container = buildHelpMainContainer(client);
+        await i.update({ flags: CV2, components: [container] });
+      },
+
+      // ── Help: quick start ─────────────────────────────────────────────────
+      help_quickstart: async (i) => {
+        const container = buildQuickStartContainer();
+        await i.update({ flags: CV2, components: [container] });
+      },
+
+      // ── Help: pagination ──────────────────────────────────────────────────
       help_page: async (i, [catArg, pageStr]) => {
         const page = parseInt(pageStr, 10) || 0;
         const cmds = [...client.commands.values()].filter(c => c.category === catArg);
         const { container } = buildHelpCategoryPage(catArg, page, cmds);
-
-        const selectRow = new ActionRowBuilder().addComponents(
-          new StringSelectMenuBuilder()
-            .setCustomId('help_category')
-            .setPlaceholder('Browse another category...')
-            .addOptions(
-              Object.entries(HELP_CATEGORIES).map(([key, c]) => ({
-                label: c.label, description: c.desc, value: key, emoji: c.emoji,
-              }))
-            )
-        );
-
-        await i.update({
-          flags: CV2 | MessageFlags.Ephemeral,
-          components: [container, selectRow],
-        });
+        await i.update({ flags: CV2, components: [container] });
       },
 
       // ── Premium notify ─────────────────────────────────────────────────────
@@ -408,22 +542,8 @@ export function buildHandlers(client) {
         const catArg = i.values[0];
         const cmds   = [...client.commands.values()].filter(c => c.category === catArg);
         const { container } = buildHelpCategoryPage(catArg, 0, cmds);
-
-        const selectRow = new ActionRowBuilder().addComponents(
-          new StringSelectMenuBuilder()
-            .setCustomId('help_category')
-            .setPlaceholder('Browse another category...')
-            .addOptions(
-              Object.entries(HELP_CATEGORIES).map(([key, c]) => ({
-                label: c.label, description: c.desc, value: key, emoji: c.emoji,
-              }))
-            )
-        );
-
-        await i.reply({
-          flags: CV2 | MessageFlags.Ephemeral,
-          components: [container, selectRow],
-        });
+        // All interactions (select + buttons) are already inside container
+        await i.update({ flags: CV2, components: [container] });
       },
 
       shop_preview: async (i, _parts) => {
