@@ -1,22 +1,28 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../config.js';
+
+const ACCENT = 0x26272F;
 
 export function luvEmbed(color = COLORS.primary) {
   return new EmbedBuilder().setColor(color);
 }
 
-export function luvContainer() {
-  return new ContainerBuilder().setAccentColor(0x26272F);
+export function luvContainer(content, ...actionRows) {
+  const c = new ContainerBuilder()
+    .setAccentColor(ACCENT)
+    .addTextDisplayComponents(new TextDisplayBuilder().setContent(content));
+  for (const row of actionRows) {
+    if (row) c.addActionRowComponents(row);
+  }
+  return c;
 }
 
 export function errorEmbed(msg) {
-  return luvEmbed(COLORS.error)
-    .setDescription(`${EMOJIS.safety} ${msg}`);
+  return luvContainer(`> ⚠️ ${msg}`);
 }
 
 export function successEmbed(msg) {
-  return luvEmbed(COLORS.success)
-    .setDescription(`${EMOJIS.sparkle} ${msg}`);
+  return luvContainer(`${EMOJIS.sparkle} ${msg}`);
 }
 
 export function buildButtons(...defs) {

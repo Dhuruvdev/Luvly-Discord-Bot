@@ -36,7 +36,7 @@
     "hearts": 59,
     "streak": 2,
     "lastDaily": 1777966966043,
-    "lastSeen": 1778051478750,
+    "lastSeen": 1778052408489,
     "aura": "chaotic",
     "profileViews": 0,
     "rizzCount": 0,
@@ -147,5 +147,26 @@
     "rizzCount": 0,
     "ghostCalls": 0,
     "createdAt": 1777870894696
+  },
+  "1473740464350822584": {
+    "id": "1473740464350822584",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778051919430,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778051919430
   }
 }

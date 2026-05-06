@@ -1,9 +1,12 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS, COMFORT_MESSAGES } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS, COMFORT_MESSAGES } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { addXP } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
 import { checkLevelUp } from '../../utils/levelUp.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 const MIDNIGHT_PROMPTS = [
   "what's the thought you keep pushing away?",
@@ -25,7 +28,7 @@ export default {
   cooldown: 4_000,
 
   async execute(message, args, client) {
-    const hour       = new Date().getHours();
+    const hour        = new Date().getHours();
     const isLateNight = hour >= 22 || hour <= 4;
     const prompt  = MIDNIGHT_PROMPTS[Math.floor(Math.random() * MIDNIGHT_PROMPTS.length)];
     const comfort = COMFORT_MESSAGES[Math.floor(Math.random() * COMFORT_MESSAGES.length)];
@@ -35,14 +38,13 @@ export default {
 
     if (isLateNight) await unlock(message.author.id, 'night_owl', client);
 
-    const embed = luvEmbed(COLORS.midnight)
-      .setAuthor({ name: `midnight mode ✦ ${isLateNight ? '🌙' : '🕯️'}` })
-      .setTitle(isLateNight ? "it's late. you're still up." : 'wherever you are, luvly is here ✦')
-      .addFields(
-        { name: "tonight's prompt", value: `> *"${prompt}"*`,   inline: false },
-        { name: 'a reminder',       value: `> *"${comfort}"*`,  inline: false },
-      )
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.moon} Midnight Mode ${isLateNight ? '🌙' : '🕯️'} ꩜ .**\n\n` +
+      `${isLateNight ? "it's late. you're still up." : 'wherever you are, luvly is here ✦'}\n\n` +
+      `${R} **Tonight's Prompt:**\n` +
+      `> *"${prompt}"*\n\n` +
+      `${R} **A Reminder:**\n` +
+      `> *"${comfort}"*`;
 
     const row = buildButtons(
       { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
@@ -50,6 +52,6 @@ export default {
       { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

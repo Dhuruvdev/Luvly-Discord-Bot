@@ -1,8 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getGhostDays, getUser, saveUser } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 const GHOST_MSGS = [
   (d) => `you disappeared for **${d} day${d !== 1 ? 's' : ''}**. ghost aura: **rising** 👻`,
@@ -28,10 +31,10 @@ export default {
     );
 
     if (days === 0) {
-      const embed = luvEmbed(COLORS.success)
-        .setDescription(`${EMOJIS.ghost} **${target.username}** is not a ghost. they're right here 💀`)
-        .setFooter(footer(client));
-      return await message.reply({ embeds: [embed], components: [baseRow] });
+      const text =
+        `**﹕ⵌ┆ ${EMOJIS.ghost} Ghost Detector ꩜ .**\n\n` +
+        `**${target.username}** is not a ghost. they're right here 💀`;
+      return await message.reply({ flags: CV2, components: [luvContainer(text, baseRow)] });
     }
 
     if (target.id !== message.author.id) {
@@ -45,17 +48,14 @@ export default {
     const ghostBar   = '👻'.repeat(Math.min(Math.ceil(days / 3), 10));
     const msgFn      = GHOST_MSGS[Math.floor(Math.random() * GHOST_MSGS.length)];
 
-    const embed = luvEmbed(COLORS.neutral)
-      .setTitle(`${EMOJIS.ghost} ghost detector ✦`)
-      .setAuthor({ name: target.username, iconURL: target.displayAvatarURL({ dynamic: true }) })
-      .setDescription(msgFn(days))
-      .addFields(
-        { name: 'ghost level', value: `**${ghostLevel}**`, inline: true },
-        { name: 'days silent', value: `**${days}**`,       inline: true },
-        { name: 'ghost aura',  value: ghostBar || '—',     inline: false },
-      )
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.ghost} Ghost Detector ꩜ .**\n\n` +
+      `__${target.username}__ — ${msgFn(days)}\n\n` +
+      `${R} **Ghost Status:**\n` +
+      `> ⤿  Ghost Level: **${ghostLevel}**\n` +
+      `> ⤿  Days Silent: **${days}**\n` +
+      `> ⤿  Ghost Aura: ${ghostBar || '—'}`;
 
-    await message.reply({ embeds: [embed], components: [baseRow] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, baseRow)] });
   },
 };

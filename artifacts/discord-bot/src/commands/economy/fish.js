@@ -1,11 +1,12 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { addToWallet, getWallet, getEconomy, fmt, tickMarket, yieldMult, getEcoUser } from '../../utils/economy.js';
 import { addXP } from '../../utils/database.js';
 import { getTable, markDirty } from '../../utils/store.js';
 
-const COOLDOWN_MS = 45 * 60 * 1_000; // 45 min
+const R         = '<:right:1501255316350959858>';
+const CV2       = MessageFlags.IsComponentsV2;
+const COOLDOWN_MS = 45 * 60 * 1_000;
 
 const FISH_TABLE = [
   { w: 35, name: 'a soggy boot',         emoji: '👟', min: 0,   max: 2   },
@@ -39,18 +40,17 @@ export default {
     const waited = now - (u.lastFish ?? 0);
 
     if (waited < COOLDOWN_MS) {
-      const left  = COOLDOWN_MS - waited;
-      const leftM = Math.ceil(left / 60_000);
-      const embed = luvEmbed(COLORS.neutral)
-        .setTitle('🎣 fishing cooldown ✦')
-        .setDescription(`the fish aren't biting yet.\n\n⏳ try again in **${leftM} min**`)
-        .setFooter(footer(client));
+      const leftM = Math.ceil((COOLDOWN_MS - waited) / 60_000);
+      const text  =
+        `**﹕ⵌ┆ 🎣 Fishing Cooldown ꩜ .**\n\n` +
+        `the fish aren't biting yet.\n\n` +
+        `> ⏳ try again in **${leftM} min**`;
       const row = buildButtons(
         { id: 'eco_work', label: 'work instead', emoji: '💼', style: ButtonStyle.Secondary },
         { id: 'eco_hunt', label: 'hunt instead', emoji: '🏹', style: ButtonStyle.Secondary },
         { id: 'eco_bal',  label: 'balance',      emoji: '👛', style: ButtonStyle.Primary },
       );
-      return message.reply({ embeds: [embed], components: [row] });
+      return message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
 
     tickMarket();
@@ -63,35 +63,31 @@ export default {
     if (earned > 0) addToWallet(userId, earned);
     const t = getTable('economy');
     if (t[userId]) { t[userId].lastFish = now; markDirty('economy'); }
-
     addXP(userId, 4);
 
-    const isBig   = fish.w <= 4;
-    const isBoot  = fish.name.includes('boot');
-    const color   = isBig ? COLORS.gold : isBoot ? COLORS.neutral : COLORS.primary;
+    const isBig  = fish.w <= 4;
+    const isBoot = fish.name.includes('boot');
 
-    const embed = luvEmbed(color)
-      .setTitle(`${fish.emoji} you caught ${fish.name}${isBig ? ' 🌟' : ''} ✦`)
-      .setDescription(
-        isBoot
-          ? "> *a wet boot. classic. you've earned the experience.*"
-          : isBig
-            ? `> ✨ *what a legendary catch — the stars aligned for you tonight*`
-            : `> *the water was calm and the catch was ${earned > 100 ? 'generous' : 'decent'} ✦*`
-      )
-      .addFields(
-        { name: '💰 earned',  value: earned > 0 ? `**${fmt(earned)}**` : '*nothing 💀*', inline: true },
-        { name: '👛 wallet',  value: `**${fmt(getWallet(userId))}**`,                    inline: true },
-        { name: '📊 market',  value: eco.marketTrend,                                    inline: true },
-      )
-      .setFooter(footer(client));
+    const catchLine = isBoot
+      ? `> *a wet boot. classic. you've earned the experience.*`
+      : isBig
+        ? `> ✨ *what a legendary catch — the stars aligned for you tonight*`
+        : `> *the water was calm and the catch was ${earned > 100 ? 'generous' : 'decent'} ✦*`;
+
+    const text =
+      `**﹕ⵌ┆ ${fish.emoji} You Caught ${fish.name}${isBig ? ' 🌟' : ''} ꩜ .**\n\n` +
+      `${catchLine}\n\n` +
+      `${R} **Result:**\n` +
+      `> ⤿  💰 Earned: ${earned > 0 ? `**${fmt(earned)}**` : '*nothing 💀*'}\n` +
+      `> ⤿  👛 Wallet: **${fmt(getWallet(userId))}**\n` +
+      `> ⤿  📊 Market: ${eco.marketTrend}`;
 
     const row = buildButtons(
-      { id: 'eco_fish',    label: 'fish again',  emoji: '🎣', style: ButtonStyle.Primary },
-      { id: 'eco_deposit', label: 'bank it',     emoji: '🏦', style: ButtonStyle.Secondary },
-      { id: 'eco_bal',     label: 'balance',     emoji: '👛', style: ButtonStyle.Secondary },
+      { id: 'eco_fish',    label: 'fish again', emoji: '🎣', style: ButtonStyle.Primary },
+      { id: 'eco_deposit', label: 'bank it',    emoji: '🏦', style: ButtonStyle.Secondary },
+      { id: 'eco_bal',     label: 'balance',    emoji: '👛', style: ButtonStyle.Secondary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

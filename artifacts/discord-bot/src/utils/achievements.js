@@ -1,24 +1,17 @@
-/**
- * Achievement system — the single biggest retention driver.
- * Awards XP bonuses + hearts + DM notifications on unlock.
- *
- * Add new achievements here; the unlock engine is generic.
- */
-
-import { EmbedBuilder } from 'discord.js';
-import { COLORS } from '../config.js';
+import { ContainerBuilder, TextDisplayBuilder, MessageFlags } from 'discord.js';
 import { getTable, markDirty } from './store.js';
 import { addXP, addHearts } from './database.js';
 
+const ACCENT = 0x26272F;
+const CV2    = MessageFlags.IsComponentsV2;
+
 export const ACHIEVEMENTS = {
-  // ── Profile ────────────────────────────────────────────────────────────────
   first_profile: {
     id: 'first_profile', emoji: '🎭',
     name: 'first look',
     desc: 'set up your profile for the first time',
     xp: 50, hearts: 10,
   },
-  // ── Matchmaking ────────────────────────────────────────────────────────────
   first_crush: {
     id: 'first_crush', emoji: '💌',
     name: 'catching feelings',
@@ -31,7 +24,6 @@ export const ACHIEVEMENTS = {
     desc: 'got a mutual crush reveal',
     xp: 200, hearts: 50,
   },
-  // ── Streaks ────────────────────────────────────────────────────────────────
   streak_3: {
     id: 'streak_3', emoji: '🔥',
     name: 'on a roll',
@@ -50,7 +42,6 @@ export const ACHIEVEMENTS = {
     desc: '30-day unbroken daily streak',
     xp: 500, hearts: 200,
   },
-  // ── Levels ─────────────────────────────────────────────────────────────────
   level_3: {
     id: 'level_3', emoji: '✨',
     name: 'rising aura',
@@ -69,7 +60,6 @@ export const ACHIEVEMENTS = {
     desc: 'reached the max level',
     xp: 0, hearts: 500,
   },
-  // ── Chemistry ──────────────────────────────────────────────────────────────
   chem_50: {
     id: 'chem_50', emoji: '⚗️',
     name: 'bonding',
@@ -88,14 +78,12 @@ export const ACHIEVEMENTS = {
     desc: 'maxed out chemistry (200) with someone',
     xp: 300, hearts: 100,
   },
-  // ── Confessions ────────────────────────────────────────────────────────────
   confessor: {
     id: 'confessor', emoji: '🎭',
     name: 'open book',
     desc: 'posted your first anonymous confession',
     xp: 75, hearts: 15,
   },
-  // ── Hidden / Viral ─────────────────────────────────────────────────────────
   night_owl: {
     id: 'night_owl', emoji: '🦉',
     name: 'night owl',
@@ -114,7 +102,6 @@ export const ACHIEVEMENTS = {
     desc: 'generated 25 pickup lines',
     xp: 100, hearts: 35,
   },
-  // ── Social ─────────────────────────────────────────────────────────────────
   profile_viewer: {
     id: 'profile_viewer', emoji: '👀',
     name: 'curious soul',
@@ -123,15 +110,6 @@ export const ACHIEVEMENTS = {
   },
 };
 
-/**
- * Try to unlock an achievement for a user.
- * Returns the achievement object if newly unlocked, null if already had it.
- *
- * @param {string} userId
- * @param {string} achievementId
- * @param {import('discord.js').Client} client - used to DM the user
- * @returns {Promise<object|null>}
- */
 export async function unlock(userId, achievementId, client) {
   const ach = ACHIEVEMENTS[achievementId];
   if (!ach) return null;
@@ -146,38 +124,32 @@ export async function unlock(userId, achievementId, client) {
   if (ach.xp > 0)     addXP(userId, ach.xp);
   if (ach.hearts > 0) addHearts(userId, ach.hearts);
 
-  // DM notification
   try {
     const user = await client.users.fetch(userId);
-    const embed = new EmbedBuilder()
-      .setColor(COLORS.gold)
-      .setTitle(`${ach.emoji} achievement unlocked!`)
-      .addFields(
-        { name: ach.name, value: ach.desc, inline: false },
-        { name: 'rewards', value: [
-          ach.xp     ? `**+${ach.xp} xp**`     : null,
-          ach.hearts ? `**+${ach.hearts} 💗 hearts**` : null,
-        ].filter(Boolean).join('  ·  '), inline: false },
-      )
-      .setFooter({ text: 'luvly achievements ✦' });
-    await user.send({ embeds: [embed] }).catch(() => {});
+    const rewards = [
+      ach.xp     ? `**+${ach.xp} xp**`          : null,
+      ach.hearts ? `**+${ach.hearts} 💗 hearts**` : null,
+    ].filter(Boolean).join('  ·  ');
+
+    const container = new ContainerBuilder()
+      .setAccentColor(ACCENT)
+      .addTextDisplayComponents(new TextDisplayBuilder().setContent(
+        `**﹕ⵌ┆ ${ach.emoji} Achievement Unlocked! ꩜ .**\n\n` +
+        `**${ach.name}** — *${ach.desc}*\n\n` +
+        `<:right:1501255316350959858> **Rewards:** ${rewards}`
+      ));
+    await user.send({ flags: CV2, components: [container] }).catch(() => {});
   } catch {}
 
   return ach;
 }
 
-/**
- * Get all unlocked achievements for a user.
- */
 export function getUserAchievements(userId) {
-  const db = getTable('achievements');
+  const db  = getTable('achievements');
   const ids = db[userId] || [];
   return ids.map(id => ACHIEVEMENTS[id]).filter(Boolean);
 }
 
-/**
- * Count of unlocked achievements.
- */
 export function getAchievementCount(userId) {
   const db = getTable('achievements');
   return (db[userId] || []).length;

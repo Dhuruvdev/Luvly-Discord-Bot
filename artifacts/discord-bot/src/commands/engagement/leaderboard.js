@@ -1,9 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS, getLevelData } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS, getLevelData } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getLeaderboard } from '../../utils/database.js';
 import { getAchievementCount } from '../../utils/achievements.js';
 
+const R      = '<:right:1501255316350959858>';
+const CV2    = MessageFlags.IsComponentsV2;
 const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
 
 export default {
@@ -22,10 +24,10 @@ export default {
 
     const top = getLeaderboard(5);
     if (!top.length) {
-      const embed = luvEmbed(COLORS.neutral)
-        .setDescription('> *no data yet — be the first to claim daily xp ✦*')
-        .setFooter(footer(client));
-      return await message.reply({ embeds: [embed], components: [row] });
+      const text =
+        `**﹕ⵌ┆ ${EMOJIS.crown} Top Aura Holders ꩜ .**\n\n` +
+        `> *no data yet — be the first to claim daily xp ✦*`;
+      return await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
 
     const lines = await Promise.all(
@@ -41,11 +43,11 @@ export default {
       })
     );
 
-    const embed = luvEmbed(COLORS.gold)
-      .setTitle(`${EMOJIS.crown} top aura holders ✦`)
-      .setDescription(lines.join('\n\n'))
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.crown} Top Aura Holders ꩜ .**\n\n` +
+      `${R} **Rankings:**\n\n` +
+      lines.join('\n\n');
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

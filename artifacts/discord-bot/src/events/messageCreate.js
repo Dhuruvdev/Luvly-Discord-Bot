@@ -1,6 +1,6 @@
-import { EmbedBuilder } from 'discord.js';
-import { PREFIXES, COLORS } from '../config.js';
-import { errorEmbed } from '../utils/embeds.js';
+import { MessageFlags } from 'discord.js';
+import { PREFIXES } from '../config.js';
+import { luvContainer } from '../utils/embeds.js';
 import { updateLastSeen } from '../utils/database.js';
 import { runMiddleware } from '../middleware/commandMiddleware.js';
 
@@ -29,7 +29,6 @@ export default {
       }
     }
 
-    // ── @mention detection ────────────────────────────────────────────────────
     if (!matched && client.user) {
       const botId        = client.user.id;
       const mentionForms = [`<@${botId}>`, `<@!${botId}>`];
@@ -37,28 +36,20 @@ export default {
         if (content.startsWith(mp)) {
           const rest = content.slice(mp.length).trim();
 
-          // ── Lone mention → greeting embed ──────────────────────────────────
           if (rest.length === 0) {
-            const embed = new EmbedBuilder()
-              .setColor(COLORS.primary)
-              .setTitle('﹕ⵌ┆ Hey there! I\'m Luvly ꩜ .')
-              .setDescription(
-                '**Your cute companion for fun, vibes & interactions.ᐟ **\n' +
-                '━━━━━━━━━━━━━━━━━━\n' +
-                '➜ **What I can do:**\n' +
-                '        ⤿  __Fun games__\n' +
-                '        ⤿  __Cute chats__\n' +
-                '        ⤿  __Server features__\n\n' +
-                '➜ **Type `luv help` to explore everything!**\n' +
-                '━━━━━━━━━━━━━━━━━━\n' +
-                '** 𝜗ৎ. Let\'s make your server more luvly.ᐟ**'
-              )
-              .setImage('https://cdn.discordapp.com/attachments/1423748506111447162/1501479831974445076/file_00000000d22c720886c3789676976bce.png?ex=69fc3990&is=69fae810&hm=1034bcbf81211a804ec3d40bbaafb243cf279a82586a8122f0fbe4583229e216&')
-              .setFooter({
-                text: ' Luvly • Made with love',
-                iconURL: client.user.displayAvatarURL(),
-              });
-            return await message.reply({ embeds: [embed] }).catch(() => {});
+            const container = luvContainer(
+              '**﹕ⵌ┆ Hey there! I\'m Luvly ꩜ .**\n\n' +
+              '**Your cute companion for fun, vibes & interactions.ᐟ **\n' +
+              '━━━━━━━━━━━━━━━━━━\n' +
+              '➜ **What I can do:**\n' +
+              '        ⤿  __Fun games__\n' +
+              '        ⤿  __Cute chats__\n' +
+              '        ⤿  __Server features__\n\n' +
+              '➜ **Type `luv help` to explore everything!**\n' +
+              '━━━━━━━━━━━━━━━━━━\n' +
+              '** 𝜗ৎ. Let\'s make your server more luvly.ᐟ**'
+            );
+            return await message.reply({ flags: MessageFlags.IsComponentsV2, components: [container] }).catch(() => {});
           }
 
           content = rest;
@@ -85,8 +76,10 @@ export default {
       await command.execute(message, args, client);
     } catch (err) {
       console.error(`[CMD ERROR] ${command.name}:`, err);
-      const embed = errorEmbed('something broke on our end. try again in a sec 💔');
-      await message.reply({ embeds: [embed] }).catch(() => {});
+      await message.reply({
+        flags: MessageFlags.IsComponentsV2,
+        components: [luvContainer('> ⚠️ something broke on our end. try again in a sec 💔')],
+      }).catch(() => {});
     }
   },
 };

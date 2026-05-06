@@ -1,9 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS, RIZZ_LINES } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS, RIZZ_LINES } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { addXP, getUser, saveUser } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
 import { checkLevelUp } from '../../utils/levelUp.js';
+
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'rizz',
@@ -25,20 +27,16 @@ export default {
     saveUser(message.author.id, { rizzCount: count });
     if (count >= 25) await unlock(message.author.id, 'rizz_master', client);
 
-    const desc = target
-      ? `*sending this to **${target.username}** ✦*\n\n> *"${line}"*`
-      : `> *"${line}"*`;
-
-    const embed = luvEmbed(COLORS.aura)
-      .setTitle(`${EMOJIS.rizz} rizz generator ✦`)
-      .setDescription(desc)
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.rizz} Rizz Generator ꩜ .**\n\n` +
+      (target ? `*sending this to **${target.username}** ✦*\n\n` : '') +
+      `> *"${line}"*`;
 
     const row = buildButtons(
       { id: 'rizz_new',  label: 'new line', emoji: '🔄', style: ButtonStyle.Secondary },
       { id: 'rizz_copy', label: 'use this', emoji: '💌', style: ButtonStyle.Primary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

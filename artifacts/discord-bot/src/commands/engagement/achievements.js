@@ -1,8 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getUserAchievements, ACHIEVEMENTS } from '../../utils/achievements.js';
 import { getHearts } from '../../utils/database.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'achievements',
@@ -23,22 +26,19 @@ export default {
     const lockedIds = Object.keys(ACHIEVEMENTS).filter(id => !unlocked.find(a => a.id === id));
     const nextHints = lockedIds.slice(0, 3).map(id => {
       const a = ACHIEVEMENTS[id];
-      return `${a.emoji} *${a.name}* — ${a.desc}`;
+      return `> ⤿  ${a.emoji} *${a.name}* — ${a.desc}`;
     });
 
-    const embed = luvEmbed(COLORS.gold)
-      .setAuthor({ name: `${target.username}'s achievements ✦`, iconURL: target.displayAvatarURL({ dynamic: true }) })
-      .setDescription(
-        unlocked.length
-          ? unlocked.map(a => `${a.emoji} **${a.name}** — *${a.desc}*`).join('\n')
-          : '> *no achievements yet — start exploring luvly ✦*'
-      )
-      .addFields(
-        { name: 'progress',              value: `\`${bar}\` **${unlocked.length}/${total}** (${pct}%)` },
-        { name: `${EMOJIS.heart} hearts`, value: `**${hearts}** 💗`, inline: true },
-        { name: 'up next',               value: nextHints.length ? nextHints.join('\n') : '*all unlocked!* 🏆' },
-      )
-      .setFooter(footer(client));
+    const achList = unlocked.length
+      ? unlocked.map(a => `> ⤿  ${a.emoji} **${a.name}** — *${a.desc}*`).join('\n')
+      : '> *no achievements yet — start exploring luvly ✦*';
+
+    const text =
+      `**﹕ⵌ┆ 🏅 ${target.username}'s Achievements ꩜ .**\n\n` +
+      `${R} **Unlocked:**\n${achList}\n\n` +
+      `${R} **Progress:** \`${bar}\` **${unlocked.length}/${total}** (${pct}%)\n\n` +
+      `${R} **Hearts:** **${hearts}** 💗\n\n` +
+      `${R} **Up Next:**\n${nextHints.length ? nextHints.join('\n') : '> *all unlocked!* 🏆'}`;
 
     const row = buildButtons(
       { id: 'daily_claim',  label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
@@ -46,6 +46,6 @@ export default {
       { id: 'profile_view', label: 'my profile',  emoji: '💫', style: ButtonStyle.Secondary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

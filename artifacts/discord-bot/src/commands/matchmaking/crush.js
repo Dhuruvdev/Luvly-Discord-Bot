@@ -1,9 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { setCrush, getCrush, checkMutualCrush, isBlocked, addXP } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
-import { checkLevelUp } from '../../utils/levelUp.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'crush',
@@ -19,42 +21,38 @@ export default {
     if (!target) {
       const existing = getCrush(message.author.id);
       if (!existing) {
-        const embed = luvEmbed(COLORS.rose)
-          .setTitle(`${EMOJIS.heart} no crush set yet`)
-          .setDescription(
-            "use **u crush @user** to set your secret crush.\n" +
-            "> *they won't be notified — it stays between you and the stars ✦*"
-          )
-          .setFooter(footer(client));
+        const text =
+          `**﹕ⵌ┆ ${EMOJIS.heart} No Crush Set Yet ꩜ .**\n\n` +
+          `use **u crush @user** to set your secret crush.\n\n` +
+          `> *they won't be notified — it stays between you and the stars ✦*`;
         const noRow = buildButtons(
           { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
         );
-        return await message.reply({ embeds: [embed], components: [noRow] });
+        return await message.reply({ flags: CV2, components: [luvContainer(text, noRow)] });
       }
       const crushUser = await client.users.fetch(existing.targetId).catch(() => null);
       const isMutual  = checkMutualCrush(message.author.id, existing.targetId);
-      const embed = luvEmbed(COLORS.rose)
-        .setTitle(`${EMOJIS.heart} your current crush`)
-        .setDescription(isMutual ? '🎉 they like you back!' : '> *your crush is safe with luvly ✦*')
-        .addFields(
-          { name: 'crush',   value: isMutual ? `**${crushUser?.username ?? 'unknown'}** 💞` : '*hidden* 🔒', inline: true },
-          { name: 'mutual?', value: isMutual ? '**yes! 💞**' : 'not yet...', inline: true },
-        )
-        .setFooter(footer(client));
-      const row = buildButtons(
-        {
-          id:    `crush_reveal:${existing.targetId}`,
-          label: isMutual ? 'reveal!' : 'check mutual',
-          emoji: isMutual ? '💞' : '🔓',
-          style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary,
-        },
-      );
-      return await message.reply({ embeds: [embed], components: [row] });
+      const text =
+        `**﹕ⵌ┆ ${EMOJIS.heart} Your Current Crush ꩜ .**\n\n` +
+        `${isMutual ? '🎉 they like you back!' : '> *your crush is safe with luvly ✦*'}\n\n` +
+        `${R} **Status:**\n` +
+        `> ⤿  Crush: ${isMutual ? `**${crushUser?.username ?? 'unknown'}** 💞` : '*hidden* 🔒'}\n` +
+        `> ⤿  Mutual: ${isMutual ? '**yes! 💞**' : 'not yet...'}`;
+      const row = buildButtons({
+        id:    `crush_reveal:${existing.targetId}`,
+        label: isMutual ? 'reveal!' : 'check mutual',
+        emoji: isMutual ? '💞' : '🔓',
+        style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary,
+      });
+      return await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
 
-    if (target.id === message.author.id) return await message.reply({ embeds: [errorEmbed("you can't crush on yourself... unless? 💀")] });
-    if (target.bot)                       return await message.reply({ embeds: [errorEmbed("bots can't love back. trust me 🤖")] });
-    if (isBlocked(message.author.id, target.id)) return await message.reply({ embeds: [errorEmbed("you can't interact with this user ✦")] });
+    if (target.id === message.author.id)
+      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't crush on yourself... unless? 💀")] });
+    if (target.bot)
+      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ bots can't love back. trust me 🤖")] });
+    if (isBlocked(message.author.id, target.id))
+      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't interact with this user ✦")] });
 
     const isFirstCrush = !getCrush(message.author.id);
     setCrush(message.author.id, target.id);
@@ -66,29 +64,26 @@ export default {
       await unlock(message.author.id, 'mutual_crush', client);
       await unlock(target.id,         'mutual_crush', client);
       try {
-        const dmEmbed = luvEmbed(COLORS.rose)
-          .setTitle('💞 someone likes you back!')
-          .setDescription(`you and **${message.author.username}** both chose each other.\n> *the universe heard you ✦*`)
-          .setFooter({ text: 'luvly ✦' });
         const tUser = await client.users.fetch(target.id);
-        await tUser.send({ embeds: [dmEmbed] }).catch(() => {});
+        await tUser.send({
+          flags: CV2,
+          components: [luvContainer(
+            `**﹕ⵌ┆ 💞 Someone Likes You Back! ꩜ .**\n\n` +
+            `you and **${message.author.username}** both chose each other.\n\n` +
+            `> *the universe heard you ✦*`
+          )],
+        }).catch(() => {});
       } catch {}
     }
 
-    const embed = luvEmbed(isMutual ? COLORS.rose : COLORS.purple)
-      .setTitle(isMutual ? `${EMOJIS.heart} it's mutual! 💞` : `${EMOJIS.heart} crush set ✦`)
-      .setThumbnail(target.displayAvatarURL({ dynamic: true }))
-      .setDescription(
-        isMutual
-          ? `you and **${target.username}** both chose each other ✦`
-          : `your feelings for **${target.username}** are safe.\n> *they won't know unless they choose you too ✦*`
-      )
-      .setFooter(footer(client));
+    const text = isMutual
+      ? `**﹕ⵌ┆ ${EMOJIS.heart} It's Mutual! 💞 ꩜ .**\n\nyou and **${target.username}** both chose each other ✦`
+      : `**﹕ⵌ┆ ${EMOJIS.heart} Crush Set ꩜ .**\n\nyour feelings for **${target.username}** are safe.\n> *they won't know unless they choose you too ✦*`;
 
     const row = buildButtons(
       { id: `crush_reveal:${target.id}`, label: isMutual ? 'reveal!' : 'check mutual', emoji: '🔓', style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary },
       { id: 'crush_anonymous', label: 'keep secret', emoji: '🔒', style: ButtonStyle.Secondary },
     );
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

@@ -1,9 +1,12 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, buildButtons, errorEmbed, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getChemistry, addChemistry, getTopAdmirer, addXP, isBlocked } from '../../utils/database.js';
 import { unlock } from '../../utils/achievements.js';
 import { checkLevelUp } from '../../utils/levelUp.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 function chemLabel(score) {
   if (score >= 200) return 'inseparable 💞';
@@ -33,35 +36,35 @@ export default {
     if (!target) {
       const top = getTopAdmirer(message.author.id);
       if (!top.userId) {
-        const embed = luvEmbed(COLORS.aura)
-          .setTitle(`${EMOJIS.chemistry} chemistry radar`)
-          .setDescription('> *no data yet. use **u chem @user** to track a connection ✦*')
-          .setFooter(footer(client));
+        const text =
+          `**﹕ⵌ┆ ${EMOJIS.chemistry} Chemistry Radar ꩜ .**\n\n` +
+          `> *no data yet. use **u chem @user** to track a connection ✦*`;
         const noDataRow = buildButtons(
           { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
         );
-        return await message.reply({ embeds: [embed], components: [noDataRow] });
+        return await message.reply({ flags: CV2, components: [luvContainer(text, noDataRow)] });
       }
       const topUser = await client.users.fetch(top.userId).catch(() => null);
-      const embed = luvEmbed(COLORS.aura)
-        .setTitle(`${EMOJIS.chemistry} your top connection`)
-        .addFields(
-          { name: 'highest chemistry with', value: `**${topUser?.username ?? 'unknown'}**`, inline: true },
-          { name: 'score',                  value: `**${top.score}**/200`,                  inline: true },
-          { name: 'connection type',        value: chemLabel(top.score) },
-          { name: 'meter',                  value: `\`${chemBar(top.score)}\`` },
-        )
-        .setFooter(footer(client));
+      const text =
+        `**﹕ⵌ┆ ${EMOJIS.chemistry} Top Connection ꩜ .**\n\n` +
+        `${R} **Your Highest Chemistry:**\n` +
+        `> ⤿  User: **${topUser?.username ?? 'unknown'}**\n` +
+        `> ⤿  Score: **${top.score}**/200\n` +
+        `> ⤿  Connection: ${chemLabel(top.score)}\n` +
+        `> ⤿  Meter: \`${chemBar(top.score)}\``;
       const topRow = buildButtons(
         { id: `chem_boost:${top.userId}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
         { id: 'daily_claim',              label: 'claim daily',     emoji: '🎁', style: ButtonStyle.Secondary },
       );
-      return await message.reply({ embeds: [embed], components: [topRow] });
+      return await message.reply({ flags: CV2, components: [luvContainer(text, topRow)] });
     }
 
-    if (target.id === message.author.id) return await message.reply({ embeds: [errorEmbed('self-chemistry? only you can decide that one 💀')] });
-    if (target.bot)                       return await message.reply({ embeds: [errorEmbed("you can't have chemistry with a bot 🤖")] });
-    if (isBlocked(message.author.id, target.id)) return await message.reply({ embeds: [errorEmbed("you can't interact with this user ✦")] });
+    if (target.id === message.author.id)
+      return await message.reply({ flags: CV2, components: [luvContainer('> ⚠️ self-chemistry? only you can decide that one 💀')] });
+    if (target.bot)
+      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't have chemistry with a bot 🤖")] });
+    if (isBlocked(message.author.id, target.id))
+      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't interact with this user ✦")] });
 
     addChemistry(message.author.id, target.id, 1);
     const { oldXP, newXP } = addXP(message.author.id, 10);
@@ -72,25 +75,18 @@ export default {
     if (score >= 100) await unlock(message.author.id, 'chem_100', client);
     if (score >= 200) await unlock(message.author.id, 'chem_200', client);
 
-    const embed = luvEmbed(COLORS.aura)
-      .setAuthor({ name: `${message.author.username} × ${target.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true }) })
-      .setThumbnail(target.displayAvatarURL({ dynamic: true }))
-      .setTitle(`${EMOJIS.chemistry} chemistry check ✦`)
-      .addFields(
-        { name: 'connection', value: `**${chemLabel(score)}**` },
-        { name: 'meter',      value: `\`${chemBar(score)}\`  **${score}**/200` },
-        {
-          name:  'insight',
-          value: score < 20
-            ? '> *keep interacting to build your chemistry ✦*'
-            : '> *you two have something real ✦*',
-        },
-      )
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.chemistry} Chemistry Check ꩜ .**\n\n` +
+      `${message.author.username} × ${target.username}\n\n` +
+      `${R} **Connection:**\n` +
+      `> ⤿  ${chemLabel(score)}\n` +
+      `> ⤿  Meter: \`${chemBar(score)}\`  **${score}**/200\n\n` +
+      `${R} **Insight:**\n` +
+      (score < 20 ? '> *keep interacting to build your chemistry ✦*' : '> *you two have something real ✦*');
 
     const row = buildButtons(
       { id: `chem_boost:${target.id}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
     );
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

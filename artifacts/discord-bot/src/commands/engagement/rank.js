@@ -1,7 +1,10 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS, getLevelData, getXpBar } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getUser, getHearts } from '../../utils/database.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'rank',
@@ -18,31 +21,26 @@ export default {
     const { current, next } = getLevelData(user.xp ?? 0);
     const xpBar = getXpBar(user.xp ?? 0, current, next);
 
-    const embed = luvEmbed(current.color)
-      .setAuthor({ name: `${target.username}'s rank ✦`, iconURL: target.displayAvatarURL({ dynamic: true }) })
-      .setThumbnail(target.displayAvatarURL({ size: 256, dynamic: true }))
-      .addFields(
-        { name: `${EMOJIS.rank} level`,    value: `**${current.level}**`,                   inline: true },
-        { name: `${EMOJIS.sparkle} title`, value: `*${current.title}*`,                     inline: true },
-        { name: `${EMOJIS.streak} streak`, value: `**${user.streak ?? 0}** days 🔥`,         inline: true },
-        { name: `${EMOJIS.fire} progress`, value: `\`${xpBar}\``,                           inline: false },
-        { name: `${EMOJIS.heart} hearts`,  value: `**${hearts}** 💗`,                        inline: true },
-        { name: 'total xp',               value: `**${user.xp ?? 0}**`,                     inline: true },
-        {
-          name:  next ? 'next level' : 'status',
-          value: next
-            ? `**${next.title}** at ${next.xp.toLocaleString()} xp`
-            : '**max level** 👑',
-          inline: true,
-        },
-      )
-      .setFooter(footer(client));
+    const nextStr = next
+      ? `**${next.title}** at ${next.xp.toLocaleString()} xp`
+      : '**max level** 👑';
+
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.rank} ${target.username}'s Rank ꩜ .**\n\n` +
+      `${R} **Level & Title:**\n` +
+      `> ⤿  Level: **${current.level}** — *${current.title}*\n` +
+      `> ⤿  Progress: \`${xpBar}\`\n` +
+      `> ⤿  Total XP: **${user.xp ?? 0}**\n` +
+      `> ⤿  Next: ${nextStr}\n\n` +
+      `${R} **Stats:**\n` +
+      `> ⤿  Hearts: **${hearts}** 💗\n` +
+      `> ⤿  Streak: **${user.streak ?? 0}** days 🔥`;
 
     const row = buildButtons(
       { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
       { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

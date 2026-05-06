@@ -1,7 +1,10 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getTable } from '../../utils/store.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'stats',
@@ -22,26 +25,25 @@ export default {
     const minutes = Math.floor((uptime % 3600) / 60);
     const memMB   = Math.round(process.memoryUsage().rss / 1_048_576);
 
-    const embed = luvEmbed(COLORS.primary)
-      .setAuthor({ name: 'luvly bot stats ✦', iconURL: client.user.displayAvatarURL() })
-      .addFields(
-        { name: `${EMOJIS.heart} users`,           value: `**${users.toLocaleString()}**`,       inline: true },
-        { name: `${EMOJIS.match} crushes`,          value: `**${crushes.toLocaleString()}**`,     inline: true },
-        { name: `${EMOJIS.chemistry} pairs`,        value: `**${chemPairs.toLocaleString()}**`,   inline: true },
-        { name: `${EMOJIS.confession} confessions`, value: `**${confessions.toLocaleString()}**`, inline: true },
-        { name: `${EMOJIS.sparkle} servers`,        value: `**${client.guilds.cache.size}**`,     inline: true },
-        { name: '⚡ uptime',                         value: `**${days}d ${hours}h ${minutes}m**`,  inline: true },
-        { name: '🧠 memory',                         value: `**${memMB} MB**`,                     inline: true },
-        { name: '📦 node',                           value: `**${process.version}**`,              inline: true },
-      )
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.sparkle} Luvly Bot Stats ꩜ .**\n\n` +
+      `${R} **Community:**\n` +
+      `> ⤿  ${EMOJIS.heart} Users: **${users.toLocaleString()}**\n` +
+      `> ⤿  ${EMOJIS.match} Crushes: **${crushes.toLocaleString()}**\n` +
+      `> ⤿  ${EMOJIS.chemistry} Pairs: **${chemPairs.toLocaleString()}**\n` +
+      `> ⤿  ${EMOJIS.confession} Confessions: **${confessions.toLocaleString()}**\n` +
+      `> ⤿  ${EMOJIS.sparkle} Servers: **${client.guilds.cache.size}**\n\n` +
+      `${R} **System:**\n` +
+      `> ⤿  ⚡ Uptime: **${days}d ${hours}h ${minutes}m**\n` +
+      `> ⤿  🧠 Memory: **${memMB} MB**\n` +
+      `> ⤿  📦 Node: **${process.version}**`;
 
     const row = buildButtons(
-      { id: 'daily_claim',  label: 'claim daily',    emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'lb_view',      label: 'leaderboard',    emoji: '🏆', style: ButtonStyle.Secondary },
-      { id: 'profile_view', label: 'my profile',     emoji: '💫', style: ButtonStyle.Secondary },
+      { id: 'daily_claim',  label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
+      { id: 'lb_view',      label: 'leaderboard', emoji: '🏆', style: ButtonStyle.Secondary },
+      { id: 'profile_view', label: 'my profile',  emoji: '💫', style: ButtonStyle.Secondary },
     );
 
-    await message.reply({ embeds: [embed], components: [row] });
+    await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },
 };

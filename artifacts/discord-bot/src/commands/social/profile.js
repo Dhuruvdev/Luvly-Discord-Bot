@@ -1,8 +1,11 @@
-import { ButtonStyle } from 'discord.js';
-import { COLORS, EMOJIS, getLevelData, getXpBar } from '../../config.js';
-import { luvEmbed, buildButtons, footer } from '../../utils/embeds.js';
+import { ButtonStyle, MessageFlags } from 'discord.js';
+import { EMOJIS, getLevelData, getXpBar } from '../../config.js';
+import { luvContainer, buildButtons } from '../../utils/embeds.js';
 import { getUser, getHearts, saveUser } from '../../utils/database.js';
 import { getUserAchievements, unlock } from '../../utils/achievements.js';
+
+const R   = '<:right:1501255316350959858>';
+const CV2 = MessageFlags.IsComponentsV2;
 
 export default {
   name: 'profile',
@@ -21,15 +24,6 @@ export default {
     const { current, next } = getLevelData(user.xp ?? 0);
     const xpBar = getXpBar(user.xp ?? 0, current, next);
 
-    const auraColors = {
-      soft:     COLORS.soft,
-      ethereal: COLORS.purple,
-      magnetic: COLORS.primary,
-      chaotic:  COLORS.rose,
-      midnight: COLORS.midnight,
-      golden:   COLORS.gold,
-    };
-
     if (!isSelf) {
       saveUser(target.id, { profileViews: (user.profileViews ?? 0) + 1 });
       await unlock(message.author.id, 'profile_viewer', client).catch(() => {});
@@ -37,41 +31,36 @@ export default {
 
     const recentAch = unlocked.slice(-3).map(a => a.emoji).join('  ') || '—';
     const badgeStr  = user.badges?.length ? user.badges.join(' ') : '';
+    const interests = user.interests?.length ? user.interests.map(i => `\`${i}\``).join('  ') : '*none listed*';
+    const bio       = user.bio ? `> *"${user.bio}"*` : '> *no bio yet — add one with* `u profile edit`';
+    const nextLevel = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** 👑';
 
-    const embed = luvEmbed(auraColors[user.aura] ?? COLORS.primary)
-      .setAuthor({ name: `${target.username} ✦`, iconURL: target.displayAvatarURL({ dynamic: true }) })
-      .setThumbnail(target.displayAvatarURL({ size: 256, dynamic: true }))
-      .setDescription(user.bio ? `> *"${user.bio}"*` : '> *no bio yet — add one with* `u profile edit`')
-      .addFields(
-        { name: `${EMOJIS.star} aura`,        value: `**${user.aura ?? 'soft'}**`,                       inline: true },
-        { name: `${EMOJIS.sparkle} pronouns`, value: user.pronouns ?? '*not set*',                       inline: true },
-        { name: `${EMOJIS.rank} level`,       value: `**${current.level}** — *${current.title}*`,        inline: true },
-        { name: `${EMOJIS.fire} progress`,    value: `\`${xpBar}\``,                                     inline: false },
-        { name: `${EMOJIS.heart} hearts`,     value: `**${hearts}** 💗`,                                  inline: true },
-        { name: `${EMOJIS.streak} streak`,    value: `**${user.streak ?? 0}** days 🔥`,                   inline: true },
-        { name: '👀 profile views',            value: `**${user.profileViews ?? 0}**`,                    inline: true },
-        {
-          name:  `${EMOJIS.heart} interests`,
-          value: user.interests?.length ? user.interests.map(i => `\`${i}\``).join('  ') : '*none listed*',
-        },
-        {
-          name:  '🏅 achievements',
-          value: recentAch + (unlocked.length ? `  *(${unlocked.length} total)*` : ''),
-        },
-      )
-      .setFooter(footer(client));
+    const text =
+      `**﹕ⵌ┆ ${EMOJIS.star} ${target.username} ꩜ .**\n\n` +
+      `${bio}\n\n` +
+      `${R} **Aura & Identity:**\n` +
+      `> ⤿  Aura: **${user.aura ?? 'soft'}**  ·  Pronouns: **${user.pronouns ?? 'not set'}**\n\n` +
+      `${R} **Level & Progress:**\n` +
+      `> ⤿  Level: **${current.level}** — *${current.title}*\n` +
+      `> ⤿  XP: \`${xpBar}\`\n` +
+      `> ⤿  Next: ${nextLevel}\n\n` +
+      `${R} **Stats:**\n` +
+      `> ⤿  Hearts: **${hearts}** 💗  ·  Streak: **${user.streak ?? 0}** days 🔥\n` +
+      `> ⤿  Profile Views: **${user.profileViews ?? 0}**\n\n` +
+      `${R} **Interests:** ${interests}\n\n` +
+      `${R} **Achievements:** ${recentAch}${unlocked.length ? `  *(${unlocked.length} total)*` : ''}` +
+      (badgeStr ? `\n\n${R} **Badges:** ${badgeStr}` : '');
 
-    if (badgeStr) embed.addFields({ name: '🏷️ badges', value: badgeStr });
+    const container = luvContainer(text);
 
-    const rows = [];
     if (isSelf) {
-      rows.push(buildButtons(
-        { id: 'profile_edit', label: 'edit profile', emoji: '✏️',  style: ButtonStyle.Primary },
-        { id: 'profile_aura', label: 'change aura',  emoji: '🌸',  style: ButtonStyle.Secondary },
-        { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁',  style: ButtonStyle.Success },
+      container.addActionRowComponents(buildButtons(
+        { id: 'profile_edit', label: 'edit profile', emoji: '✏️', style: ButtonStyle.Primary },
+        { id: 'profile_aura', label: 'change aura',  emoji: '🌸', style: ButtonStyle.Secondary },
+        { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁', style: ButtonStyle.Success },
       ));
     }
 
-    await message.reply({ embeds: [embed], components: rows });
+    await message.reply({ flags: CV2, components: [container] });
   },
 };
