@@ -35,7 +35,7 @@ import { checkLevelUp } from '../utils/levelUp.js';
 import { SHOP_ITEMS } from '../commands/engagement/shop.js';
 import { buildThemeListPage } from '../utils/themeListPage.js';
 import { THEME_LIST } from '../themes/index.js';
-import { generateCard } from '../utils/cardGenerator.js';
+import { generateCard, generateDailyCard } from '../utils/cardGenerator.js';
 
 const CV2 = MessageFlags.IsComponentsV2;
 const EPH = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
@@ -392,14 +392,56 @@ export function buildHandlers(client) {
         if (result.streak >= 7)  await unlock(i.user.id, 'streak_7',  client);
         if (result.streak >= 30) await unlock(i.user.id, 'streak_30', client);
 
-        const text =
-          `**﹕ⵌ┆ ${EMOJIS.streak ?? ''} Daily Claimed ꩜ .**\n\n` +
-          `<:right:1501255316350959858> **Rewards:**\n` +
-          `> ⤿   XP Earned: **+${result.xp} xp**\n` +
-          `> ⤿   Hearts: **+${result.hearts}**\n` +
-          `> ⤿   Streak: **${result.streak} days**`;
+        // Show loading then generate daily card
+        await i.deferUpdate();
 
-        await i.update({ flags: CV2, components: [luvContainer(text)] });
+        const user   = getUser(i.user.id);
+        const hearts = getHearts(i.user.id);
+        const { current } = getLevelData(result.newXP);
+
+        try {
+          const themeId = getUserTheme(i.user.id);
+          const buffer  = await generateDailyCard({
+            username:     i.user.username,
+            avatarURL:    i.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            hearts,
+            xp:           result.newXP,
+            streak:       result.streak,
+            earnedHearts: result.hearts,
+            earnedXp:     result.xp,
+            multiplier:   result.multiplier ?? 1,
+            aura:         user.aura ?? 'soft',
+          }, themeId);
+
+          const filename   = `${i.user.username}-daily.png`;
+          const attachment = new AttachmentBuilder(buffer, { name: filename });
+
+          const container = new ContainerBuilder().setAccentColor(current.color ?? 0xEDB5F8);
+          container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`**﹕ⵌ┆ ${EMOJIS.sparkle} Daily Reward Claimed ꩜ .**`)
+          );
+          container.addMediaGalleryComponents(
+            new MediaGalleryBuilder().addItems(
+              new MediaGalleryItemBuilder().setURL(`attachment://${filename}`)
+            )
+          );
+          container.addActionRowComponents(
+            new ActionRowBuilder().addComponents(
+              new ButtonBuilder().setCustomId('profile_view').setLabel('my profile').setStyle(ButtonStyle.Primary),
+              new ButtonBuilder().setCustomId('match_again').setLabel('find a match').setStyle(ButtonStyle.Secondary),
+            )
+          );
+
+          await i.editReply({ flags: CV2, files: [attachment], components: [container] });
+        } catch (err) {
+          console.error('[DAILY CLAIM CARD ERROR]', err);
+          const text =
+            `**﹕ⵌ┆ ${EMOJIS.sparkle} Daily Claimed ꩜ .**\n\n` +
+            `> ⤿   **+${result.hearts} hearts** added\n` +
+            `> ⤿   **+${result.xp} XP** earned\n` +
+            `> ⤿   Streak: **${result.streak} days**`;
+          await i.editReply({ flags: CV2, components: [luvContainer(text)] });
+        }
       },
 
       // ── Chemistry boost ────────────────────────────────────────────────────
@@ -526,7 +568,48 @@ export function buildHandlers(client) {
       },
 
       daily_card: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.sparkle} use **u card** to generate your profile card ✦`)] });
+        await i.deferReply({ ephemeral: true });
+        const user   = getUser(i.user.id);
+        const hearts = getHearts(i.user.id);
+        const { current } = getLevelData(user.xp ?? 0);
+        try {
+          const themeId = getUserTheme(i.user.id);
+          const buffer  = await generateDailyCard({
+            username:     i.user.username,
+            avatarURL:    i.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            hearts,
+            xp:           user.xp ?? 0,
+            streak:       user.streak ?? 0,
+            earnedHearts: 0,
+            earnedXp:     0,
+            multiplier:   1,
+            aura:         user.aura ?? 'soft',
+          }, themeId);
+
+          const filename   = `${i.user.username}-daily.png`;
+          const attachment = new AttachmentBuilder(buffer, { name: filename });
+
+          const container = new ContainerBuilder().setAccentColor(current.color ?? 0xEDB5F8);
+          container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`**﹕ⵌ┆ ${EMOJIS.sparkle} ${i.user.username}'s Daily Card ꩜ .**`)
+          );
+          container.addMediaGalleryComponents(
+            new MediaGalleryBuilder().addItems(
+              new MediaGalleryItemBuilder().setURL(`attachment://${filename}`)
+            )
+          );
+          container.addActionRowComponents(
+            new ActionRowBuilder().addComponents(
+              new ButtonBuilder().setCustomId('daily_claim').setLabel('claim daily').setStyle(ButtonStyle.Success),
+              new ButtonBuilder().setCustomId('profile_view').setLabel('my profile').setStyle(ButtonStyle.Primary),
+            )
+          );
+
+          await i.editReply({ flags: CV2, files: [attachment], components: [container] });
+        } catch (err) {
+          console.error('[DAILY CARD BTN ERROR]', err);
+          await i.editReply({ flags: CV2, components: [luvContainer(`> use **luv daily** to claim your reward ✦`)] });
+        }
       },
 
       theme_list: async (i) => {

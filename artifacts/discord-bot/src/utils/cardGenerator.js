@@ -35,6 +35,13 @@ try {
   if (existsSync(LOGO_PATH)) logoImg = await loadImage(LOGO_PATH);
 } catch {}
 
+// ── Luv Cash icon ─────────────────────────────────────────────────────────────
+const CASH_PATH = join(__dir, '../../assets/luvcash.png');
+let cashImg = null;
+try {
+  if (existsSync(CASH_PATH)) cashImg = await loadImage(CASH_PATH);
+} catch {}
+
 // ── Canvas size ───────────────────────────────────────────────────────────────
 const W = 900, H = 380;
 
@@ -339,16 +346,201 @@ async function drawCard(ctx, data, theme) {
   drawWatermark(ctx, W / 2, H - 10);
 }
 
-// ── Export ────────────────────────────────────────────────────────────────────
+// ── Daily Card draw ───────────────────────────────────────────────────────────
+async function drawDailyCard(ctx, data, theme) {
+  const isDark = isColorDark(theme.bg ?? '#ffffff');
+
+  // Glass panel — same dimensions as profile card
+  const M  = 20;
+  const CX = M, CY = M, CW = W - M * 2, CH = H - M * 2;
+
+  ctx.save();
+  ctx.shadowColor   = 'rgba(0,0,0,0.22)';
+  ctx.shadowBlur    = 28;
+  ctx.shadowOffsetY = 6;
+  ctx.fillStyle = isDark ? 'rgba(10,5,20,0.62)' : 'rgba(255,255,255,0.68)';
+  rrect(ctx, CX, CY, CW, CH, 22);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  rrect(ctx, CX, CY, CW, CH, 22);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.80)';
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Left column: luv cash icon ────────────────────────────────────────────
+  const AV_SIZE = 150;
+  const AV_PAD  = 10;
+  const AV_X    = CX + 28 + AV_PAD;
+  const AV_Y    = CY + (CH - AV_SIZE) / 2 - 16;
+
+  // Colored bg box (same as avatar box in profile)
+  ctx.fillStyle = theme.avatarBg ?? (theme.nameColor ? theme.nameColor + '55' : 'rgba(180,160,210,0.45)');
+  rrect(ctx, AV_X - AV_PAD, AV_Y - AV_PAD, AV_SIZE + AV_PAD * 2, AV_SIZE + AV_PAD * 2, 16);
+  ctx.fill();
+
+  // Draw luv cash icon — object-fit: contain inside the box
+  if (cashImg) {
+    const iw = cashImg.width, ih = cashImg.height;
+    const scale = Math.min(AV_SIZE / iw, AV_SIZE / ih) * 0.82;
+    const dw = iw * scale, dh = ih * scale;
+    const dx = AV_X + (AV_SIZE - dw) / 2;
+    const dy = AV_Y + (AV_SIZE - dh) / 2;
+    ctx.drawImage(cashImg, dx, dy, dw, dh);
+  } else {
+    // Fallback: big heart text
+    ctx.font      = `800 64px '${FONT}', sans-serif`;
+    ctx.fillStyle = theme.nameColor ?? '#A78BFA';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('', AV_X + AV_SIZE / 2, AV_Y + AV_SIZE / 2);
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // "daily reward" label below icon
+  ctx.fillStyle    = isDark ? 'rgba(255,255,255,0.55)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.font         = `600 11px '${FONT}', sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('daily reward', AV_X + AV_SIZE / 2, AV_Y + AV_SIZE + AV_PAD + 18);
+  ctx.textAlign    = 'left';
+
+  // ── Vertical divider ──────────────────────────────────────────────────────
+  const DIV_X = AV_X + AV_SIZE + AV_PAD + 22;
+  ctx.beginPath();
+  ctx.moveTo(DIV_X, CY + 20);
+  ctx.lineTo(DIV_X, CY + CH - 20);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+
+  // ── Right column ──────────────────────────────────────────────────────────
+  const TX = DIV_X + 22;
+  const TW = CX + CW - TX - 22;
+
+  const { current, next } = getLevelData(data.xp ?? 0);
+
+  // Username
+  clampFont(ctx, data.username ?? 'unknown', TW, 36);
+  ctx.fillStyle    = theme.nameColor ?? '#8B5CF6';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(data.username ?? 'unknown', TX, CY + 52);
+
+  // Streak subtitle
+  const streakLabel = data.streak >= 7
+    ? `day ${data.streak} streak  ·  you're on fire! 🔥`
+    : data.streak >= 3
+      ? `day ${data.streak} streak  ·  keep it up! ✦`
+      : `day ${data.streak} streak`;
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.60)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.font      = `600 12px '${FONT}', sans-serif`;
+  ctx.fillText(streakLabel, TX, CY + 72);
+
+  // XP bar
+  drawXpBar(ctx, data.xp ?? 0, current, next, TX, CY + 82, TW, theme, isDark);
+
+  // Divider
+  ctx.beginPath();
+  ctx.moveTo(TX, CY + 104);
+  ctx.lineTo(TX + TW, CY + 104);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+
+  // Rewards section
+  const textColor = isDark ? 'rgba(255,255,255,0.85)' : (theme.tagColor ?? '#A78BFA');
+  ctx.fillStyle    = textColor;
+  ctx.font         = `700 13px '${FONT}', sans-serif`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText("today's drop", TX, CY + 126);
+
+  // Hearts earned
+  ctx.font      = `800 28px '${FONT}', sans-serif`;
+  ctx.fillStyle = theme.nameColor ?? '#8B5CF6';
+  ctx.fillText(`+${data.earnedHearts ?? 0}`, TX, CY + 166);
+
+  ctx.font      = `600 11px '${FONT}', sans-serif`;
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.50)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.fillText('hearts', TX, CY + 182);
+
+  // XP earned
+  const xpColX = TX + 90;
+  ctx.font      = `800 28px '${FONT}', sans-serif`;
+  ctx.fillStyle = theme.nameColor ?? '#8B5CF6';
+  ctx.fillText(`+${data.earnedXp ?? 0}`, xpColX, CY + 166);
+
+  ctx.font      = `600 11px '${FONT}', sans-serif`;
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.50)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.fillText('xp', xpColX, CY + 182);
+
+  // Multiplier badge
+  if ((data.multiplier ?? 1) > 1) {
+    const badgeX = xpColX + 65;
+    const badgeTxt = `×${data.multiplier} streak bonus`;
+    ctx.font = `600 10px '${FONT}', sans-serif`;
+    const bw = ctx.measureText(badgeTxt).width + 16;
+    const bh = 20;
+    const by = CY + 155;
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.12)' : (theme.nameColor + '22' ?? '#EDE9FE');
+    rrect(ctx, badgeX, by, bw, bh, bh / 2);
+    ctx.fill();
+    ctx.fillStyle = theme.nameColor ?? '#8B5CF6';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(badgeTxt, badgeX + bw / 2, by + bh / 2);
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // Total hearts info line
+  ctx.font      = `400 11px '${FONT}', sans-serif`;
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.45)' : (theme.tagColor ?? '#C4A3DF');
+  ctx.fillText(`total: ${data.hearts ?? 0} hearts  ·  lv${current.level} — ${current.title}`, TX, CY + 210);
+
+  // ── Bottom stat pills ─────────────────────────────────────────────────────
+  const PILL_TOP = CY + CH - 48;
+
+  ctx.beginPath();
+  ctx.moveTo(CX + 16, PILL_TOP - 12);
+  ctx.lineTo(CX + CW - 16, PILL_TOP - 12);
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+
+  const mult  = data.multiplier ?? 1;
+  const stats = [
+    { label: `${data.hearts ?? 0} hearts`,    icon: '' },
+    { label: `+${data.earnedXp ?? 0} xp`,     icon: '' },
+    { label: `${data.streak ?? 0}d streak`,    icon: '' },
+    { label: `Level ${current.level}`,         icon: '' },
+    { label: mult > 1 ? `×${mult} bonus` : 'no bonus', icon: '' },
+  ];
+  drawStatPills(ctx, stats, theme, CX + 16, PILL_TOP, CW - 32, isDark);
+
+  // ── Watermark ─────────────────────────────────────────────────────────────
+  drawWatermark(ctx, W / 2, H - 10);
+}
+
+// ── Exports ───────────────────────────────────────────────────────────────────
 export async function generateCard(data, themeId = 'lavender') {
   const theme  = getTheme(themeId);
   const canvas = createCanvas(W, H);
   const ctx    = canvas.getContext('2d');
-
   ctx.imageSmoothingEnabled = true;
-
   renderBackground(ctx, theme, W, H);
   await drawCard(ctx, data, theme);
+  return canvas.toBuffer('image/png');
+}
 
+export async function generateDailyCard(data, themeId = 'lavender') {
+  const theme  = getTheme(themeId);
+  const canvas = createCanvas(W, H);
+  const ctx    = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  renderBackground(ctx, theme, W, H);
+  await drawDailyCard(ctx, data, theme);
   return canvas.toBuffer('image/png');
 }
