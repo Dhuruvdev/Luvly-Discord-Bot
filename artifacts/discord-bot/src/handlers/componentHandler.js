@@ -11,8 +11,10 @@
 import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
   ModalBuilder, TextInputBuilder, TextInputStyle,
+  ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
+import { HELP_CATEGORIES, HELP_PAGE_SIZE, buildHelpCategoryPage } from '../commands/social/help.js';
 import { luvEmbed, buildButtons, errorEmbed, footer } from '../utils/embeds.js';
 import {
   getUser, saveUser, addXP, addHearts, getHearts, spendHearts,
@@ -370,6 +372,30 @@ export function buildHandlers(client) {
         await i.reply({ embeds: [embed], ephemeral: true });
       },
 
+      // ── Help pagination ───────────────────────────────────────────────────
+      // help_page:{category}:{page}
+      help_page: async (i, [catArg, pageStr]) => {
+        const page = parseInt(pageStr, 10) || 0;
+        const cmds = [...client.commands.values()].filter(c => c.category === catArg);
+        const { container } = buildHelpCategoryPage(catArg, page, cmds);
+
+        const selectRow = new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId('help_category')
+            .setPlaceholder('Browse another category...')
+            .addOptions(
+              Object.entries(HELP_CATEGORIES).map(([key, c]) => ({
+                label: c.label, description: c.desc, value: key, emoji: c.emoji,
+              }))
+            )
+        );
+
+        await i.update({
+          flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+          components: [container, selectRow],
+        });
+      },
+
       // ── Premium notify ────────────────────────────────────────────────────
       premium_interest: async (i) => {
         addHearts(i.user.id, 5);
@@ -385,29 +411,24 @@ export function buildHandlers(client) {
 
       help_category: async (i, _parts) => {
         const catArg = i.values[0];
-        const CAT_META = {
-          social:      { emoji: '❤️',  label: 'social' },
-          matchmaking: { emoji: '💌',  label: 'matchmaking' },
-          midnight:    { emoji: '🌙',  label: 'midnight' },
-          confession:  { emoji: '🎭',  label: 'confession' },
-          chemistry:   { emoji: '⚗️',  label: 'chemistry' },
-          engagement:  { emoji: '🎮',  label: 'engagement' },
-          ai:          { emoji: '🤖',  label: 'ai' },
-          safety:      { emoji: '🛡️',  label: 'safety' },
-          premium:     { emoji: '💎',  label: 'premium' },
-          hidden:      { emoji: '🔥',  label: 'hidden' },
-        };
-        const cat  = CAT_META[catArg];
-        const cmds = [...client.commands.values()].filter(c => c.category === catArg);
-        const embed = luvEmbed(COLORS.primary)
-          .setTitle(`${cat?.emoji ?? '✦'} ${cat?.label ?? catArg} commands ✦`)
-          .setDescription(
-            cmds.map(c =>
-              `**u ${c.name}**${c.aliases?.length ? ' · ' + c.aliases.map(a => `**u ${a}**`).join(' · ') : ''}\n*${c.description}*  ·  \`${c.usage}\``
-            ).join('\n\n') || '*no commands in this category*'
-          )
-          .setFooter(footer(client));
-        await i.reply({ embeds: [embed], ephemeral: true });
+        const cmds   = [...client.commands.values()].filter(c => c.category === catArg);
+        const { container, totalPages } = buildHelpCategoryPage(catArg, 0, cmds);
+
+        const selectRow = new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId('help_category')
+            .setPlaceholder('Browse another category...')
+            .addOptions(
+              Object.entries(HELP_CATEGORIES).map(([key, c]) => ({
+                label: c.label, description: c.desc, value: key, emoji: c.emoji,
+              }))
+            )
+        );
+
+        await i.reply({
+          flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+          components: totalPages > 1 ? [container, selectRow] : [container, selectRow],
+        });
       },
 
       shop_preview: async (i, _parts) => {

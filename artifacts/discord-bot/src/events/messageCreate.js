@@ -1,9 +1,9 @@
-import { PREFIXES } from '../config.js';
+import { EmbedBuilder } from 'discord.js';
+import { PREFIXES, COLORS } from '../config.js';
 import { errorEmbed } from '../utils/embeds.js';
 import { updateLastSeen } from '../utils/database.js';
 import { runMiddleware } from '../middleware/commandMiddleware.js';
 
-// Only update lastSeen at most once per 60 seconds per user (no disk I/O spam)
 const seenThrottle = new Map();
 
 export default {
@@ -11,7 +11,6 @@ export default {
   async execute(message, client) {
     if (message.author.bot || !message.guild) return;
 
-    // throttled lastSeen — fires at most every 60s per user
     const now = Date.now();
     const lastSeen = seenThrottle.get(message.author.id) ?? 0;
     if (now - lastSeen > 60_000) {
@@ -22,7 +21,6 @@ export default {
     let content = message.content;
     let matched  = false;
 
-    // ── Standard prefix detection ─────────────────────────────────────────────
     for (const prefix of PREFIXES) {
       if (content.startsWith(prefix)) {
         content = content.slice(prefix.length).trim();
@@ -31,17 +29,40 @@ export default {
       }
     }
 
-    // ── @mention prefix — e.g. @Luvly card, @Luvly card @user ───────────────
+    // ── @mention detection ────────────────────────────────────────────────────
     if (!matched && client.user) {
-      const botId         = client.user.id;
-      const mentionForms  = [`<@${botId}>`, `<@!${botId}>`];
+      const botId        = client.user.id;
+      const mentionForms = [`<@${botId}>`, `<@!${botId}>`];
       for (const mp of mentionForms) {
         if (content.startsWith(mp)) {
           const rest = content.slice(mp.length).trim();
-          if (rest.length > 0) {
-            content = rest;
-            matched = true;
+
+          // ── Lone mention → greeting embed ──────────────────────────────────
+          if (rest.length === 0) {
+            const embed = new EmbedBuilder()
+              .setColor(COLORS.primary)
+              .setTitle('﹕ⵌ┆ Hey there! I\'m Luvly ꩜ .')
+              .setDescription(
+                '**Your cute companion for fun, vibes & interactions.ᐟ **\n' +
+                '━━━━━━━━━━━━━━━━━━\n' +
+                '➜ **What I can do:**\n' +
+                '        ⤿  __Fun games__\n' +
+                '        ⤿  __Cute chats__\n' +
+                '        ⤿  __Server features__\n\n' +
+                '➜ **Type `luv help` to explore everything!**\n' +
+                '━━━━━━━━━━━━━━━━━━\n' +
+                '** 𝜗ৎ. Let\'s make your server more luvly.ᐟ**'
+              )
+              .setImage(client.user.displayAvatarURL({ size: 512 }))
+              .setFooter({
+                text: ' Luvly • Made with love',
+                iconURL: client.user.displayAvatarURL(),
+              });
+            return await message.reply({ embeds: [embed] }).catch(() => {});
           }
+
+          content = rest;
+          matched = true;
           break;
         }
       }
@@ -57,7 +78,6 @@ export default {
     const command = client.commands.get(name);
     if (!command) return;
 
-    // middleware (cooldown, spam, etc.)
     const blocked = await runMiddleware(message, command);
     if (blocked) return;
 
