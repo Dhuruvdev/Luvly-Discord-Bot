@@ -5,12 +5,12 @@
     "totalSupply": 0,
     "baseInterestRate": 0.05,
     "savingsRate": 0.005,
-    "marketTrend": "stable",
-    "marketMood": 0.923,
+    "marketTrend": "bear",
+    "marketMood": 0.774,
     "taxPool": 0,
     "totalTransactions": 0,
     "lastInflationTick": 1778050102880,
-    "lastMarketShift": 1778050102881,
+    "lastMarketShift": 1778074268413,
     "lastSupplySnapshot": 1778050102880
   }
 }
