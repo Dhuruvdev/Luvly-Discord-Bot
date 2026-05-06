@@ -12,7 +12,7 @@ import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
   ModalBuilder, TextInputBuilder, TextInputStyle,
   ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
-  SeparatorBuilder, SeparatorSpacingSize, ChannelType,
+  SeparatorBuilder, SeparatorSpacingSize, ChannelType, AttachmentBuilder,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
 import {
@@ -20,20 +20,21 @@ import {
   buildHelpCategoryPage, buildHelpMainContainer, buildQuickStartContainer,
 } from '../commands/social/help.js';
 import { buildTOSContainer, buildProfileFormContainer } from '../commands/social/setup.js';
-import { luvContainer, buildButtons, errorEmbed } from '../utils/embeds.js';
+import { luvContainer, buildButtons, errorEmbed, luvEmbed, footer } from '../utils/embeds.js';
 import {
   getUser, saveUser, addXP, addHearts, getHearts, spendHearts,
   setCrush, getCrush, checkMutualCrush,
   getChemistry, addChemistry,
   revealConfession, getConfession, addConfession,
   claimDaily, blockUser,
-  setUserTheme, buyTheme, getOwnedThemes,
+  setUserTheme, buyTheme, getOwnedThemes, getUserTheme,
 } from '../utils/database.js';
 import { unlock } from '../utils/achievements.js';
 import { checkLevelUp } from '../utils/levelUp.js';
 import { SHOP_ITEMS } from '../commands/engagement/shop.js';
 import { buildThemeListPage } from '../utils/themeListPage.js';
 import { THEME_LIST } from '../themes/index.js';
+import { generateCard } from '../utils/cardGenerator.js';
 
 const CV2 = MessageFlags.IsComponentsV2;
 const EPH = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
@@ -190,10 +191,55 @@ export function buildHandlers(client) {
         const user  = getUser(i.user.id);
         const next  = auras[(auras.indexOf(user.aura ?? 'soft') + 1) % auras.length];
         saveUser(i.user.id, { aura: next });
-        await i.update({
-          flags: CV2,
-          components: [luvContainer(`**﹕ⵌ┆ ${EMOJIS.aura} Aura Updated ꩜ .**\n\nyour aura is now **${next}** ✦`)],
-        });
+
+        // Defer so we have time to regenerate the card
+        await i.deferUpdate();
+
+        try {
+          const hearts   = getHearts(i.user.id);
+          const themeId  = getUserTheme ? getUserTheme(i.user.id) : 'default';
+          const buffer   = await generateCard({
+            username:  i.user.username,
+            avatarURL: i.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            pronouns:  user.pronouns,
+            bio:       user.bio,
+            interests: user.interests ?? [],
+            xp:        user.xp       ?? 0,
+            streak:    user.streak   ?? 0,
+            hearts,
+            aura:      next,
+          }, themeId);
+
+          const { current } = getLevelData(user.xp ?? 0);
+          const attachment  = new AttachmentBuilder(buffer, { name: `${i.user.username}-profile.png` });
+
+          const resultEmbed = luvEmbed(current.color ?? 0xEDB5F8)
+            .setAuthor({
+              name:    `${i.user.username}'s profile ✦`,
+              iconURL: i.user.displayAvatarURL({ dynamic: true }),
+            })
+            .setImage(`attachment://${i.user.username}-profile.png`)
+            .setFooter(footer(client));
+
+          const buttons = buildButtons(
+            { id: 'profile_edit', label: 'edit profile', emoji: '', style: ButtonStyle.Primary   },
+            { id: 'profile_aura', label: 'change aura',  emoji: '', style: ButtonStyle.Secondary },
+            { id: 'daily_claim',  label: 'claim daily',  emoji: '', style: ButtonStyle.Success   },
+          );
+
+          await i.editReply({
+            embeds:     [resultEmbed],
+            files:      [attachment],
+            components: [buttons],
+          });
+        } catch (err) {
+          console.error('[AURA BTN ERROR]', err);
+          // Fallback: ephemeral confirmation only
+          await i.followUp({
+            flags: EPH,
+            components: [luvContainer(`**aura updated to ${next}** ✦\n\n> run \`luv profile\` to see the change`)],
+          });
+        }
       },
 
       // ── Match ──────────────────────────────────────────────────────────────
