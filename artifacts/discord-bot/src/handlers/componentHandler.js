@@ -88,7 +88,7 @@ export function buildHandlers(client) {
           new ActionRowBuilder().addComponents(
             new TextInputBuilder()
               .setCustomId('interests')
-              .setLabel('Interests  (optional · comma separated · max 5)')
+              .setLabel('Interests  (optional, comma separated)')
               .setStyle(TextInputStyle.Short)
               .setMaxLength(150)
               .setRequired(false)
