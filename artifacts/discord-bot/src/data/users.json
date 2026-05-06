@@ -1,1 +1,86 @@
-{}
+{
+  "1354287041772392478": {
+    "id": "1354287041772392478",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778079558197,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778075059021
+  },
+  "1488514301907046431": {
+    "id": "1488514301907046431",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778075148331,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778075148331
+  },
+  "1196355427219292250": {
+    "id": "1196355427219292250",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778075788746,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778075788746
+  },
+  "1354464875274834234": {
+    "id": "1354464875274834234",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778079464101,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778079464101
+  }
+}

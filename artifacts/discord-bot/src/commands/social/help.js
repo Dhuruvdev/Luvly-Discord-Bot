@@ -30,6 +30,10 @@ export const HELP_CATEGORIES = {
   support:      { emoji: '',  label: 'Support',       desc: 'bug · report'                               },
 };
 
+export const OWNER_HELP_CATEGORIES = {
+  owner: { emoji: '', label: 'Owner', desc: 'listusers · ban · unban · bans · guilds · botstats' },
+};
+
 // ── Static command definitions ─────────────────────────────────────────────────
 
 export const HELP_COMMANDS = {
@@ -64,19 +68,34 @@ export const HELP_COMMANDS = {
     { name: 'bug',    description: 'report a bug or issue with the bot'      },
     { name: 'report', description: 'report a user for breaking server rules' },
   ],
+  owner: [
+    { name: 'listusers', description: 'list all registered users (paginated)'       },
+    { name: 'ban',       description: 'ban a user from using the bot'               },
+    { name: 'unban',     description: 'unban a user from the bot'                   },
+    { name: 'bans',      description: 'list all currently bot-banned users'         },
+    { name: 'guilds',    description: 'list all guilds the bot is in (paginated)'   },
+    { name: 'botstats',  description: 'detailed bot statistics and memory usage'    },
+  ],
 };
 
 export const HELP_PAGE_SIZE = 8;
 
 // ── Shared: category select menu (always inside container via row) ─────────────
 
-function makeCategorySelect(placeholder = 'Browse Commands') {
+function isOwner(userId) {
+  return process.env.OWNER_ID && userId === process.env.OWNER_ID;
+}
+
+function makeCategorySelect(placeholder = 'Browse Commands', userId = null) {
+  const cats = { ...HELP_CATEGORIES };
+  if (userId && isOwner(userId)) Object.assign(cats, OWNER_HELP_CATEGORIES);
+
   return new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId('help_category')
       .setPlaceholder(placeholder)
       .addOptions(
-        Object.entries(HELP_CATEGORIES).map(([key, c]) => {
+        Object.entries(cats).map(([key, c]) => {
           const opt = { label: c.label, description: c.desc, value: key };
           if (c.emoji) opt.emoji = c.emoji;
           return opt;
@@ -87,8 +106,12 @@ function makeCategorySelect(placeholder = 'Browse Commands') {
 
 // ── Main help container ────────────────────────────────────────────────────────
 
-export function buildHelpMainContainer(client) {
-  const botTag = client?.user?.tag ?? 'Luvly';
+export function buildHelpMainContainer(client, userId = null) {
+  const botTag   = client?.user?.tag ?? 'Luvly';
+  const showOwner = userId && isOwner(userId);
+  const displayCats = showOwner
+    ? { ...HELP_CATEGORIES, ...OWNER_HELP_CATEGORIES }
+    : HELP_CATEGORIES;
 
   const headerText =
     `**﹕ⵌ┆ <:luvly:1501269739324838151> Luvly Help ꩜ .**\n\n` +
@@ -97,7 +120,7 @@ export function buildHelpMainContainer(client) {
     `**Prefix:** \`luv \`  ·  **Slash:** \`/\`\n` +
     `**Developer ⤿** [Falooda](https://discord.com/users/1354287041772392478)\n\n` +
     `**<:right:1501255316350959858> Categories at a glance:**\n` +
-    Object.entries(HELP_CATEGORIES).map(([, c]) =>
+    Object.entries(displayCats).map(([, c]) =>
       `> **${c.label}** — *${c.desc}*`
     ).join('\n') +
     `\n\n` +
@@ -118,7 +141,7 @@ export function buildHelpMainContainer(client) {
     );
   } catch (_) {}
 
-  container.addActionRowComponents(makeCategorySelect('Browse Commands'));
+  container.addActionRowComponents(makeCategorySelect('Browse Commands', userId));
 
   container.addActionRowComponents(
     new ActionRowBuilder().addComponents(
@@ -142,8 +165,11 @@ export function buildHelpMainContainer(client) {
 
 // ── Category page container ────────────────────────────────────────────────────
 
-export function buildHelpCategoryPage(catArg, page) {
-  const cat        = HELP_CATEGORIES[catArg] ?? { emoji: '', label: catArg, desc: '' };
+export function buildHelpCategoryPage(catArg, page, userId = null) {
+  const allCats    = userId && isOwner(userId)
+    ? { ...HELP_CATEGORIES, ...OWNER_HELP_CATEGORIES }
+    : HELP_CATEGORIES;
+  const cat        = allCats[catArg] ?? { emoji: '', label: catArg, desc: '' };
   const cmds       = HELP_COMMANDS[catArg] ?? [];
   const totalPages = Math.max(1, Math.ceil(cmds.length / HELP_PAGE_SIZE));
   const safePage   = Math.max(0, Math.min(page, totalPages - 1));
@@ -183,7 +209,7 @@ export function buildHelpCategoryPage(catArg, page) {
   } catch (_) {}
 
   container.addActionRowComponents(
-    makeCategorySelect(`Browsing: ${cat.label}  ·  Pick another...`)
+    makeCategorySelect(`Browsing: ${cat.label}  ·  Pick another...`, userId)
   );
 
   const navButtons = [
@@ -284,17 +310,21 @@ export default {
   usage:       'help [category]',
 
   async execute(message, args, client) {
-    const catArg = args[0]?.toLowerCase();
+    const catArg  = args[0]?.toLowerCase();
+    const userId  = message.author?.id ?? null;
+    const allCats = { ...HELP_CATEGORIES, ...OWNER_HELP_CATEGORIES };
 
-    if (catArg && HELP_CATEGORIES[catArg]) {
-      const { container } = buildHelpCategoryPage(catArg, 0);
+    if (catArg && allCats[catArg]) {
+      // Block non-owners from accessing owner category directly
+      if (catArg === 'owner' && !isOwner(userId)) return;
+      const { container } = buildHelpCategoryPage(catArg, 0, userId);
       return await message.reply({
         flags: MessageFlags.IsComponentsV2,
         components: [container],
       });
     }
 
-    const container = buildHelpMainContainer(client);
+    const container = buildHelpMainContainer(client, userId);
     await message.reply({
       flags: MessageFlags.IsComponentsV2,
       components: [container],

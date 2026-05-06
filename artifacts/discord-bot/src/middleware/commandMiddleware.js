@@ -56,6 +56,16 @@ export async function runMiddleware(message, command) {
     return 'blocked';
   }
 
+  // 1b. Bot-ban check — banned users cannot use any command
+  const bans = getTable('bans');
+  if (bans[uid]) {
+    await message.reply({
+      flags: CV2,
+      components: [luvContainer(`> you've been banned from using luvly ✦`)],
+    }).catch(() => {});
+    return 'blocked';
+  }
+
   // 2. Spam gate — max 4 cmds in 3 seconds
   if (isSpamming(uid)) {
     await message.reply({ embeds: [errorEmbed('slow down. luvly isn\'t going anywhere ✦')] }).catch(() => {});

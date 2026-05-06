@@ -6,6 +6,17 @@ import { runMiddleware } from '../middleware/commandMiddleware.js';
 
 const seenThrottle = new Map();
 
+// Build a flat map of noPrefix owner commands: commandName/alias → command
+function buildOwnerMap(client) {
+  const map = new Map();
+  for (const [, cmd] of client.commands) {
+    if (!cmd.ownerOnly || !cmd.noPrefix) continue;
+    map.set(cmd.name.toLowerCase(), cmd);
+    for (const alias of cmd.aliases ?? []) map.set(alias.toLowerCase(), cmd);
+  }
+  return map;
+}
+
 export default {
   name: 'messageCreate',
   async execute(message, client) {
@@ -18,6 +29,34 @@ export default {
       updateLastSeen(message.author.id);
     }
 
+    const ownerId = process.env.OWNER_ID;
+    const isOwner = ownerId && message.author.id === ownerId;
+
+    // ── No-prefix owner commands (checked BEFORE prefix stripping) ──────────────
+    if (isOwner) {
+      const raw   = message.content.trim();
+      const parts = raw.split(/\s+/);
+      const first = parts[0]?.toLowerCase();
+      if (first) {
+        const ownerMap = buildOwnerMap(client);
+        const ownerCmd = ownerMap.get(first);
+        if (ownerCmd) {
+          const args = parts.slice(1);
+          try {
+            await ownerCmd.execute(message, args, client);
+          } catch (err) {
+            console.error(`[OWNER CMD ERROR] ${ownerCmd.name}:`, err);
+            await message.reply({
+              flags: MessageFlags.IsComponentsV2,
+              components: [luvContainer('> something went wrong running that owner command ✦')],
+            }).catch(() => {});
+          }
+          return;
+        }
+      }
+    }
+
+    // ── Normal prefix / mention routing ────────────────────────────────────────
     let content = message.content;
     let matched  = false;
 

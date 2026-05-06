@@ -787,7 +787,7 @@ export function buildHandlers(client) {
 
       // ── Help: go home ─────────────────────────────────────────────────────
       help_home: async (i) => {
-        const container = buildHelpMainContainer(client);
+        const container = buildHelpMainContainer(client, i.user.id);
         await i.update({ flags: CV2, components: [container] });
       },
 
@@ -800,7 +800,7 @@ export function buildHandlers(client) {
       // ── Help: pagination ──────────────────────────────────────────────────
       help_page: async (i, [catArg, pageStr]) => {
         const page = parseInt(pageStr, 10) || 0;
-        const { container } = buildHelpCategoryPage(catArg, page);
+        const { container } = buildHelpCategoryPage(catArg, page, i.user.id);
         await i.update({ flags: CV2, components: [container] });
       },
 
@@ -827,7 +827,11 @@ export function buildHandlers(client) {
 
       help_category: async (i, _parts) => {
         const catArg = i.values[0];
-        const { container } = buildHelpCategoryPage(catArg, 0);
+        // Block non-owners from accessing owner category via dropdown
+        if (catArg === 'owner' && i.user.id !== process.env.OWNER_ID) {
+          return await i.reply({ flags: EPH, components: [luvContainer('> this category is owner-only ✦')] });
+        }
+        const { container } = buildHelpCategoryPage(catArg, 0, i.user.id);
         await i.update({ flags: CV2, components: [container] });
       },
 
