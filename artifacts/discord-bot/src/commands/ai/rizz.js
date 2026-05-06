@@ -33,8 +33,8 @@ export default {
       `> *"${line}"*`;
 
     const row = buildButtons(
-      { id: 'rizz_new',  label: 'new line', emoji: '🔄', style: ButtonStyle.Secondary },
-      { id: 'rizz_copy', label: 'use this', emoji: '💌', style: ButtonStyle.Primary },
+      { id: 'rizz_new',  label: 'new line', emoji: '', style: ButtonStyle.Secondary },
+      { id: 'rizz_copy', label: 'use this', emoji: '', style: ButtonStyle.Primary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

@@ -6,7 +6,7 @@ import { generateCard } from '../../utils/cardGenerator.js';
 import { THEME_LIST, getTheme, RARITY_COLORS } from '../../themes/index.js';
 
 function rarityBadge(r) {
-  const map = { common: '⬜ Common', rare: '🟦 Rare', legendary: '🟨 Legendary' };
+  const map = { common: ' Common', rare: ' Rare', legendary: ' Legendary' };
   return map[r] ?? r;
 }
 
@@ -28,8 +28,8 @@ async function handleSet(message, args, client) {
   const id    = args[1]?.toLowerCase();
   const theme = THEME_LIST.find(t => t.id === id);
   const homeRow = buildButtons(
-    { id: 'theme_list', label: 'browse themes', emoji: '🎨', style: ButtonStyle.Secondary },
-    { id: 'daily_card', label: 'view my card',  emoji: '🎴', style: ButtonStyle.Primary },
+    { id: 'theme_list', label: 'browse themes', emoji: '', style: ButtonStyle.Secondary },
+    { id: 'daily_card', label: 'view my card',  emoji: '', style: ButtonStyle.Primary },
   );
   if (!id || !theme) {
     return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to browse ✦')], components: [homeRow] });
@@ -52,8 +52,8 @@ async function handleBuy(message, args, client) {
   const id    = args[1]?.toLowerCase();
   const theme = THEME_LIST.find(t => t.id === id);
   const browseRow = buildButtons(
-    { id: 'theme_list', label: 'browse themes', emoji: '🎨', style: ButtonStyle.Secondary },
-    { id: 'daily_claim', label: 'earn hearts',  emoji: '💗', style: ButtonStyle.Primary },
+    { id: 'theme_list', label: 'browse themes', emoji: '', style: ButtonStyle.Secondary },
+    { id: 'daily_claim', label: 'earn hearts',  emoji: '', style: ButtonStyle.Primary },
   );
   if (!theme) {
     return message.reply({ embeds: [errorEmbed('unknown theme id. use `u theme list` to browse ✦')], components: [browseRow] });
@@ -74,16 +74,16 @@ async function handleBuy(message, args, client) {
   const result = buyTheme(message.author.id, theme.id, theme.cost);
   if (!result.success) {
     return message.reply({
-      embeds: [errorEmbed(`not enough hearts! need **${theme.cost}** 💗, you have **${result.balance}** ✦`)],
+      embeds: [errorEmbed(`not enough hearts! need **${theme.cost}** , you have **${result.balance}** ✦`)],
       components: [browseRow],
     });
   }
   const embed = luvEmbed(COLORS.success)
-    .setDescription(`${EMOJIS.sparkle} purchased ${theme.emoji} **${theme.name}**! (-${theme.cost} 💗)\nuse \`u theme set ${theme.id}\` to equip it ✦`)
+    .setDescription(`${EMOJIS.sparkle} purchased ${theme.emoji} **${theme.name}**! (-${theme.cost} )\nuse \`u theme set ${theme.id}\` to equip it ✦`)
     .setFooter(footer(client));
   const equipRow = buildButtons(
     { id: `tls:${theme.id}:${message.author.id}`, label: 'equip now', emoji: theme.emoji, style: ButtonStyle.Success },
-    { id: 'daily_card', label: 'view my card', emoji: '🎴', style: ButtonStyle.Primary },
+    { id: 'daily_card', label: 'view my card', emoji: '', style: ButtonStyle.Primary },
   );
   await message.reply({ embeds: [embed], components: [equipRow] });
 }
@@ -116,12 +116,12 @@ async function handlePreview(message, args, client) {
     const owned      = getOwnedThemes(message.author.id);
     const embed = luvEmbed(COLORS.primary)
       .setTitle(`${theme.emoji} ${theme.name} preview`)
-      .setDescription(`*${theme.description}*\n${rarityBadge(theme.rarity)} · ${theme.cost === 0 ? 'free' : `💗 ${theme.cost} hearts`}`)
+      .setDescription(`*${theme.description}*\n${rarityBadge(theme.rarity)} · ${theme.cost === 0 ? 'free' : ` ${theme.cost} hearts`}`)
       .setImage(`attachment://preview-${theme.id}.png`)
       .setFooter(footer(client));
     const buttons = [];
     if (!owned.includes(theme.id) && theme.cost > 0) {
-      buttons.push({ id: `tlb:${theme.id}:${message.author.id}`, label: `buy (${theme.cost} 💗)`, style: ButtonStyle.Success, emoji: theme.emoji });
+      buttons.push({ id: `tlb:${theme.id}:${message.author.id}`, label: `buy (${theme.cost} )`, style: ButtonStyle.Success, emoji: theme.emoji });
     }
     if (owned.includes(theme.id)) {
       buttons.push({ id: `tls:${theme.id}:${message.author.id}`, label: 'equip this theme', style: ButtonStyle.Primary, emoji: theme.emoji });
@@ -143,11 +143,11 @@ async function handleInfo(message, args, client) {
     .setDescription(`current: ${curr.emoji} **${curr.name}**\n> *${curr.description}*`)
     .addFields(
       { name: 'owned themes', value: owned.map(id => getTheme(id).emoji + ' `' + id + '`').join('  ') || 'none' },
-      { name: '💗 hearts',   value: `**${getHearts(message.author.id)}**`, inline: true },
+      { name: ' hearts',   value: `**${getHearts(message.author.id)}**`, inline: true },
     )
     .setFooter(footer(client));
   const row = buildButtons(
-    { id: 'theme_list', label: 'browse themes', emoji: '🎨', style: ButtonStyle.Primary },
+    { id: 'theme_list', label: 'browse themes', emoji: '', style: ButtonStyle.Primary },
   );
   await message.reply({ embeds: [embed], components: [row] });
 }

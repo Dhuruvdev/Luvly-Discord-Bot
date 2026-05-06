@@ -22,12 +22,12 @@ import {
 // ── Category registry ──────────────────────────────────────────────────────────
 
 export const HELP_CATEGORIES = {
-  profile:      { emoji: '👤',  label: 'Profile',      desc: 'setup · profile · edit · theme'              },
-  relationship: { emoji: '💍',  label: 'Relationship',  desc: 'breakup · propose · marry · relationship'   },
-  economy:      { emoji: '💰',  label: 'Economy',       desc: 'cash · give · shop · gift · buy · inv'      },
-  analysis:     { emoji: '📊',  label: 'Analysis',      desc: 'rank · lb'                                  },
-  greeting:     { emoji: '👋',  label: 'Greeting',      desc: 'welcome'                                    },
-  support:      { emoji: '🛡️',  label: 'Support',       desc: 'bug · report'                               },
+  profile:      { emoji: '',  label: 'Profile',      desc: 'setup · profile · edit · theme'              },
+  relationship: { emoji: '',  label: 'Relationship',  desc: 'breakup · propose · marry · relationship'   },
+  economy:      { emoji: '',  label: 'Economy',       desc: 'cash · give · shop · gift · buy · inv'      },
+  analysis:     { emoji: '',  label: 'Analysis',      desc: 'rank · lb'                                  },
+  greeting:     { emoji: '',  label: 'Greeting',      desc: 'welcome'                                    },
+  support:      { emoji: '',  label: 'Support',       desc: 'bug · report'                               },
 };
 
 // ── Static command definitions ─────────────────────────────────────────────────
@@ -40,10 +40,10 @@ export const HELP_COMMANDS = {
     { name: 'theme',   description: 'change your profile card theme'                },
   ],
   relationship: [
-    { name: 'breakup',      description: 'end your current relationship'      },
-    { name: 'propose',      description: 'propose to someone you love'        },
-    { name: 'marry',        description: 'confirm and seal a marriage proposal' },
-    { name: 'relationship', description: 'view your current relationship status' },
+    { name: 'breakup',      description: 'end your current relationship'           },
+    { name: 'propose',      description: 'propose to someone you love'             },
+    { name: 'marry',        description: 'confirm and seal a marriage proposal'    },
+    { name: 'relationship', description: 'view your current relationship status'   },
   ],
   economy: [
     { name: 'cash',  description: 'check your current luv balance'    },
@@ -61,7 +61,7 @@ export const HELP_COMMANDS = {
     { name: 'welcome', description: 'send a warm welcome to a new member' },
   ],
   support: [
-    { name: 'bug',    description: 'report a bug or issue with the bot'         },
+    { name: 'bug',    description: 'report a bug or issue with the bot'      },
     { name: 'report', description: 'report a user for breaking server rules' },
   ],
 };
@@ -76,12 +76,11 @@ function makeCategorySelect(placeholder = 'Browse Commands') {
       .setCustomId('help_category')
       .setPlaceholder(placeholder)
       .addOptions(
-        Object.entries(HELP_CATEGORIES).map(([key, c]) => ({
-          label:       c.label,
-          description: c.desc,
-          value:       key,
-          emoji:       c.emoji,
-        }))
+        Object.entries(HELP_CATEGORIES).map(([key, c]) => {
+          const opt = { label: c.label, description: c.desc, value: key };
+          if (c.emoji) opt.emoji = c.emoji;
+          return opt;
+        })
       )
   );
 }
@@ -99,7 +98,7 @@ export function buildHelpMainContainer(client) {
     `**Developer ⤿** [Falooda](https://discord.com/users/1354287041772392478)\n\n` +
     `**<:right:1501255316350959858> Categories at a glance:**\n` +
     Object.entries(HELP_CATEGORIES).map(([, c]) =>
-      `> ${c.emoji}  **${c.label}** — *${c.desc}*`
+      `> **${c.label}** — *${c.desc}*`
     ).join('\n') +
     `\n\n` +
     `**<:right:1501255316350959858> Pick a category below to explore its commands.**`;
@@ -126,17 +125,14 @@ export function buildHelpMainContainer(client) {
       new ButtonBuilder()
         .setCustomId('help_quickstart')
         .setLabel('Quick Start')
-        .setEmoji('🚀')
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId('profile_edit')
         .setLabel('My Profile')
-        .setEmoji('💫')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('daily_claim')
         .setLabel('Daily Claim')
-        .setEmoji('🎁')
         .setStyle(ButtonStyle.Secondary),
     )
   );
@@ -147,7 +143,7 @@ export function buildHelpMainContainer(client) {
 // ── Category page container ────────────────────────────────────────────────────
 
 export function buildHelpCategoryPage(catArg, page) {
-  const cat        = HELP_CATEGORIES[catArg] ?? { emoji: '✦', label: catArg, desc: '' };
+  const cat        = HELP_CATEGORIES[catArg] ?? { emoji: '', label: catArg, desc: '' };
   const cmds       = HELP_COMMANDS[catArg] ?? [];
   const totalPages = Math.max(1, Math.ceil(cmds.length / HELP_PAGE_SIZE));
   const safePage   = Math.max(0, Math.min(page, totalPages - 1));
@@ -163,7 +159,7 @@ export function buildHelpCategoryPage(catArg, page) {
     : '';
 
   const content =
-    `**﹕ⵌ┆ ${cat.emoji} ${cat.label} Commands ꩜ .**\n\n` +
+    `**﹕ⵌ┆ ${cat.label} Commands ꩜ .**\n\n` +
     pageIndicator +
     `**Interact, express & connect with others.ᐟ**\n\n` +
     `**<:right:1501255316350959858> ${cat.label} Commands:**\n` +
@@ -194,7 +190,6 @@ export function buildHelpCategoryPage(catArg, page) {
     new ButtonBuilder()
       .setCustomId('help_home')
       .setLabel('Home')
-      .setEmoji('🏠')
       .setStyle(ButtonStyle.Secondary),
   ];
 
@@ -203,7 +198,6 @@ export function buildHelpCategoryPage(catArg, page) {
       new ButtonBuilder()
         .setCustomId(`help_page:${catArg}:${safePage - 1}`)
         .setLabel('Prev')
-        .setEmoji('⬅️')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(safePage === 0),
       new ButtonBuilder()
@@ -214,7 +208,6 @@ export function buildHelpCategoryPage(catArg, page) {
       new ButtonBuilder()
         .setCustomId(`help_page:${catArg}:${safePage + 1}`)
         .setLabel('Next')
-        .setEmoji('➡️')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(safePage >= totalPages - 1),
     );
@@ -231,7 +224,7 @@ export function buildHelpCategoryPage(catArg, page) {
 
 export function buildQuickStartContainer() {
   const content =
-    `**﹕ⵌ┆ 🚀 Quick Start ꩜ .**\n\n` +
+    `**﹕ⵌ┆ Quick Start ꩜ .**\n\n` +
     `**Here's everything you need to get going right away.ᐟ**\n\n` +
     `**<:right:1501255316350959858> Essential Commands:**\n` +
     `> ⤿  \`luv setup\` — set up your luvly profile\n` +
@@ -270,12 +263,10 @@ export function buildQuickStartContainer() {
       new ButtonBuilder()
         .setCustomId('help_home')
         .setLabel('Back to Help')
-        .setEmoji('🏠')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('daily_claim')
         .setLabel('Claim Daily')
-        .setEmoji('🎁')
         .setStyle(ButtonStyle.Success),
     )
   );

@@ -34,16 +34,16 @@ export default {
       : '> *no achievements yet — start exploring luvly ✦*';
 
     const text =
-      `**﹕ⵌ┆ 🏅 ${target.username}'s Achievements ꩜ .**\n\n` +
+      `**﹕ⵌ┆  ${target.username}'s Achievements ꩜ .**\n\n` +
       `${R} **Unlocked:**\n${achList}\n\n` +
       `${R} **Progress:** \`${bar}\` **${unlocked.length}/${total}** (${pct}%)\n\n` +
-      `${R} **Hearts:** **${hearts}** 💗\n\n` +
-      `${R} **Up Next:**\n${nextHints.length ? nextHints.join('\n') : '> *all unlocked!* 🏆'}`;
+      `${R} **Hearts:** **${hearts}** \n\n` +
+      `${R} **Up Next:**\n${nextHints.length ? nextHints.join('\n') : '> *all unlocked!* '}`;
 
     const row = buildButtons(
-      { id: 'daily_claim',  label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'rank_view',    label: 'my rank',     emoji: '🏆', style: ButtonStyle.Secondary },
-      { id: 'profile_view', label: 'my profile',  emoji: '💫', style: ButtonStyle.Secondary },
+      { id: 'daily_claim',  label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+      { id: 'rank_view',    label: 'my rank',     emoji: '', style: ButtonStyle.Secondary },
+      { id: 'profile_view', label: 'my profile',  emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

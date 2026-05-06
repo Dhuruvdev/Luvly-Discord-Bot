@@ -23,7 +23,7 @@ export default {
 
     const nextStr = next
       ? `**${next.title}** at ${next.xp.toLocaleString()} xp`
-      : '**max level** 👑';
+      : '**max level** ';
 
     const text =
       `**﹕ⵌ┆ ${EMOJIS.rank} ${target.username}'s Rank ꩜ .**\n\n` +
@@ -33,12 +33,12 @@ export default {
       `> ⤿  Total XP: **${user.xp ?? 0}**\n` +
       `> ⤿  Next: ${nextStr}\n\n` +
       `${R} **Stats:**\n` +
-      `> ⤿  Hearts: **${hearts}** 💗\n` +
-      `> ⤿  Streak: **${user.streak ?? 0}** days 🔥`;
+      `> ⤿  Hearts: **${hearts}** \n` +
+      `> ⤿  Streak: **${user.streak ?? 0}** days `;
 
     const row = buildButtons(
-      { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
+      { id: 'daily_claim', label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+      { id: 'shop_open',   label: 'open shop',   emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

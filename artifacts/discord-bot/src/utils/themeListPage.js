@@ -51,9 +51,9 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
 
   // ── Rarity info ───────────────────────────────────────────────────────────
   const rarityInfo = RARITY_COLORS[theme.rarity] ?? RARITY_COLORS.common;
-  const rarityStr  = { common: '⬜ Common', rare: '🟦 Rare', legendary: '🟨 Legendary' }[theme.rarity] ?? theme.rarity;
-  const costStr    = theme.cost === 0 ? '🆓 Free' : `💗 ${theme.cost} hearts`;
-  const statusStr  = active ? '📌 Equipped' : (isOwned ? '✅ Owned' : '🔒 Not Owned');
+  const rarityStr  = { common: ' Common', rare: ' Rare', legendary: ' Legendary' }[theme.rarity] ?? theme.rarity;
+  const costStr    = theme.cost === 0 ? '🆓 Free' : ` ${theme.cost} hearts`;
+  const statusStr  = active ? ' Equipped' : (isOwned ? ' Owned' : ' Not Owned');
 
   // ── Embed ─────────────────────────────────────────────────────────────────
   const embed = luvEmbed(0x26272F)
@@ -65,7 +65,7 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
       { name: 'Status',  value: statusStr,   inline: true },
     )
     .setImage(`attachment://${fileName}`)
-    .setFooter({ text: `page ${idx + 1} / ${TOTAL} · use ◀ ▶ to browse · ${footer(client).text}` });
+    .setFooter({ text: `page ${idx + 1} / ${TOTAL} · use   to browse · ${footer(client).text}` });
 
   // ── Navigation row ────────────────────────────────────────────────────────
   const prevId = `tlg:${idx - 1}:${userId}`;
@@ -74,7 +74,7 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
   const navRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(prevId)
-      .setLabel('◀')
+      .setLabel('')
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(idx === 0),
 
@@ -86,7 +86,7 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
 
     new ButtonBuilder()
       .setCustomId(nextId)
-      .setLabel('▶')
+      .setLabel('')
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(idx === TOTAL - 1),
   );
@@ -98,36 +98,33 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
     actionRow.addComponents(
       new ButtonBuilder()
         .setCustomId(`tls:${theme.id}:${userId}_active`)
-        .setLabel('📌 currently equipped')
+        .setLabel(' currently equipped')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true),
     );
   } else if (isOwned) {
-    actionRow.addComponents(
-      new ButtonBuilder()
-        .setCustomId(`tls:${theme.id}:${userId}`)
-        .setLabel(`equip ${theme.name}`)
-        .setEmoji(theme.emoji)
-        .setStyle(ButtonStyle.Primary),
-    );
+    const btn = new ButtonBuilder()
+      .setCustomId(`tls:${theme.id}:${userId}`)
+      .setLabel(`equip ${theme.name}`)
+      .setStyle(ButtonStyle.Primary);
+    if (theme.emoji) btn.setEmoji(theme.emoji);
+    actionRow.addComponents(btn);
   } else if (theme.cost === 0) {
     // Free theme not yet added to owned list (edge case) — just equip it
-    actionRow.addComponents(
-      new ButtonBuilder()
-        .setCustomId(`tls:${theme.id}:${userId}`)
-        .setLabel('equip (free!)')
-        .setEmoji(theme.emoji)
-        .setStyle(ButtonStyle.Success),
-    );
+    const btn = new ButtonBuilder()
+      .setCustomId(`tls:${theme.id}:${userId}`)
+      .setLabel('equip (free!)')
+      .setStyle(ButtonStyle.Success);
+    if (theme.emoji) btn.setEmoji(theme.emoji);
+    actionRow.addComponents(btn);
   } else {
-    actionRow.addComponents(
-      new ButtonBuilder()
-        .setCustomId(`tlb:${theme.id}:${userId}`)
-        .setLabel(`buy · ${theme.cost} 💗`)
-        .setEmoji(theme.emoji)
-        .setStyle(hearts >= theme.cost ? ButtonStyle.Success : ButtonStyle.Secondary)
-        .setDisabled(hearts < theme.cost),
-    );
+    const btn = new ButtonBuilder()
+      .setCustomId(`tlb:${theme.id}:${userId}`)
+      .setLabel(`buy · ${theme.cost}`)
+      .setStyle(hearts >= theme.cost ? ButtonStyle.Success : ButtonStyle.Secondary)
+      .setDisabled(hearts < theme.cost);
+    if (theme.emoji) btn.setEmoji(theme.emoji);
+    actionRow.addComponents(btn);
   }
 
   return {

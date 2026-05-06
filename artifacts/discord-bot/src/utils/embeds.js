@@ -18,7 +18,7 @@ export function luvContainer(content, ...actionRows) {
 }
 
 export function errorEmbed(msg) {
-  return luvContainer(`> ⚠️ ${msg}`);
+  return luvContainer(`>  ${msg}`);
 }
 
 export function successEmbed(msg) {
@@ -49,5 +49,5 @@ export function buildLinkButton(label, url, emoji) {
 }
 
 export function footer(client) {
-  return { text: 'luvly ✦ made with ❤️', iconURL: client?.user?.displayAvatarURL() };
+  return { text: 'luvly ✦ made with ', iconURL: client?.user?.displayAvatarURL() };
 }

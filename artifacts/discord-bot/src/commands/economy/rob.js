@@ -35,16 +35,16 @@ export default {
   async execute(message, args, client) {
     const target  = message.mentions.users.filter(u => !u.bot).first();
     const baseRow = buildButtons(
-      { id: 'eco_bal',  label: 'my balance',  emoji: '👛', style: ButtonStyle.Primary },
-      { id: 'eco_work', label: 'work for it', emoji: '💼', style: ButtonStyle.Secondary },
+      { id: 'eco_bal',  label: 'my balance',  emoji: '', style: ButtonStyle.Primary },
+      { id: 'eco_work', label: 'work for it', emoji: '', style: ButtonStyle.Secondary },
     );
 
     if (!target)
-      return message.reply({ flags: CV2, components: [luvContainer('> ⚠️ mention someone to rob ✦', baseRow)] });
+      return message.reply({ flags: CV2, components: [luvContainer('>  mention someone to rob ✦', baseRow)] });
     if (target.id === message.author.id)
-      return message.reply({ flags: CV2, components: [luvContainer("⚠️ you can't rob yourself 💀", baseRow)] });
+      return message.reply({ flags: CV2, components: [luvContainer(" you can't rob yourself ", baseRow)] });
     if (isBlocked(message.author.id, target.id))
-      return message.reply({ flags: CV2, components: [luvContainer("⚠️ you can't interact with this user ✦", baseRow)] });
+      return message.reply({ flags: CV2, components: [luvContainer(" you can't interact with this user ✦", baseRow)] });
 
     const u   = getEcoUser(message.author.id);
     const now = Date.now();
@@ -53,7 +53,7 @@ export default {
       const text =
         `**﹕ⵌ┆ ${EMOJIS.ghost} Lay Low ꩜ .**\n\n` +
         `police are still looking for you.\n\n` +
-        `> ⏳ try again in **${Math.ceil(left / 60_000)} min**`;
+        `>  try again in **${Math.ceil(left / 60_000)} min**`;
       return message.reply({ flags: CV2, components: [luvContainer(text, baseRow)] });
     }
 
@@ -74,12 +74,12 @@ export default {
         `**﹕ⵌ┆ ${EMOJIS.ghost} Successful Robbery ꩜ .**\n\n` +
         `*${line}*\n\n` +
         `${R} **Haul:**\n` +
-        `> ⤿  💸 Stolen from: **${target.username}**\n` +
-        `> ⤿  💰 Haul: **${fmt(result.stolen)}**\n` +
-        `> ⤿  👛 Your Wallet: **${fmt(getWallet(message.author.id))}**`;
+        `> ⤿   Stolen from: **${target.username}**\n` +
+        `> ⤿   Haul: **${fmt(result.stolen)}**\n` +
+        `> ⤿   Your Wallet: **${fmt(getWallet(message.author.id))}**`;
       const row = buildButtons(
-        { id: 'eco_deposit', label: 'stash it', emoji: '🏦', style: ButtonStyle.Primary },
-        { id: 'eco_bal',     label: 'balance',  emoji: '👛', style: ButtonStyle.Secondary },
+        { id: 'eco_deposit', label: 'stash it', emoji: '', style: ButtonStyle.Primary },
+        { id: 'eco_bal',     label: 'balance',  emoji: '', style: ButtonStyle.Secondary },
       );
       return message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
@@ -87,15 +87,15 @@ export default {
     if (result.reason === 'caught') {
       const line = CAUGHT_LINES[Math.floor(Math.random() * CAUGHT_LINES.length)];
       const text =
-        `**﹕ⵌ┆ 🚨 Caught! ꩜ .**\n\n` +
+        `**﹕ⵌ┆  Caught! ꩜ .**\n\n` +
         `*${line}*\n\n` +
         `> you paid **${fmt(result.fine)}** in fines\n\n` +
         `${R} **Fine:**\n` +
-        `> ⤿  💸 Fine Paid: **${fmt(result.fine)}**\n` +
-        `> ⤿  👛 Wallet: **${fmt(getWallet(message.author.id))}**`;
+        `> ⤿   Fine Paid: **${fmt(result.fine)}**\n` +
+        `> ⤿   Wallet: **${fmt(getWallet(message.author.id))}**`;
       const row = buildButtons(
-        { id: 'eco_work', label: 'earn it back', emoji: '💼', style: ButtonStyle.Primary },
-        { id: 'eco_bal',  label: 'balance',      emoji: '👛', style: ButtonStyle.Secondary },
+        { id: 'eco_work', label: 'earn it back', emoji: '', style: ButtonStyle.Primary },
+        { id: 'eco_bal',  label: 'balance',      emoji: '', style: ButtonStyle.Secondary },
       );
       return message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }

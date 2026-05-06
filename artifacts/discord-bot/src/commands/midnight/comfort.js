@@ -19,8 +19,8 @@ export default {
       `> *"${msg}"*`;
 
     const row = buildButtons(
-      { id: 'comfort_more', label: 'i need more',   emoji: '🌙', style: ButtonStyle.Secondary },
-      { id: 'comfort_done', label: 'i feel better', emoji: '✨', style: ButtonStyle.Success },
+      { id: 'comfort_more', label: 'i need more',   emoji: '', style: ButtonStyle.Secondary },
+      { id: 'comfort_done', label: 'i feel better', emoji: '', style: ButtonStyle.Success },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

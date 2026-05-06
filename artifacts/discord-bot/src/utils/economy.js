@@ -360,15 +360,15 @@ export function fmt(n) {
 }
 
 export function trendEmoji(trend) {
-  return trend === 'bull' ? '📈' : trend === 'bear' ? '📉' : '📊';
+  return trend === 'bull' ? '' : trend === 'bear' ? '' : '';
 }
 
 export function inflationLabel(rate) {
-  if (rate > 1.50) return '🔴 hyperinflation';
-  if (rate > 1.20) return '🟠 high inflation';
-  if (rate > 1.05) return '🟡 moderate inflation';
-  if (rate > 0.98) return '🟢 stable';
-  return '🔵 deflation';
+  if (rate > 1.50) return ' hyperinflation';
+  if (rate > 1.20) return ' high inflation';
+  if (rate > 1.05) return ' moderate inflation';
+  if (rate > 0.98) return ' stable';
+  return ' deflation';
 }
 
 // ── Boot: run ticks on startup ─────────────────────────────────────────────────

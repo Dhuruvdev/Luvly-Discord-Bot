@@ -47,7 +47,7 @@ export function buildHandlers(client) {
       // ── Theme gallery pagination ──────────────────────────────────────────
       tlg: async (i, [pageStr, userId]) => {
         if (i.user.id !== userId) {
-          return i.reply({ flags: EPH, components: [luvContainer("> ⚠️ these controls aren't for you ✦")] });
+          return i.reply({ flags: EPH, components: [luvContainer(">  these controls aren't for you ✦")] });
         }
         await i.deferUpdate();
         try {
@@ -55,22 +55,22 @@ export function buildHandlers(client) {
           await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
         } catch (err) {
           console.error('[THEME NAV]', err);
-          await i.editReply({ flags: CV2, components: [luvContainer('> ⚠️ failed to load page ✦')], embeds: [], files: [] });
+          await i.editReply({ flags: CV2, components: [luvContainer('>  failed to load page ✦')], embeds: [], files: [] });
         }
       },
 
       tlb: async (i, [themeId, userId]) => {
         if (i.user.id !== userId) {
-          return i.reply({ flags: EPH, components: [luvContainer("> ⚠️ these controls aren't for you ✦")] });
+          return i.reply({ flags: EPH, components: [luvContainer(">  these controls aren't for you ✦")] });
         }
         const theme = THEME_LIST.find(t => t.id === themeId);
-        if (!theme) return i.reply({ flags: EPH, components: [luvContainer('> ⚠️ theme not found ✦')] });
+        if (!theme) return i.reply({ flags: EPH, components: [luvContainer('>  theme not found ✦')] });
 
         const result = buyTheme(userId, themeId, theme.cost);
         if (!result.success) {
           return i.reply({
             flags: EPH,
-            components: [luvContainer(`> ⚠️ not enough hearts! need **${theme.cost}** 💗, you have **${result.balance}** ✦`)],
+            components: [luvContainer(`>  not enough hearts! need **${theme.cost}** , you have **${result.balance}** ✦`)],
           });
         }
         await i.deferUpdate();
@@ -79,23 +79,23 @@ export function buildHandlers(client) {
           const page = await buildThemeListPage(userId, currentPage, client, i.user);
           await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
         } catch (err) {
-          await i.editReply({ flags: CV2, components: [luvContainer(`> ✅ bought! use \`u theme set ${themeId}\` to equip ✦`)], embeds: [], files: [] });
+          await i.editReply({ flags: CV2, components: [luvContainer(`>  bought! use \`u theme set ${themeId}\` to equip ✦`)], embeds: [], files: [] });
         }
       },
 
       tls: async (i, [themeId, userId]) => {
         if (i.user.id !== userId) {
-          return i.reply({ flags: EPH, components: [luvContainer("> ⚠️ these controls aren't for you ✦")] });
+          return i.reply({ flags: EPH, components: [luvContainer(">  these controls aren't for you ✦")] });
         }
         const theme = THEME_LIST.find(t => t.id === themeId);
-        if (!theme) return i.reply({ flags: EPH, components: [luvContainer('> ⚠️ theme not found ✦')] });
+        if (!theme) return i.reply({ flags: EPH, components: [luvContainer('>  theme not found ✦')] });
 
         const owned = getOwnedThemes(userId);
         if (theme.cost === 0 && !owned.includes(themeId)) buyTheme(userId, themeId, 0);
 
         const ok = setUserTheme(userId, themeId);
         if (!ok) {
-          return i.reply({ flags: EPH, components: [luvContainer(`> ⚠️ you don't own **${theme.name}** yet ✦`)] });
+          return i.reply({ flags: EPH, components: [luvContainer(`>  you don't own **${theme.name}** yet ✦`)] });
         }
 
         await i.deferUpdate();
@@ -104,7 +104,7 @@ export function buildHandlers(client) {
           const page = await buildThemeListPage(userId, currentPage, client, i.user);
           await i.editReply({ embeds: [page.embed], files: page.files, components: page.components });
         } catch (err) {
-          await i.editReply({ flags: CV2, components: [luvContainer(`> ✅ equipped **${theme.name}**! ✦`)], embeds: [], files: [] });
+          await i.editReply({ flags: CV2, components: [luvContainer(`>  equipped **${theme.name}**! ✦`)], embeds: [], files: [] });
         }
       },
 
@@ -149,7 +149,7 @@ export function buildHandlers(client) {
         const picked  = members.length ? members[Math.floor(Math.random() * members.length)] : null;
         const compat  = 60 + Math.floor(Math.random() * 40);
         const hearts  = Math.round(compat / 10);
-        const heartBar = '❤️'.repeat(hearts) + '🤍'.repeat(10 - hearts);
+        const heartBar = ''.repeat(hearts) + ''.repeat(10 - hearts);
         const vibes    = ['soft', 'ethereal', 'magnetic', 'chaotic', 'midnight', 'golden'];
         const vibe     = vibes[Math.floor(Math.random() * vibes.length)];
 
@@ -162,8 +162,8 @@ export function buildHandlers(client) {
           `> ⤿  Their vibe: **${vibe}**`;
 
         const row = buildButtons(
-          { id: 'match_again', label: 'another match', emoji: '🔄', style: ButtonStyle.Secondary },
-          { id: 'match_crush', label: 'set as crush',  emoji: '💌', style: ButtonStyle.Primary },
+          { id: 'match_again', label: 'another match', emoji: '', style: ButtonStyle.Secondary },
+          { id: 'match_crush', label: 'set as crush',  emoji: '', style: ButtonStyle.Primary },
         );
         await i.update({ flags: CV2, components: [luvContainer(text, row)] });
       },
@@ -182,7 +182,7 @@ export function buildHandlers(client) {
           return await i.reply({
             flags: EPH,
             components: [luvContainer(
-              `**﹕ⵌ┆ 🔒 Not Yet... ꩜ .**\n\n` +
+              `**﹕ⵌ┆  Not Yet... ꩜ .**\n\n` +
               `they haven't set their crush yet.\n` +
               `if they choose you too, you'll both be revealed ✦`
             )],
@@ -193,7 +193,7 @@ export function buildHandlers(client) {
         await i.update({
           flags: CV2,
           components: [luvContainer(
-            `**﹕ⵌ┆ ${EMOJIS.heart} It's Mutual 💞 ꩜ .**\n\n` +
+            `**﹕ⵌ┆ ${EMOJIS.heart} It's Mutual  ꩜ .**\n\n` +
             `you and **${target?.username ?? 'them'}** both have a crush on each other.\n\ndon't waste it ✦`
           )],
         });
@@ -211,8 +211,8 @@ export function buildHandlers(client) {
         const line = randomFrom(RIZZ_LINES);
         const text = `**﹕ⵌ┆ ${EMOJIS.rizz} Fresh Line ꩜ .**\n\n> *"${line}"*`;
         const row  = buildButtons(
-          { id: 'rizz_new',  label: 'new line', emoji: '🔄', style: ButtonStyle.Secondary },
-          { id: 'rizz_copy', label: 'use this', emoji: '💌', style: ButtonStyle.Primary },
+          { id: 'rizz_new',  label: 'new line', emoji: '', style: ButtonStyle.Secondary },
+          { id: 'rizz_copy', label: 'use this', emoji: '', style: ButtonStyle.Primary },
         );
         await i.update({ flags: CV2, components: [luvContainer(text, row)] });
       },
@@ -229,8 +229,8 @@ export function buildHandlers(client) {
         const msg = randomFrom(COMFORT_MESSAGES);
         const text = `**﹕ⵌ┆ ${EMOJIS.moon} Still Here ꩜ .**\n\n> *"${msg}"*`;
         const row  = buildButtons(
-          { id: 'comfort_more', label: 'i need more',   emoji: '🌙', style: ButtonStyle.Secondary },
-          { id: 'comfort_done', label: 'i feel better', emoji: '✨', style: ButtonStyle.Success },
+          { id: 'comfort_more', label: 'i need more',   emoji: '', style: ButtonStyle.Secondary },
+          { id: 'comfort_done', label: 'i feel better', emoji: '', style: ButtonStyle.Success },
         );
         await i.update({ flags: CV2, components: [luvContainer(text, row)] });
       },
@@ -263,9 +263,9 @@ export function buildHandlers(client) {
       confess_reveal: async (i, [confessionId]) => {
         const conf = getConfession(confessionId);
         if (!conf)
-          return await i.reply({ flags: EPH, components: [luvContainer('> ⚠️ confession not found ✦')] });
+          return await i.reply({ flags: EPH, components: [luvContainer('>  confession not found ✦')] });
         if (conf.authorId !== i.user.id)
-          return await i.reply({ flags: EPH, components: [luvContainer("> ⚠️ this isn't yours to reveal ✦")] });
+          return await i.reply({ flags: EPH, components: [luvContainer(">  this isn't yours to reveal ✦")] });
         revealConfession(confessionId);
         await i.update({
           flags: CV2,
@@ -294,11 +294,11 @@ export function buildHandlers(client) {
         if (result.streak >= 30) await unlock(i.user.id, 'streak_30', client);
 
         const text =
-          `**﹕ⵌ┆ ${EMOJIS.streak ?? '⭐'} Daily Claimed ꩜ .**\n\n` +
+          `**﹕ⵌ┆ ${EMOJIS.streak ?? ''} Daily Claimed ꩜ .**\n\n` +
           `<:right:1501255316350959858> **Rewards:**\n` +
-          `> ⤿  ⭐ XP Earned: **+${result.xp} xp**\n` +
-          `> ⤿  💗 Hearts: **+${result.hearts}**\n` +
-          `> ⤿  🔥 Streak: **${result.streak} days**`;
+          `> ⤿   XP Earned: **+${result.xp} xp**\n` +
+          `> ⤿   Hearts: **+${result.hearts}**\n` +
+          `> ⤿   Streak: **${result.streak} days**`;
 
         await i.update({ flags: CV2, components: [luvContainer(text)] });
       },
@@ -338,11 +338,11 @@ export function buildHandlers(client) {
 
       midnight_vibe: async (i) => {
         const vibes = [
-          "you're giving: soft chaos at 2am ✨",
-          'vibe: melancholic but make it aesthetic 🌙',
-          'energy: someone who thinks too much and feels even more 💫',
-          "you're giving: quiet storm 🌧️",
-          'vibe check: emotionally loaded but holding it together 💜',
+          "you're giving: soft chaos at 2am ",
+          'vibe: melancholic but make it aesthetic ',
+          'energy: someone who thinks too much and feels even more ',
+          "you're giving: quiet storm ",
+          'vibe check: emotionally loaded but holding it together ',
         ];
         await i.reply({
           flags: EPH,
@@ -357,14 +357,14 @@ export function buildHandlers(client) {
 
         let text =
           `**﹕ⵌ┆ ${EMOJIS.diamond} Luvly Shop ꩜ .**\n\n` +
-          `you have **${hearts} 💗 hearts**\n` +
+          `you have **${hearts}  hearts**\n` +
           `use **u shop buy <item_id>** to purchase ✦\n`;
 
         for (const cat of [...new Set(Object.values(SHOP_ITEMS).map(it => it.category))]) {
           const items = Object.values(SHOP_ITEMS).filter(it => it.category === cat);
           text += `\n${R} **${cat.charAt(0).toUpperCase() + cat.slice(1)}:**\n`;
           for (const it of items) {
-            text += `> ⤿  ${it.emoji} \`${it.id}\` — **${it.name}** · ${it.price} 💗\n`;
+            text += `> ⤿  ${it.emoji} \`${it.id}\` — **${it.name}** · ${it.price} \n`;
           }
         }
 
@@ -388,11 +388,11 @@ export function buildHandlers(client) {
           `**﹕ⵌ┆ ${EMOJIS.star} ${i.user.username} ꩜ .**\n\n${bio}\n\n` +
           `${R} **Level:** **${current.level}** — *${current.title}*\n` +
           `> ⤿  \`${xpBar}\`\n\n` +
-          `${R} **Stats:** ❤️ **${hearts}** hearts  ·  🔥 **${user.streak ?? 0}** day streak\n\n` +
+          `${R} **Stats:**  **${hearts}** hearts  ·   **${user.streak ?? 0}** day streak\n\n` +
           `${R} **Interests:** ${interests}`;
         const row = buildButtons(
-          { id: 'profile_edit', label: 'edit profile', emoji: '✏️', style: ButtonStyle.Primary },
-          { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁', style: ButtonStyle.Success },
+          { id: 'profile_edit', label: 'edit profile', emoji: '', style: ButtonStyle.Primary },
+          { id: 'daily_claim',  label: 'claim daily',  emoji: '', style: ButtonStyle.Success },
         );
         await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
       },
@@ -405,7 +405,7 @@ export function buildHandlers(client) {
         const hearts = getHearts(i.user.id);
         const { current, next } = getLevelData(user.xp ?? 0);
         const xpBar  = getXpBar(user.xp ?? 0, current, next);
-        const nextStr = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** 👑';
+        const nextStr = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** ';
         const text =
           `**﹕ⵌ┆ ${EMOJIS.rank} ${i.user.username}'s Rank ꩜ .**\n\n` +
           `${R} **Level & Title:**\n` +
@@ -414,10 +414,10 @@ export function buildHandlers(client) {
           `> ⤿  Total XP: **${user.xp ?? 0}**\n` +
           `> ⤿  Next: ${nextStr}\n\n` +
           `${R} **Stats:**\n` +
-          `> ⤿  Hearts: **${hearts}** 💗  ·  Streak: **${user.streak ?? 0}** days 🔥`;
+          `> ⤿  Hearts: **${hearts}**   ·  Streak: **${user.streak ?? 0}** days `;
         const row = buildButtons(
-          { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-          { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
+          { id: 'daily_claim', label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+          { id: 'shop_open',   label: 'open shop',   emoji: '', style: ButtonStyle.Secondary },
         );
         await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
       },
@@ -443,15 +443,15 @@ export function buildHandlers(client) {
         const eco = getEconomy();
         const net = getNetWorth(i.user.id);
         const text =
-          `**﹕ⵌ┆ 👛 ${i.user.username}'s Wallet ꩜ .**\n\n` +
+          `**﹕ⵌ┆  ${i.user.username}'s Wallet ꩜ .**\n\n` +
           `${trendEmoji(eco.marketTrend)} market is **${eco.marketTrend}** · ${inflationLabel(eco.inflation)}\n\n` +
           `${R} **Balances:**\n` +
-          `> ⤿  👛 Wallet: **${fmt(u.wallet ?? 0)}**\n` +
-          `> ⤿  🏦 Bank: **${fmt(u.bank ?? 0)}**\n` +
+          `> ⤿   Wallet: **${fmt(u.wallet ?? 0)}**\n` +
+          `> ⤿   Bank: **${fmt(u.bank ?? 0)}**\n` +
           `> ⤿  Net Worth: **${fmt(net)}**`;
         const row = buildButtons(
-          { id: 'eco_deposit', label: 'deposit', emoji: '🏦', style: ButtonStyle.Primary },
-          { id: 'eco_work',    label: 'work',    emoji: '💼', style: ButtonStyle.Secondary },
+          { id: 'eco_deposit', label: 'deposit', emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_work',    label: 'work',    emoji: '', style: ButtonStyle.Secondary },
         );
         await i.reply({ flags: EPH, components: [luvContainer(text, row)] });
       },
@@ -461,48 +461,48 @@ export function buildHandlers(client) {
       },
 
       eco_fish: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`🎣 use **u fish** to go fishing and earn luv ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u fish** to go fishing and earn luv ✦`)] });
       },
 
       eco_hunt: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`🏹 use **u hunt** to go hunting and earn luv ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u hunt** to go hunting and earn luv ✦`)] });
       },
 
       eco_gamble: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`🎰 use **u gamble <amount>** to spin the slots ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u gamble <amount>** to spin the slots ✦`)] });
       },
 
       eco_deposit: async (i) => {
         const { deposit, getWallet, getBank, fmt } = await import('../utils/economy.js');
         const wallet = getWallet(i.user.id);
         if (wallet <= 0) {
-          return i.reply({ flags: EPH, components: [luvContainer('> ⚠️ nothing in your wallet to deposit ✦')] });
+          return i.reply({ flags: EPH, components: [luvContainer('>  nothing in your wallet to deposit ✦')] });
         }
         const result = deposit(i.user.id, wallet);
         const text = result.success
-          ? `🏦 deposited **${fmt(wallet)}** into your bank ✦\n> Bank: **${fmt(result.bank ?? 0)}**`
-          : '> ⚠️ deposit failed ✦';
+          ? ` deposited **${fmt(wallet)}** into your bank ✦\n> Bank: **${fmt(result.bank ?? 0)}**`
+          : '>  deposit failed ✦';
         await i.reply({ flags: EPH, components: [luvContainer(text)] });
       },
 
       eco_withdraw: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`👛 use **u bank with <amount>** to withdraw from your bank ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u bank with <amount>** to withdraw from your bank ✦`)] });
       },
 
       eco_bank: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`🏦 use **u bank** to view your bank details and rates ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u bank** to view your bank details and rates ✦`)] });
       },
 
       eco_market: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`📊 use **u market** to view the live economy dashboard ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u market** to view the live economy dashboard ✦`)] });
       },
 
       eco_repay: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`✅ use **u loan repay all** to repay your loan ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u loan repay all** to repay your loan ✦`)] });
       },
 
       eco_borrow: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`💳 use **u loan 1000** to borrow 1000 luv ✦`)] });
+        await i.reply({ flags: EPH, components: [luvContainer(` use **u loan 1000** to borrow 1000 luv ✦`)] });
       },
 
       // ── Help: go home ─────────────────────────────────────────────────────
@@ -529,7 +529,7 @@ export function buildHandlers(client) {
         addHearts(i.user.id, 5);
         await i.reply({
           flags: EPH,
-          components: [luvContainer(`${EMOJIS.diamond} you'll be notified when premium launches. we gave you **+5 💗** for your patience ✦`)],
+          components: [luvContainer(`${EMOJIS.diamond} you'll be notified when premium launches. we gave you **+5 ** for your patience ✦`)],
         });
       },
     },
@@ -546,7 +546,7 @@ export function buildHandlers(client) {
       shop_preview: async (i, _parts) => {
         const itemId = i.values[0];
         const item   = SHOP_ITEMS[itemId];
-        if (!item) return await i.reply({ flags: EPH, components: [luvContainer('> ⚠️ item not found ✦')] });
+        if (!item) return await i.reply({ flags: EPH, components: [luvContainer('>  item not found ✦')] });
 
         const hearts    = getHearts(i.user.id);
         const canAfford = hearts >= item.price;
@@ -556,9 +556,9 @@ export function buildHandlers(client) {
           `**﹕ⵌ┆ ${item.emoji} ${item.name} ꩜ .**\n\n` +
           `${item.desc}\n\n` +
           `${R} **Details:**\n` +
-          `> ⤿  💗 Price: **${item.price}**\n` +
-          `> ⤿  💰 Your Hearts: **${hearts}**\n` +
-          `> ⤿  ${canAfford ? '✅ you can afford this' : '❌ not enough hearts'}`;
+          `> ⤿   Price: **${item.price}**\n` +
+          `> ⤿   Your Hearts: **${hearts}**\n` +
+          `> ⤿  ${canAfford ? ' you can afford this' : ' not enough hearts'}`;
 
         await i.reply({ flags: EPH, components: [luvContainer(text)] });
       },
@@ -597,7 +597,7 @@ export function buildHandlers(client) {
           `> *confession · id: ${conf.id}*`;
 
         const row = buildButtons(
-          { id: `confess_reveal:${conf.id}`, label: 'reveal identity', emoji: '🔓', style: ButtonStyle.Danger },
+          { id: `confess_reveal:${conf.id}`, label: 'reveal identity', emoji: '', style: ButtonStyle.Danger },
         );
         await i.reply({ flags: CV2, components: [luvContainer(confText, row)] });
       },

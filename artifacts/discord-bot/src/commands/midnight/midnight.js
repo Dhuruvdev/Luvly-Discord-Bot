@@ -39,7 +39,7 @@ export default {
     if (isLateNight) await unlock(message.author.id, 'night_owl', client);
 
     const text =
-      `**﹕ⵌ┆ ${EMOJIS.moon} Midnight Mode ${isLateNight ? '🌙' : '🕯️'} ꩜ .**\n\n` +
+      `**﹕ⵌ┆ ${EMOJIS.moon} Midnight Mode ${isLateNight ? '' : ''} ꩜ .**\n\n` +
       `${isLateNight ? "it's late. you're still up." : 'wherever you are, luvly is here ✦'}\n\n` +
       `${R} **Tonight's Prompt:**\n` +
       `> *"${prompt}"*\n\n` +
@@ -47,9 +47,9 @@ export default {
       `> *"${comfort}"*`;
 
     const row = buildButtons(
-      { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
-      { id: 'midnight_comfort', label: 'comfort me',    emoji: '💙', style: ButtonStyle.Secondary },
-      { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
+      { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+      { id: 'midnight_comfort', label: 'comfort me',    emoji: '', style: ButtonStyle.Secondary },
+      { id: 'midnight_vibe',    label: 'vibe check',    emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

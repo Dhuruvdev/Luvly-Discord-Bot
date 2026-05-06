@@ -287,11 +287,11 @@ async function drawCard(ctx, data, theme) {
   ctx.stroke();
 
   const stats = [
-    { label: `Level ${current.level}`,     icon: '✨' },
-    { label: `${data.xp ?? 0} XP`,         icon: '⭐' },
-    { label: `${data.streak ?? 0}d streak`, icon: '🔥' },
-    { label: `${data.hearts ?? 0} hearts`,  icon: '💗' },
-    { label: data.aura ?? 'soft',           icon: '🌸' },
+    { label: `Level ${current.level}`,     icon: '' },
+    { label: `${data.xp ?? 0} XP`,         icon: '' },
+    { label: `${data.streak ?? 0}d streak`, icon: '' },
+    { label: `${data.hearts ?? 0} hearts`,  icon: '' },
+    { label: data.aura ?? 'soft',           icon: '' },
   ];
   drawStatPills(ctx, stats, theme, CX + 18, PILL_TOP, CW - 36);
 

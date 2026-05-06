@@ -34,14 +34,14 @@ export default {
       `> ⤿  ${EMOJIS.confession} Confessions: **${confessions.toLocaleString()}**\n` +
       `> ⤿  ${EMOJIS.sparkle} Servers: **${client.guilds.cache.size}**\n\n` +
       `${R} **System:**\n` +
-      `> ⤿  ⚡ Uptime: **${days}d ${hours}h ${minutes}m**\n` +
-      `> ⤿  🧠 Memory: **${memMB} MB**\n` +
-      `> ⤿  📦 Node: **${process.version}**`;
+      `> ⤿   Uptime: **${days}d ${hours}h ${minutes}m**\n` +
+      `> ⤿   Memory: **${memMB} MB**\n` +
+      `> ⤿   Node: **${process.version}**`;
 
     const row = buildButtons(
-      { id: 'daily_claim',  label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'lb_view',      label: 'leaderboard', emoji: '🏆', style: ButtonStyle.Secondary },
-      { id: 'profile_view', label: 'my profile',  emoji: '💫', style: ButtonStyle.Secondary },
+      { id: 'daily_claim',  label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+      { id: 'lb_view',      label: 'leaderboard', emoji: '', style: ButtonStyle.Secondary },
+      { id: 'profile_view', label: 'my profile',  emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

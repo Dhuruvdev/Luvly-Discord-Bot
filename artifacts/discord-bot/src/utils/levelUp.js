@@ -21,7 +21,7 @@ export async function checkLevelUp(userId, oldXP, newXP, channel, client) {
     const container = new ContainerBuilder()
       .setAccentColor(ACCENT)
       .addTextDisplayComponents(new TextDisplayBuilder().setContent(
-        `**﹕ⵌ┆ ✨ Level Up! ꩜ .**\n\n` +
+        `**﹕ⵌ┆  Level Up! ꩜ .**\n\n` +
         `<@${userId}> just reached **level ${newLevel.level}** — *${newLevel.title}* ✦`
       ));
     await channel.send({ flags: CV2, components: [container] }).catch(() => {});
@@ -32,7 +32,7 @@ export async function checkLevelUp(userId, oldXP, newXP, channel, client) {
     const container = new ContainerBuilder()
       .setAccentColor(ACCENT)
       .addTextDisplayComponents(new TextDisplayBuilder().setContent(
-        `**﹕ⵌ┆ ${newLevel.level === 8 ? '👑' : '✨'} You Leveled Up! ꩜ .**\n\n` +
+        `**﹕ⵌ┆ ${newLevel.level === 8 ? '' : ''} You Leveled Up! ꩜ .**\n\n` +
         `you're now **level ${newLevel.level}** — *${newLevel.title}* ✦\n\n` +
         `keep going. the aura gets stronger from here.`
       ));

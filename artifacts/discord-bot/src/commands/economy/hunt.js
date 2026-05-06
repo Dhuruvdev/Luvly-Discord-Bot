@@ -9,13 +9,13 @@ const CV2       = MessageFlags.IsComponentsV2;
 const COOLDOWN_MS = 60 * 60 * 1_000;
 
 const LOOT_TABLE = [
-  { w: 30, label: 'a stray kitten begging for food', emoji: '🐱', min: 5,   max: 15  },
-  { w: 25, label: 'a wild rabbit',                   emoji: '🐇', min: 15,  max: 35  },
-  { w: 20, label: 'a rare fox',                      emoji: '🦊', min: 40,  max: 80  },
-  { w: 12, label: 'a majestic deer',                 emoji: '🦌', min: 70,  max: 130 },
-  { w:  7, label: 'a golden eagle',                  emoji: '🦅', min: 120, max: 200 },
-  { w:  4, label: 'a legendary dragon butterfly',    emoji: '🦋', min: 200, max: 350 },
-  { w:  2, label: 'THE VOID RABBIT',                 emoji: '🐰', min: 400, max: 800 },
+  { w: 30, label: 'a stray kitten begging for food', emoji: '', min: 5,   max: 15  },
+  { w: 25, label: 'a wild rabbit',                   emoji: '', min: 15,  max: 35  },
+  { w: 20, label: 'a rare fox',                      emoji: '', min: 40,  max: 80  },
+  { w: 12, label: 'a majestic deer',                 emoji: '', min: 70,  max: 130 },
+  { w:  7, label: 'a golden eagle',                  emoji: '', min: 120, max: 200 },
+  { w:  4, label: 'a legendary dragon butterfly',    emoji: '', min: 200, max: 350 },
+  { w:  2, label: 'THE VOID RABBIT',                 emoji: '', min: 400, max: 800 },
 ];
 
 function pickLoot() {
@@ -42,13 +42,13 @@ export default {
     if (waited < COOLDOWN_MS) {
       const leftM = Math.ceil((COOLDOWN_MS - waited) / 60_000);
       const text  =
-        `**﹕ⵌ┆ 🏹 Hunting Cooldown ꩜ .**\n\n` +
+        `**﹕ⵌ┆  Hunting Cooldown ꩜ .**\n\n` +
         `your arrows are recharging.\n\n` +
-        `> ⏳ ready in **${leftM} min**`;
+        `>  ready in **${leftM} min**`;
       const row = buildButtons(
-        { id: 'eco_work', label: 'work instead', emoji: '💼', style: ButtonStyle.Secondary },
-        { id: 'eco_fish', label: 'fish instead', emoji: '🎣', style: ButtonStyle.Secondary },
-        { id: 'eco_bal',  label: 'balance',      emoji: '👛', style: ButtonStyle.Primary },
+        { id: 'eco_work', label: 'work instead', emoji: '', style: ButtonStyle.Secondary },
+        { id: 'eco_fish', label: 'fish instead', emoji: '', style: ButtonStyle.Secondary },
+        { id: 'eco_bal',  label: 'balance',      emoji: '', style: ButtonStyle.Primary },
       );
       return message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
@@ -67,23 +67,23 @@ export default {
 
     const isRare   = loot.w <= 4;
     const trendStr = eco.marketTrend === 'bull'
-      ? '📈 bull market bonus!'
+      ? ' bull market bonus!'
       : eco.marketTrend === 'bear'
-        ? '📉 bear market dampener'
-        : '📊 stable market';
+        ? ' bear market dampener'
+        : ' stable market';
 
     const text =
-      `**﹕ⵌ┆ ${loot.emoji} Hunt Complete ꩜ .**${isRare ? ' 🌟 RARE FIND!' : ''}\n\n` +
-      `you found **${loot.label}**${isRare ? '\n> ✨ *what a catch!*' : ''}\n\n` +
+      `**﹕ⵌ┆ ${loot.emoji} Hunt Complete ꩜ .**${isRare ? '  RARE FIND!' : ''}\n\n` +
+      `you found **${loot.label}**${isRare ? '\n>  *what a catch!*' : ''}\n\n` +
       `<:right:1501255316350959858> **Loot:**\n` +
-      `> ⤿  💰 Earned: **${fmt(earned)}**\n` +
-      `> ⤿  👛 Wallet: **${fmt(getWallet(userId))}**\n` +
-      `> ⤿  📊 Market: ${trendStr}`;
+      `> ⤿   Earned: **${fmt(earned)}**\n` +
+      `> ⤿   Wallet: **${fmt(getWallet(userId))}**\n` +
+      `> ⤿   Market: ${trendStr}`;
 
     const row = buildButtons(
-      { id: 'eco_hunt',    label: 'hunt again', emoji: '🏹', style: ButtonStyle.Primary },
-      { id: 'eco_deposit', label: 'bank it',    emoji: '🏦', style: ButtonStyle.Secondary },
-      { id: 'eco_bal',     label: 'balance',    emoji: '👛', style: ButtonStyle.Secondary },
+      { id: 'eco_hunt',    label: 'hunt again', emoji: '', style: ButtonStyle.Primary },
+      { id: 'eco_deposit', label: 'bank it',    emoji: '', style: ButtonStyle.Secondary },
+      { id: 'eco_bal',     label: 'balance',    emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

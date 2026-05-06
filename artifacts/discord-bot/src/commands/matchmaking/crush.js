@@ -26,7 +26,7 @@ export default {
           `use **u crush @user** to set your secret crush.\n\n` +
           `> *they won't be notified — it stays between you and the stars ✦*`;
         const noRow = buildButtons(
-          { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
+          { id: 'match_again', label: 'find a match', emoji: '', style: ButtonStyle.Primary },
         );
         return await message.reply({ flags: CV2, components: [luvContainer(text, noRow)] });
       }
@@ -34,25 +34,25 @@ export default {
       const isMutual  = checkMutualCrush(message.author.id, existing.targetId);
       const text =
         `**﹕ⵌ┆ ${EMOJIS.heart} Your Current Crush ꩜ .**\n\n` +
-        `${isMutual ? '🎉 they like you back!' : '> *your crush is safe with luvly ✦*'}\n\n` +
+        `${isMutual ? ' they like you back!' : '> *your crush is safe with luvly ✦*'}\n\n` +
         `${R} **Status:**\n` +
-        `> ⤿  Crush: ${isMutual ? `**${crushUser?.username ?? 'unknown'}** 💞` : '*hidden* 🔒'}\n` +
-        `> ⤿  Mutual: ${isMutual ? '**yes! 💞**' : 'not yet...'}`;
+        `> ⤿  Crush: ${isMutual ? `**${crushUser?.username ?? 'unknown'}** ` : '*hidden* '}\n` +
+        `> ⤿  Mutual: ${isMutual ? '**yes! **' : 'not yet...'}`;
       const row = buildButtons({
         id:    `crush_reveal:${existing.targetId}`,
         label: isMutual ? 'reveal!' : 'check mutual',
-        emoji: isMutual ? '💞' : '🔓',
+        emoji: isMutual ? '' : '',
         style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary,
       });
       return await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
     }
 
     if (target.id === message.author.id)
-      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't crush on yourself... unless? 💀")] });
+      return await message.reply({ flags: CV2, components: [luvContainer(">  you can't crush on yourself... unless? ")] });
     if (target.bot)
-      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ bots can't love back. trust me 🤖")] });
+      return await message.reply({ flags: CV2, components: [luvContainer(">  bots can't love back. trust me ")] });
     if (isBlocked(message.author.id, target.id))
-      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't interact with this user ✦")] });
+      return await message.reply({ flags: CV2, components: [luvContainer(">  you can't interact with this user ✦")] });
 
     const isFirstCrush = !getCrush(message.author.id);
     setCrush(message.author.id, target.id);
@@ -68,7 +68,7 @@ export default {
         await tUser.send({
           flags: CV2,
           components: [luvContainer(
-            `**﹕ⵌ┆ 💞 Someone Likes You Back! ꩜ .**\n\n` +
+            `**﹕ⵌ┆  Someone Likes You Back! ꩜ .**\n\n` +
             `you and **${message.author.username}** both chose each other.\n\n` +
             `> *the universe heard you ✦*`
           )],
@@ -77,12 +77,12 @@ export default {
     }
 
     const text = isMutual
-      ? `**﹕ⵌ┆ ${EMOJIS.heart} It's Mutual! 💞 ꩜ .**\n\nyou and **${target.username}** both chose each other ✦`
+      ? `**﹕ⵌ┆ ${EMOJIS.heart} It's Mutual!  ꩜ .**\n\nyou and **${target.username}** both chose each other ✦`
       : `**﹕ⵌ┆ ${EMOJIS.heart} Crush Set ꩜ .**\n\nyour feelings for **${target.username}** are safe.\n> *they won't know unless they choose you too ✦*`;
 
     const row = buildButtons(
-      { id: `crush_reveal:${target.id}`, label: isMutual ? 'reveal!' : 'check mutual', emoji: '🔓', style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary },
-      { id: 'crush_anonymous', label: 'keep secret', emoji: '🔒', style: ButtonStyle.Secondary },
+      { id: `crush_reveal:${target.id}`, label: isMutual ? 'reveal!' : 'check mutual', emoji: '', style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary },
+      { id: 'crush_anonymous', label: 'keep secret', emoji: '', style: ButtonStyle.Secondary },
     );
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },

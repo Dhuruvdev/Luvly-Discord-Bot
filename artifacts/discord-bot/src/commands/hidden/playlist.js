@@ -32,8 +32,8 @@ export default {
       `> *search these on spotify or youtube music for the best experience ✦*`;
 
     const row = buildButtons(
-      { id: 'rizz_new',         label: 'different vibe', emoji: '🔄', style: ButtonStyle.Secondary },
-      { id: 'midnight_comfort', label: 'comfort mode',   emoji: '🌙', style: ButtonStyle.Secondary },
+      { id: 'rizz_new',         label: 'different vibe', emoji: '', style: ButtonStyle.Secondary },
+      { id: 'midnight_comfort', label: 'comfort mode',   emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

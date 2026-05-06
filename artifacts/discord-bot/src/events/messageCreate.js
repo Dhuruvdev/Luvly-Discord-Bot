@@ -78,7 +78,7 @@ export default {
       console.error(`[CMD ERROR] ${command.name}:`, err);
       await message.reply({
         flags: MessageFlags.IsComponentsV2,
-        components: [luvContainer('> ⚠️ something broke on our end. try again in a sec 💔')],
+        components: [luvContainer('>  something broke on our end. try again in a sec ')],
       }).catch(() => {});
     }
   },

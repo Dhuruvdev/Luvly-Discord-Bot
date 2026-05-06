@@ -14,26 +14,26 @@ export const COLORS = {
 };
 
 export const EMOJIS = {
-  heart:     '❤️',
-  sparkle:   '✨',
-  moon:      '🌙',
-  star:      '⭐',
-  fire:      '🔥',
-  ghost:     '👻',
-  music:     '🎧',
-  lock:      '🔒',
-  crown:     '👑',
-  diamond:   '💎',
-  chemistry: '⚗️',
-  aura:      '🌸',
-  streak:    '🔥',
-  rank:      '🏆',
-  rizz:      '💬',
-  safety:    '🛡️',
-  premium:   '💎',
-  confession:'🎭',
-  match:     '💌',
-  midnight:  '🌙',
+  heart:     '',
+  sparkle:   '',
+  moon:      '',
+  star:      '',
+  fire:      '',
+  ghost:     '',
+  music:     '',
+  lock:      '',
+  crown:     '',
+  diamond:   '',
+  chemistry: '',
+  aura:      '',
+  streak:    '',
+  rank:      '',
+  rizz:      '',
+  safety:    '',
+  premium:   '',
+  confession:'',
+  match:     '',
+  midnight:  '',
 };
 
 export const RIZZ_LINES = [
@@ -60,7 +60,7 @@ export const RIZZ_LINES = [
 ];
 
 export const COMFORT_MESSAGES = [
-  "hey. i know it's hard right now. but you made it through every bad day before this one too. 💙",
+  "hey. i know it's hard right now. but you made it through every bad day before this one too. ",
   "you don't have to have it together all the time. rest is valid. healing is valid. you are valid.",
   "the world is genuinely better with you in it. not because of what you do — because of who you are.",
   "it's okay to feel everything you're feeling. all of it. no feelings are wrong feelings.",

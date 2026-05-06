@@ -48,9 +48,9 @@ export default {
         .setFooter(footer(client));
 
       const row = buildButtons(
-        { id: 'profile_edit', label: 'edit profile', emoji: '✏️',  style: ButtonStyle.Primary },
-        { id: 'profile_aura', label: 'change aura',  emoji: '🌸',  style: ButtonStyle.Secondary },
-        { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁',  style: ButtonStyle.Success },
+        { id: 'profile_edit', label: 'edit profile', emoji: '',  style: ButtonStyle.Primary },
+        { id: 'profile_aura', label: 'change aura',  emoji: '',  style: ButtonStyle.Secondary },
+        { id: 'daily_claim',  label: 'claim daily',  emoji: '',  style: ButtonStyle.Success },
       );
 
       await loadMsg.edit({ embeds: [resultEmbed], files: [attachment], components: [row] });

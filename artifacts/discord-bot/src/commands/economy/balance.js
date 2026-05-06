@@ -34,11 +34,11 @@ export default {
     const walletBar = makeBar(wallet, Math.max(wallet + bank, 1000));
     const bankBar   = makeBar(bank,   Math.max(wallet + bank, 1000));
     const loanInfo  = loan > 0
-      ? `\n> ⚠️ **loan outstanding:** ${fmt(loan)} @ ${(u.loanRate * 365 * 100).toFixed(1)}% APR`
+      ? `\n>  **loan outstanding:** ${fmt(loan)} @ ${(u.loanRate * 365 * 100).toFixed(1)}% APR`
       : '';
 
     const text =
-      `**﹕ⵌ┆ 👛 ${target.username}'s Luv Wallet ꩜ .**\n\n` +
+      `**﹕ⵌ┆  ${target.username}'s Luv Wallet ꩜ .**\n\n` +
       `${trendEmoji(eco.marketTrend)} market is **${eco.marketTrend}** · ${inflationLabel(eco.inflation)}${loanInfo}\n\n` +
       `${R} **Wallet:**\n` +
       `> ⤿  ${fmt(wallet)}\n` +
@@ -53,13 +53,13 @@ export default {
 
     const row = isSelf
       ? buildButtons(
-          { id: 'eco_work',    label: 'work',        emoji: '💼', style: ButtonStyle.Primary },
-          { id: 'eco_deposit', label: 'deposit all', emoji: '🏦', style: ButtonStyle.Secondary },
-          { id: 'daily_claim', label: 'daily',       emoji: '🎁', style: ButtonStyle.Success },
+          { id: 'eco_work',    label: 'work',        emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_deposit', label: 'deposit all', emoji: '', style: ButtonStyle.Secondary },
+          { id: 'daily_claim', label: 'daily',       emoji: '', style: ButtonStyle.Success },
         )
       : buildButtons(
-          { id: 'eco_market',  label: 'market',      emoji: '📊', style: ButtonStyle.Secondary },
-          { id: 'daily_claim', label: 'daily',       emoji: '🎁', style: ButtonStyle.Primary },
+          { id: 'eco_market',  label: 'market',      emoji: '', style: ButtonStyle.Secondary },
+          { id: 'daily_claim', label: 'daily',       emoji: '', style: ButtonStyle.Primary },
         );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

@@ -6,7 +6,7 @@ import { getAchievementCount } from '../../utils/achievements.js';
 
 const R      = '<:right:1501255316350959858>';
 const CV2    = MessageFlags.IsComponentsV2;
-const MEDALS = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+const MEDALS = ['', '', '', '4', '5'];
 
 export default {
   name: 'leaderboard',
@@ -18,8 +18,8 @@ export default {
 
   async execute(message, args, client) {
     const row = buildButtons(
-      { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-      { id: 'rank_view',   label: 'my rank',     emoji: '🏆', style: ButtonStyle.Secondary },
+      { id: 'daily_claim', label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+      { id: 'rank_view',   label: 'my rank',     emoji: '', style: ButtonStyle.Secondary },
     );
 
     const top = getLeaderboard(5);
@@ -38,7 +38,7 @@ export default {
         try { const usr = await client.users.fetch(u.id); name = usr.username; } catch {}
         return (
           `${MEDALS[i]}  **${name}**\n` +
-          `  lv${current.level} *${current.title}*  ·  **${u.xp ?? 0} xp**  ·  ${u.hearts ?? 0} 💗  ·  ${achCount} 🏅`
+          `  lv${current.level} *${current.title}*  ·  **${u.xp ?? 0} xp**  ·  ${u.hearts ?? 0}   ·  ${achCount} `
         );
       })
     );

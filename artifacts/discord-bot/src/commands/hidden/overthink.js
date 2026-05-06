@@ -21,8 +21,8 @@ export default {
       `> *"${thought}"*`;
 
     const row = buildButtons(
-      { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
-      { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
+      { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+      { id: 'midnight_vibe',    label: 'vibe check',    emoji: '', style: ButtonStyle.Secondary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

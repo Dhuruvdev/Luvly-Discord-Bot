@@ -9,12 +9,12 @@ const R   = '<:right:1501255316350959858>';
 const CV2 = MessageFlags.IsComponentsV2;
 
 function chemLabel(score) {
-  if (score >= 200) return 'inseparable 💞';
-  if (score >= 100) return 'deeply bonded 🔥';
-  if (score >= 50)  return 'connected ⚗️';
-  if (score >= 20)  return 'building something ✨';
-  if (score >= 5)   return 'just started 🌱';
-  return 'strangers... for now 👀';
+  if (score >= 200) return 'inseparable ';
+  if (score >= 100) return 'deeply bonded ';
+  if (score >= 50)  return 'connected ';
+  if (score >= 20)  return 'building something ';
+  if (score >= 5)   return 'just started ';
+  return 'strangers... for now ';
 }
 
 function chemBar(score) {
@@ -40,7 +40,7 @@ export default {
           `**﹕ⵌ┆ ${EMOJIS.chemistry} Chemistry Radar ꩜ .**\n\n` +
           `> *no data yet. use **u chem @user** to track a connection ✦*`;
         const noDataRow = buildButtons(
-          { id: 'match_again', label: 'find a match', emoji: '💌', style: ButtonStyle.Primary },
+          { id: 'match_again', label: 'find a match', emoji: '', style: ButtonStyle.Primary },
         );
         return await message.reply({ flags: CV2, components: [luvContainer(text, noDataRow)] });
       }
@@ -53,18 +53,18 @@ export default {
         `> ⤿  Connection: ${chemLabel(top.score)}\n` +
         `> ⤿  Meter: \`${chemBar(top.score)}\``;
       const topRow = buildButtons(
-        { id: `chem_boost:${top.userId}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
-        { id: 'daily_claim',              label: 'claim daily',     emoji: '🎁', style: ButtonStyle.Secondary },
+        { id: `chem_boost:${top.userId}`, label: 'boost chemistry', emoji: '', style: ButtonStyle.Primary },
+        { id: 'daily_claim',              label: 'claim daily',     emoji: '', style: ButtonStyle.Secondary },
       );
       return await message.reply({ flags: CV2, components: [luvContainer(text, topRow)] });
     }
 
     if (target.id === message.author.id)
-      return await message.reply({ flags: CV2, components: [luvContainer('> ⚠️ self-chemistry? only you can decide that one 💀')] });
+      return await message.reply({ flags: CV2, components: [luvContainer('>  self-chemistry? only you can decide that one ')] });
     if (target.bot)
-      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't have chemistry with a bot 🤖")] });
+      return await message.reply({ flags: CV2, components: [luvContainer(">  you can't have chemistry with a bot ")] });
     if (isBlocked(message.author.id, target.id))
-      return await message.reply({ flags: CV2, components: [luvContainer("> ⚠️ you can't interact with this user ✦")] });
+      return await message.reply({ flags: CV2, components: [luvContainer(">  you can't interact with this user ✦")] });
 
     addChemistry(message.author.id, target.id, 1);
     const { oldXP, newXP } = addXP(message.author.id, 10);
@@ -85,7 +85,7 @@ export default {
       (score < 20 ? '> *keep interacting to build your chemistry ✦*' : '> *you two have something real ✦*');
 
     const row = buildButtons(
-      { id: `chem_boost:${target.id}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
+      { id: `chem_boost:${target.id}`, label: 'boost chemistry', emoji: '', style: ButtonStyle.Primary },
     );
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
   },

@@ -19,8 +19,8 @@ export default {
     const target = message.mentions.users.filter(u => !u.bot).first();
 
     const homeRow = buildButtons(
-      { id: 'profile_view', label: 'my profile', emoji: '💫', style: ButtonStyle.Secondary },
-      { id: 'daily_claim',  label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
+      { id: 'profile_view', label: 'my profile', emoji: '', style: ButtonStyle.Secondary },
+      { id: 'daily_claim',  label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
     );
 
     if (!target && sub !== 'block') {
@@ -34,10 +34,10 @@ export default {
     }
 
     if (!target) {
-      return await message.reply({ flags: CV2, components: [luvContainer('> ⚠️ mention a user ✦', homeRow)] });
+      return await message.reply({ flags: CV2, components: [luvContainer('>  mention a user ✦', homeRow)] });
     }
     if (target.id === message.author.id) {
-      return await message.reply({ flags: CV2, components: [luvContainer("⚠️ you can't report yourself 💀", homeRow)] });
+      return await message.reply({ flags: CV2, components: [luvContainer(" you can't report yourself ", homeRow)] });
     }
 
     if (sub === 'block') {
@@ -64,7 +64,7 @@ export default {
       );
       if (modLog) {
         const logText =
-          `⚠️ **Safety Report**\n\n` +
+          ` **Safety Report**\n\n` +
           `${R} **Reporter:** ${message.author.tag ?? message.author.username} (${message.author.id})\n` +
           `${R} **Reported:** ${target.tag ?? target.username} (${target.id})\n` +
           `${R} **Reason:** ${reason}`;

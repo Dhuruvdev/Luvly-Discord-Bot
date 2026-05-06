@@ -8,9 +8,9 @@ const R   = '<:right:1501255316350959858>';
 const CV2 = MessageFlags.IsComponentsV2;
 
 const GHOST_MSGS = [
-  (d) => `you disappeared for **${d} day${d !== 1 ? 's' : ''}**. ghost aura: **rising** 👻`,
-  (d) => `**${d} days** of silence. the chat misses you. or maybe it doesn't. 💀`,
-  (d) => `officially ghosting for **${d} day${d !== 1 ? 's' : ''}**. the respect is immaculate. 👻`,
+  (d) => `you disappeared for **${d} day${d !== 1 ? 's' : ''}**. ghost aura: **rising** `,
+  (d) => `**${d} days** of silence. the chat misses you. or maybe it doesn't. `,
+  (d) => `officially ghosting for **${d} day${d !== 1 ? 's' : ''}**. the respect is immaculate. `,
 ];
 
 export default {
@@ -26,14 +26,14 @@ export default {
     const days   = getGhostDays(target.id);
 
     const baseRow = buildButtons(
-      { id: 'midnight_confess', label: 'say something', emoji: '💌', style: ButtonStyle.Primary },
-      { id: 'comfort_more',     label: 'comfort me',    emoji: '🌙', style: ButtonStyle.Secondary },
+      { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+      { id: 'comfort_more',     label: 'comfort me',    emoji: '', style: ButtonStyle.Secondary },
     );
 
     if (days === 0) {
       const text =
         `**﹕ⵌ┆ ${EMOJIS.ghost} Ghost Detector ꩜ .**\n\n` +
-        `**${target.username}** is not a ghost. they're right here 💀`;
+        `**${target.username}** is not a ghost. they're right here `;
       return await message.reply({ flags: CV2, components: [luvContainer(text, baseRow)] });
     }
 
@@ -45,7 +45,7 @@ export default {
     }
 
     const ghostLevel = days > 30 ? 'legendary' : days > 14 ? 'serious' : days > 7 ? 'moderate' : 'low';
-    const ghostBar   = '👻'.repeat(Math.min(Math.ceil(days / 3), 10));
+    const ghostBar   = ''.repeat(Math.min(Math.ceil(days / 3), 10));
     const msgFn      = GHOST_MSGS[Math.floor(Math.random() * GHOST_MSGS.length)];
 
     const text =

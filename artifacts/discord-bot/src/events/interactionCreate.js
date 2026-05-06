@@ -23,7 +23,7 @@ export default {
       const method = interaction.replied || interaction.deferred ? 'followUp' : 'reply';
       await interaction[method]({
         flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-        components: [luvContainer('> ⚠️ something went wrong 💔')],
+        components: [luvContainer('>  something went wrong ')],
       }).catch(() => {});
     }
   },
@@ -35,7 +35,7 @@ async function handleButton(interaction, handlers, client) {
   if (isButtonDebounced(uid, interaction.customId)) {
     return interaction.reply({
       flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-      components: [luvContainer('> ⚠️ slow down ✦')],
+      components: [luvContainer('>  slow down ✦')],
     }).catch(() => {});
   }
 
@@ -47,7 +47,7 @@ async function handleButton(interaction, handlers, client) {
   } else {
     await interaction.reply({
       flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-      components: [luvContainer('> ⚠️ this button has expired ✦')],
+      components: [luvContainer('>  this button has expired ✦')],
     }).catch(() => {});
   }
 }

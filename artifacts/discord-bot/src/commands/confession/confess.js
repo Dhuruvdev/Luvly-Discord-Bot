@@ -20,7 +20,7 @@ export default {
       `> *only you can choose to reveal yourself ✦*`;
 
     const row = buildButtons(
-      { id: 'confess_open', label: 'write confession', emoji: '🖊️', style: ButtonStyle.Primary },
+      { id: 'confess_open', label: 'write confession', emoji: '', style: ButtonStyle.Primary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });

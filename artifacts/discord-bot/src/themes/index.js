@@ -9,7 +9,7 @@ export const THEMES = {
   lavender: {
     id:          'lavender',
     name:        'Lavender Dream',
-    emoji:       '🌸',
+    emoji:       '',
     rarity:      'common',
     cost:        0,
     description: 'soft purple haze — the classic luvly look',
@@ -33,7 +33,7 @@ export const THEMES = {
   sakura: {
     id:          'sakura',
     name:        'Sakura Kiss',
-    emoji:       '🌺',
+    emoji:       '',
     rarity:      'common',
     cost:        150,
     description: 'cherry blossom petals in a gentle breeze',
@@ -57,7 +57,7 @@ export const THEMES = {
   cotton: {
     id:          'cotton',
     name:        'Cotton Candy',
-    emoji:       '🍬',
+    emoji:       '',
     rarity:      'common',
     cost:        100,
     description: 'dreamy pastel pink & blue swirls',
@@ -81,7 +81,7 @@ export const THEMES = {
   mint: {
     id:          'mint',
     name:        'Mint Cloud',
-    emoji:       '🍃',
+    emoji:       '',
     rarity:      'common',
     cost:        150,
     description: 'cool minty freshness with soft teal wisps',
@@ -105,7 +105,7 @@ export const THEMES = {
   ocean: {
     id:          'ocean',
     name:        'Ocean Mist',
-    emoji:       '🌊',
+    emoji:       '',
     rarity:      'rare',
     cost:        250,
     description: 'calm ocean waves in soft cerulean blue',
@@ -129,7 +129,7 @@ export const THEMES = {
   sunset: {
     id:          'sunset',
     name:        'Golden Sunset',
-    emoji:       '🌅',
+    emoji:       '',
     rarity:      'rare',
     cost:        280,
     description: 'warm peach and coral glowing at dusk',
@@ -153,7 +153,7 @@ export const THEMES = {
   rose: {
     id:          'rose',
     name:        'Rose Garden',
-    emoji:       '🥀',
+    emoji:       '',
     rarity:      'rare',
     cost:        320,
     description: 'deep rose petals with a romantic pink glow',
@@ -179,7 +179,7 @@ export const THEMES = {
   neon: {
     id:          'neon',
     name:        'Neon Abyss',
-    emoji:       '⚡',
+    emoji:       '',
     rarity:      'legendary',
     cost:        600,
     description: 'electric cyber grid pulsing with neon plasma in the void',
@@ -203,7 +203,7 @@ export const THEMES = {
   crimson: {
     id:          'crimson',
     name:        'Crimson Eclipse',
-    emoji:       '🔴',
+    emoji:       '',
     rarity:      'legendary',
     cost:        700,
     description: 'solar corona ignites as a blood-red eclipse consumes the sky',
@@ -227,7 +227,7 @@ export const THEMES = {
   aurora: {
     id:          'aurora',
     name:        'Aurora Borealis',
-    emoji:       '🌌',
+    emoji:       '',
     rarity:      'legendary',
     cost:        750,
     description: 'dancing northern lights in emerald and violet',
@@ -256,7 +256,7 @@ export function getTheme(id) {
 }
 
 export const RARITY_COLORS = {
-  common:    { color: '#78C878', emoji: '⬜' },
-  rare:      { color: '#7878F0', emoji: '🟦' },
-  legendary: { color: '#F0C840', emoji: '🟨' },
+  common:    { color: '#78C878', emoji: '' },
+  rare:      { color: '#7878F0', emoji: '' },
+  legendary: { color: '#F0C840', emoji: '' },
 };

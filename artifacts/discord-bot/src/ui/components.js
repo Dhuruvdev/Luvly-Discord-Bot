@@ -62,14 +62,14 @@ export function dangerButton(id, label, emoji) {
 // ── Pagination ─────────────────────────────────────────────────────────────────
 
 /**
- * Standard ◀ · N/T · ▶ pagination row.
+ * Standard  · N/T ·  pagination row.
  * prefix = custom ID prefix, e.g. 'tlg'
  */
 export function paginationRow(idx, total, userId, prefix) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`${prefix}:${idx - 1}:${userId}`)
-      .setLabel('◀')
+      .setLabel('')
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(idx === 0),
 
@@ -81,7 +81,7 @@ export function paginationRow(idx, total, userId, prefix) {
 
     new ButtonBuilder()
       .setCustomId(`${prefix}:${idx + 1}:${userId}`)
-      .setLabel('▶')
+      .setLabel('')
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(idx >= total - 1),
   );
@@ -91,17 +91,17 @@ export function paginationRow(idx, total, userId, prefix) {
 
 export function profileActions() {
   return buildButtons(
-    { id: 'profile_edit', label: 'edit profile', emoji: '✏️',  style: ButtonStyle.Primary },
-    { id: 'profile_aura', label: 'change aura',  emoji: '🌸',  style: ButtonStyle.Secondary },
-    { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁',  style: ButtonStyle.Success },
+    { id: 'profile_edit', label: 'edit profile', emoji: '',  style: ButtonStyle.Primary },
+    { id: 'profile_aura', label: 'change aura',  emoji: '',  style: ButtonStyle.Secondary },
+    { id: 'daily_claim',  label: 'claim daily',  emoji: '',  style: ButtonStyle.Success },
   );
 }
 
 export function cardActions() {
   return buildButtons(
-    { id: 'profile_edit', label: 'edit profile', emoji: '✏️',  style: ButtonStyle.Primary },
-    { id: 'profile_aura', label: 'change aura',  emoji: '🌸',  style: ButtonStyle.Secondary },
-    { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁',  style: ButtonStyle.Success },
+    { id: 'profile_edit', label: 'edit profile', emoji: '',  style: ButtonStyle.Primary },
+    { id: 'profile_aura', label: 'change aura',  emoji: '',  style: ButtonStyle.Secondary },
+    { id: 'daily_claim',  label: 'claim daily',  emoji: '',  style: ButtonStyle.Success },
   );
 }
 
@@ -109,8 +109,8 @@ export function cardActions() {
 
 export function matchActions() {
   return buildButtons(
-    { id: 'match_again', label: 'try another', emoji: '🔄', style: ButtonStyle.Secondary },
-    { id: 'match_crush', label: 'set as crush', emoji: '💌', style: ButtonStyle.Primary },
+    { id: 'match_again', label: 'try another', emoji: '', style: ButtonStyle.Secondary },
+    { id: 'match_crush', label: 'set as crush', emoji: '', style: ButtonStyle.Primary },
   );
 }
 
@@ -121,10 +121,10 @@ export function crushRevealActions(targetId, isMutual) {
     {
       id:    `crush_reveal:${targetId}`,
       label: isMutual ? 'reveal!' : 'check mutual',
-      emoji: isMutual ? '💞' : '🔓',
+      emoji: isMutual ? '' : '',
       style: isMutual ? ButtonStyle.Success : ButtonStyle.Secondary,
     },
-    { id: 'crush_anonymous', label: 'keep secret', emoji: '🔒', style: ButtonStyle.Secondary },
+    { id: 'crush_anonymous', label: 'keep secret', emoji: '', style: ButtonStyle.Secondary },
   );
 }
 
@@ -132,8 +132,8 @@ export function crushRevealActions(targetId, isMutual) {
 
 export function comfortActions() {
   return buildButtons(
-    { id: 'comfort_more', label: 'i need more',   emoji: '🌙', style: ButtonStyle.Secondary },
-    { id: 'comfort_done', label: 'i feel better', emoji: '✨', style: ButtonStyle.Success },
+    { id: 'comfort_more', label: 'i need more',   emoji: '', style: ButtonStyle.Secondary },
+    { id: 'comfort_done', label: 'i feel better', emoji: '', style: ButtonStyle.Success },
   );
 }
 
@@ -141,9 +141,9 @@ export function comfortActions() {
 
 export function midnightActions() {
   return buildButtons(
-    { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
-    { id: 'midnight_comfort', label: 'comfort me',    emoji: '💙', style: ButtonStyle.Secondary },
-    { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
+    { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+    { id: 'midnight_comfort', label: 'comfort me',    emoji: '', style: ButtonStyle.Secondary },
+    { id: 'midnight_vibe',    label: 'vibe check',    emoji: '', style: ButtonStyle.Secondary },
   );
 }
 
@@ -151,8 +151,8 @@ export function midnightActions() {
 
 export function rizzActions() {
   return buildButtons(
-    { id: 'rizz_new',  label: 'new line', emoji: '🔄', style: ButtonStyle.Secondary },
-    { id: 'rizz_copy', label: 'use this', emoji: '💌', style: ButtonStyle.Primary },
+    { id: 'rizz_new',  label: 'new line', emoji: '', style: ButtonStyle.Secondary },
+    { id: 'rizz_copy', label: 'use this', emoji: '', style: ButtonStyle.Primary },
   );
 }
 
@@ -160,7 +160,7 @@ export function rizzActions() {
 
 export function chemActions(targetId) {
   return buildButtons(
-    { id: `chem_boost:${targetId}`, label: 'boost chemistry', emoji: '⚗️', style: ButtonStyle.Primary },
+    { id: `chem_boost:${targetId}`, label: 'boost chemistry', emoji: '', style: ButtonStyle.Primary },
   );
 }
 
@@ -168,13 +168,13 @@ export function chemActions(targetId) {
 
 export function confessOpenAction() {
   return buildButtons(
-    { id: 'confess_open', label: 'write confession', emoji: '🖊️', style: ButtonStyle.Primary },
+    { id: 'confess_open', label: 'write confession', emoji: '', style: ButtonStyle.Primary },
   );
 }
 
 export function confessRevealAction(confessionId) {
   return buildButtons(
-    { id: `confess_reveal:${confessionId}`, label: 'reveal yourself', emoji: '👁️', style: ButtonStyle.Danger },
+    { id: `confess_reveal:${confessionId}`, label: 'reveal yourself', emoji: '', style: ButtonStyle.Danger },
   );
 }
 
@@ -182,8 +182,8 @@ export function confessRevealAction(confessionId) {
 
 export function rankActions() {
   return buildButtons(
-    { id: 'daily_claim', label: 'claim daily', emoji: '🎁', style: ButtonStyle.Primary },
-    { id: 'shop_open',   label: 'open shop',   emoji: '💗', style: ButtonStyle.Secondary },
+    { id: 'daily_claim', label: 'claim daily', emoji: '', style: ButtonStyle.Primary },
+    { id: 'shop_open',   label: 'open shop',   emoji: '', style: ButtonStyle.Secondary },
   );
 }
 
@@ -213,7 +213,7 @@ export function shopPreviewSelect(items) {
     .addOptions(
       Object.values(items).map(i => ({
         label:       i.name,
-        description: `${i.price} 💗 — ${i.desc.replace(/\*\*/g, '').slice(0, 50)}`,
+        description: `${i.price}  — ${i.desc.replace(/\*\*/g, '').slice(0, 50)}`,
         value:       i.id,
         emoji:       i.emoji,
       }))
@@ -225,21 +225,21 @@ export function shopPreviewSelect(items) {
 
 export function missActions() {
   return buildButtons(
-    { id: 'midnight_confess', label: 'say something', emoji: '💌', style: ButtonStyle.Primary },
-    { id: 'comfort_more',     label: 'comfort me',    emoji: '🌙', style: ButtonStyle.Secondary },
+    { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+    { id: 'comfort_more',     label: 'comfort me',    emoji: '', style: ButtonStyle.Secondary },
   );
 }
 
 export function overthinkActions() {
   return buildButtons(
-    { id: 'midnight_confess', label: 'say something', emoji: '🌙', style: ButtonStyle.Primary },
-    { id: 'midnight_vibe',    label: 'vibe check',    emoji: '✨', style: ButtonStyle.Secondary },
+    { id: 'midnight_confess', label: 'say something', emoji: '', style: ButtonStyle.Primary },
+    { id: 'midnight_vibe',    label: 'vibe check',    emoji: '', style: ButtonStyle.Secondary },
   );
 }
 
 export function playlistActions() {
   return buildButtons(
-    { id: 'rizz_new',         label: 'different vibe', emoji: '🔄', style: ButtonStyle.Secondary },
-    { id: 'midnight_comfort', label: 'comfort mode',   emoji: '🌙', style: ButtonStyle.Secondary },
+    { id: 'rizz_new',         label: 'different vibe', emoji: '', style: ButtonStyle.Secondary },
+    { id: 'midnight_comfort', label: 'comfort mode',   emoji: '', style: ButtonStyle.Secondary },
   );
 }

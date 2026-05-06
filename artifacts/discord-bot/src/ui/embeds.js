@@ -72,9 +72,9 @@ export function profileEmbed({ user, discordUser, hearts, unlocked, isSelf, clie
       { name: `${EMOJIS.sparkle} pronouns`, value: user.pronouns ?? '*not set*',                        inline: true },
       { name: `${EMOJIS.rank} level`,       value: `**${current.level}** ${DASH} *${current.title}*`,   inline: true },
       { name: `${EMOJIS.fire} progress`,    value: `\`${xpBar}\``,                                      inline: false },
-      { name: `${EMOJIS.heart} hearts`,     value: `**${hearts}** 💗`,                                   inline: true },
-      { name: `${EMOJIS.streak} streak`,    value: `**${user.streak ?? 0}** days 🔥`,                    inline: true },
-      { name: '👀 profile views',            value: `**${user.profileViews ?? 0}**`,                     inline: true },
+      { name: `${EMOJIS.heart} hearts`,     value: `**${hearts}** `,                                   inline: true },
+      { name: `${EMOJIS.streak} streak`,    value: `**${user.streak ?? 0}** days `,                    inline: true },
+      { name: ' profile views',            value: `**${user.profileViews ?? 0}**`,                     inline: true },
     );
 
   if (user.interests?.length) {
@@ -85,11 +85,11 @@ export function profileEmbed({ user, discordUser, hearts, unlocked, isSelf, clie
   }
 
   embed.addFields({
-    name:  '🏅 achievements',
+    name:  ' achievements',
     value: recentAch + (unlocked.length ? `  *(${unlocked.length} total)*` : ''),
   });
 
-  if (badge) embed.addFields({ name: '🏷️ badges', value: badge });
+  if (badge) embed.addFields({ name: ' badges', value: badge });
 
   embed.setFooter(luvFooter(client, `${discordUser.username}'s profile`));
 
@@ -99,7 +99,7 @@ export function profileEmbed({ user, discordUser, hearts, unlocked, isSelf, clie
 // ── Match card embed ───────────────────────────────────────────────────────────
 export function matchEmbed({ author, matched, compat, vibe, sign, reason, client }) {
   const hearts   = Math.round(compat / 10);
-  const heartBar = '❤️'.repeat(hearts) + '🤍'.repeat(10 - hearts);
+  const heartBar = ''.repeat(hearts) + ''.repeat(10 - hearts);
 
   return luvEmbed(COLORS.primary)
     .setAuthor({
@@ -121,7 +121,7 @@ export function matchEmbed({ author, matched, compat, vibe, sign, reason, client
 export function crushEmbed({ target, isMutual, existing, client }) {
   if (isMutual) {
     return luvEmbed(COLORS.rose)
-      .setTitle(`${EMOJIS.heart} it's mutual 💞`)
+      .setTitle(`${EMOJIS.heart} it's mutual `)
       .setThumbnail(target?.displayAvatarURL({ dynamic: true }) ?? null)
       .setDescription(
         `you and **${target?.username ?? 'them'}** both chose each other.\n\n` +
@@ -168,13 +168,13 @@ export function rankEmbed({ user, discordUser, hearts, client }) {
     .addFields(
       { name: `${EMOJIS.rank} level`,    value: `**${current.level}**`,                      inline: true },
       { name: `${EMOJIS.sparkle} title`, value: `*${current.title}*`,                        inline: true },
-      { name: `${EMOJIS.streak} streak`, value: `**${user.streak ?? 0}** days 🔥`,            inline: true },
+      { name: `${EMOJIS.streak} streak`, value: `**${user.streak ?? 0}** days `,            inline: true },
       { name: `${EMOJIS.fire} progress`, value: `\`${xpBar}\``,                              inline: false },
-      { name: `${EMOJIS.heart} hearts`,  value: `**${hearts}** 💗`,                           inline: true },
+      { name: `${EMOJIS.heart} hearts`,  value: `**${hearts}** `,                           inline: true },
       { name: 'total xp',               value: `**${user.xp ?? 0}**`,                        inline: true },
       {
         name:  next ? 'next level' : 'status',
-        value: next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** 👑',
+        value: next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** ',
         inline: true,
       },
     )
@@ -206,7 +206,7 @@ export function chemEmbed({ author, target, score, label, bar, client }) {
 // ── Midnight embed ─────────────────────────────────────────────────────────────
 export function midnightEmbed({ isLateNight, prompt, comfort, client }) {
   return luvEmbed(COLORS.midnight)
-    .setAuthor({ name: `midnight mode ✦ ${isLateNight ? '🌙' : '🕯️'}` })
+    .setAuthor({ name: `midnight mode ✦ ${isLateNight ? '' : ''}` })
     .setTitle(isLateNight ? "it's late. you're still up." : 'wherever you are, luvly is here ✦')
     .addFields(
       { name: "tonight's prompt", value: `> *"${prompt}"*`,   inline: false },
@@ -241,8 +241,8 @@ export function dailyEmbed({ streak, xp, hearts, client }) {
     .setTitle(`${EMOJIS.streak} daily claimed ✦`)
     .addFields(
       { name: 'xp earned', value: `**+${xp} xp**`,          inline: true },
-      { name: 'hearts',    value: `**+${hearts} 💗**`,       inline: true },
-      { name: 'streak',    value: `**${streak} days** 🔥`,   inline: true },
+      { name: 'hearts',    value: `**+${hearts} **`,       inline: true },
+      { name: 'streak',    value: `**${streak} days** `,   inline: true },
     )
     .setFooter(luvFooter(client));
 }

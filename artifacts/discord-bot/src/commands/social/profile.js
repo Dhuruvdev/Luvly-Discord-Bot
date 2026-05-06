@@ -33,7 +33,7 @@ export default {
     const badgeStr  = user.badges?.length ? user.badges.join(' ') : '';
     const interests = user.interests?.length ? user.interests.map(i => `\`${i}\``).join('  ') : '*none listed*';
     const bio       = user.bio ? `> *"${user.bio}"*` : '> *no bio yet — add one with* `u profile edit`';
-    const nextLevel = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** 👑';
+    const nextLevel = next ? `**${next.title}** at ${next.xp.toLocaleString()} xp` : '**max level** ';
 
     const text =
       `**﹕ⵌ┆ ${EMOJIS.star} ${target.username} ꩜ .**\n\n` +
@@ -45,7 +45,7 @@ export default {
       `> ⤿  XP: \`${xpBar}\`\n` +
       `> ⤿  Next: ${nextLevel}\n\n` +
       `${R} **Stats:**\n` +
-      `> ⤿  Hearts: **${hearts}** 💗  ·  Streak: **${user.streak ?? 0}** days 🔥\n` +
+      `> ⤿  Hearts: **${hearts}**   ·  Streak: **${user.streak ?? 0}** days \n` +
       `> ⤿  Profile Views: **${user.profileViews ?? 0}**\n\n` +
       `${R} **Interests:** ${interests}\n\n` +
       `${R} **Achievements:** ${recentAch}${unlocked.length ? `  *(${unlocked.length} total)*` : ''}` +
@@ -55,9 +55,9 @@ export default {
 
     if (isSelf) {
       container.addActionRowComponents(buildButtons(
-        { id: 'profile_edit', label: 'edit profile', emoji: '✏️', style: ButtonStyle.Primary },
-        { id: 'profile_aura', label: 'change aura',  emoji: '🌸', style: ButtonStyle.Secondary },
-        { id: 'daily_claim',  label: 'claim daily',  emoji: '🎁', style: ButtonStyle.Success },
+        { id: 'profile_edit', label: 'edit profile', emoji: '', style: ButtonStyle.Primary },
+        { id: 'profile_aura', label: 'change aura',  emoji: '', style: ButtonStyle.Secondary },
+        { id: 'daily_claim',  label: 'claim daily',  emoji: '', style: ButtonStyle.Success },
       ));
     }
 

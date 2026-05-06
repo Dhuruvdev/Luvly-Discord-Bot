@@ -7,7 +7,7 @@ const R   = '<:right:1501255316350959858>';
 const CV2 = MessageFlags.IsComponentsV2;
 
 const VIBES   = ['soft', 'ethereal', 'magnetic', 'chaotic', 'midnight', 'golden', 'mysterious'];
-const SIGNS   = ['♈ aries', '♉ taurus', '♊ gemini', '♋ cancer', '♌ leo', '♍ virgo', '♎ libra', '♏ scorpio', '♐ sagittarius', '♑ capricorn', '♒ aquarius', '♓ pisces'];
+const SIGNS   = [' aries', ' taurus', ' gemini', ' cancer', ' leo', ' virgo', ' libra', ' scorpio', ' sagittarius', ' capricorn', ' aquarius', ' pisces'];
 const REASONS = [
   'you both carry the same quiet energy',
   'your vibes are eerily similar at 2am',
@@ -32,7 +32,7 @@ export default {
     const matched  = randomMatch(message.guild);
     const compat   = 60 + Math.floor(Math.random() * 40);
     const hearts   = Math.round(compat / 10);
-    const heartBar = '❤️'.repeat(hearts) + '🤍'.repeat(10 - hearts);
+    const heartBar = ''.repeat(hearts) + ''.repeat(10 - hearts);
     const vibe     = VIBES[Math.floor(Math.random() * VIBES.length)];
     const sign     = SIGNS[Math.floor(Math.random() * SIGNS.length)];
     const reason   = REASONS[Math.floor(Math.random() * REASONS.length)];
@@ -49,8 +49,8 @@ export default {
       `> ⤿  Their vibe: **${vibe}**  ·  Star energy: ${sign}`;
 
     const row = buildButtons(
-      { id: 'match_again', label: 'try another',  emoji: '🔄', style: ButtonStyle.Secondary },
-      { id: 'match_crush', label: 'set as crush', emoji: '💌', style: ButtonStyle.Primary },
+      { id: 'match_again', label: 'try another',  emoji: '', style: ButtonStyle.Secondary },
+      { id: 'match_crush', label: 'set as crush', emoji: '', style: ButtonStyle.Primary },
     );
 
     await message.reply({ flags: CV2, components: [luvContainer(text, row)] });
