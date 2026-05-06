@@ -82,5 +82,26 @@
     "rizzCount": 0,
     "ghostCalls": 0,
     "createdAt": 1778079464101
+  },
+  "746679334848299009": {
+    "id": "746679334848299009",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778080632773,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778080632773
   }
 }

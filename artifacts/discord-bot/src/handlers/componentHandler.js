@@ -812,6 +812,54 @@ export function buildHandlers(client) {
           components: [luvContainer(`${EMOJIS.diamond} you'll be notified when premium launches. we gave you **+5 ** for your patience ✦`)],
         });
       },
+
+      // ── Bug report: open modal ─────────────────────────────────────────────
+      bug_report_open: async (i) => {
+        const modal = new ModalBuilder()
+          .setCustomId(`modal_bug_report:${i.channelId}:${i.message.id}`)
+          .setTitle('🐛 Bug Report');
+
+        modal.addComponents(
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('command_used')
+              .setLabel('Command used')
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(50)
+              .setRequired(true)
+              .setPlaceholder('e.g. luv profile, luv match...')
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('what_happened')
+              .setLabel('What happened?')
+              .setStyle(TextInputStyle.Paragraph)
+              .setMaxLength(500)
+              .setRequired(true)
+              .setPlaceholder('Describe the bug in detail...')
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('expected_result')
+              .setLabel('What did you expect?')
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(200)
+              .setRequired(true)
+              .setPlaceholder('What should have happened instead?')
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('screenshot_url')
+              .setLabel('Screenshot URL (optional)')
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(300)
+              .setRequired(false)
+              .setPlaceholder('Paste an image link if you have one...')
+          ),
+        );
+
+        await i.showModal(modal);
+      },
     },
 
     // ── SELECTS ──────────────────────────────────────────────────────────────
@@ -976,6 +1024,65 @@ export function buildHandlers(client) {
           `*"${thought}"*\n\n` +
           `> *— anonymous soul, ${time}*`;
         await i.reply({ flags: CV2, components: [luvContainer(text)] });
+      },
+
+      // ── Bug report: modal submission ───────────────────────────────────────
+      modal_bug_report: async (i, [channelId, messageId]) => {
+        const R          = '<:right:1501255316350959858>';
+        const command    = i.fields.getTextInputValue('command_used')?.trim();
+        const happened   = i.fields.getTextInputValue('what_happened')?.trim();
+        const expected   = i.fields.getTextInputValue('expected_result')?.trim();
+        const screenshot = i.fields.getTextInputValue('screenshot_url')?.trim() || null;
+
+        // 1. Acknowledge the modal immediately (ephemeral)
+        await i.reply({
+          flags: EPH,
+          components: [luvContainer(`> ✅ bug report sent — thank you ✦`)],
+        });
+
+        // 2. Edit original bug card → success state
+        try {
+          const origChannel = await client.channels.fetch(channelId).catch(() => null);
+          if (origChannel) {
+            const origMsg = await origChannel.messages.fetch(messageId).catch(() => null);
+            if (origMsg) {
+              const successContainer = new ContainerBuilder().setAccentColor(0x43B581);
+              successContainer.addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                  `**﹕ⵌ┆ 🐛 Bug Report ꩜ .**\n\n` +
+                  `**✅ Your report has been sent successfully.ᐟ**\n\n` +
+                  `${R} Our team will review it shortly.\n` +
+                  `${R} Thank you for helping improve Luvly ✦`
+                )
+              );
+              await origMsg.edit({ flags: CV2, components: [successContainer] }).catch(() => {});
+            }
+          }
+        } catch (err) {
+          console.error('[BUG REPORT] edit original failed:', err.message);
+        }
+
+        // 3. Forward organized report to the bug report thread
+        const BUG_CHANNEL_ID = '1425093951253123072';
+        try {
+          const bugChannel = await client.channels.fetch(BUG_CHANNEL_ID).catch(() => null);
+          if (bugChannel) {
+            const reportText =
+              `**﹕ⵌ┆ 🐛 New Bug Report ꩜ .**\n\n` +
+              `${R} **Reporter:** ${i.user.username} (\`${i.user.id}\`)\n` +
+              `${R} **Server:** ${i.guild?.name ?? 'Unknown'} (\`${i.guildId ?? 'DM'}\`)\n` +
+              `${R} **Channel:** <#${channelId}>\n\n` +
+              `${R} **Command used:** \`${command}\`\n\n` +
+              `${R} **What happened:**\n> ${happened.replace(/\n/g, '\n> ')}\n\n` +
+              `${R} **Expected result:** ${expected}\n` +
+              (screenshot ? `\n${R} **Screenshot:** ${screenshot}\n` : '') +
+              `\n> *submitted <t:${Math.floor(Date.now() / 1000)}:R>*`;
+
+            await bugChannel.send({ flags: CV2, components: [luvContainer(reportText)] });
+          }
+        } catch (err) {
+          console.error('[BUG REPORT] send to channel failed:', err.message);
+        }
       },
     },
   };
