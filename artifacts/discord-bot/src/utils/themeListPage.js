@@ -56,8 +56,7 @@ export async function buildThemeListPage(userId, pageIdx, client, discordUser) {
   const statusStr  = active ? '📌 Equipped' : (isOwned ? '✅ Owned' : '🔒 Not Owned');
 
   // ── Embed ─────────────────────────────────────────────────────────────────
-  const hexColor = parseInt((theme.nameColor ?? '#8B5CF6').replace('#', ''), 16);
-  const embed = luvEmbed(hexColor)
+  const embed = luvEmbed(0x26272F)
     .setTitle(`${theme.emoji} ${theme.name}`)
     .setDescription(`*${theme.description}*`)
     .addFields(

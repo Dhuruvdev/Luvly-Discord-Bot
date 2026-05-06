@@ -6,7 +6,7 @@ export function luvEmbed(color = COLORS.primary) {
 }
 
 export function luvContainer() {
-  return new ContainerBuilder().setAccentColor(COLORS.primary);
+  return new ContainerBuilder().setAccentColor(0x26272F);
 }
 
 export function errorEmbed(msg) {

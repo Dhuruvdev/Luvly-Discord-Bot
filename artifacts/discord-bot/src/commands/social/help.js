@@ -45,7 +45,7 @@ export function buildHelpCategoryPage(catArg, page, cmds) {
     `<:right:1501255316350959858> **Use these to make chats more fun & lively!**`;
 
   const container = new ContainerBuilder()
-    .setAccentColor(0xFF6B9D)
+    .setAccentColor(0x26272F)
     .addTextDisplayComponents(new TextDisplayBuilder().setContent(content));
 
   if (totalPages > 1) {
@@ -117,7 +117,7 @@ export default {
       '<:right:1501255316350959858> **Select a category below to continue!**';
 
     const container = new ContainerBuilder()
-      .setAccentColor(0xFF6B9D)
+      .setAccentColor(0x26272F)
       .addTextDisplayComponents(new TextDisplayBuilder().setContent(mainText));
 
     const selectRow = new ActionRowBuilder().addComponents(

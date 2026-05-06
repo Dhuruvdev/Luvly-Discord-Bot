@@ -1,16 +1,16 @@
 export const PREFIXES = ['luv ', 'Luv ', 'LUV ', 'luv', 'Luv', 'LUV', 'u ', 'U ', 'u', 'U'];
 
 export const COLORS = {
-  primary:   0xFF6B9D,
-  purple:    0xC77DFF,
-  rose:      0xFF4B6E,
-  midnight:  0x1A1A2E,
-  soft:      0xFFB3C6,
-  gold:      0xFFD700,
-  success:   0x57F287,
-  error:     0xED4245,
-  neutral:   0x2B2D31,
-  aura:      0xE040FB,
+  primary:   0x26272F,
+  purple:    0x26272F,
+  rose:      0x26272F,
+  midnight:  0x26272F,
+  soft:      0x26272F,
+  gold:      0x26272F,
+  success:   0x26272F,
+  error:     0x26272F,
+  neutral:   0x26272F,
+  aura:      0x26272F,
 };
 
 export const EMOJIS = {
@@ -95,14 +95,14 @@ export const XP_REWARDS = {
 };
 
 export const LEVELS = [
-  { level: 1,  xp: 0,    title: 'new soul',        color: 0x9E9E9E },
-  { level: 2,  xp: 100,  title: 'soft heart',       color: 0xFFB3C6 },
-  { level: 3,  xp: 250,  title: 'rising aura',      color: 0xC77DFF },
-  { level: 4,  xp: 500,  title: 'glowing',          color: 0xFF6B9D },
-  { level: 5,  xp: 1000, title: 'ethereal',         color: 0xFF4B6E },
-  { level: 6,  xp: 2000, title: 'magnetic',         color: 0xFFD700 },
-  { level: 7,  xp: 4000, title: 'iconic',           color: 0xE040FB },
-  { level: 8,  xp: 7500, title: 'legendary lover',  color: 0xFF0000 },
+  { level: 1,  xp: 0,    title: 'new soul',        color: 0x26272F },
+  { level: 2,  xp: 100,  title: 'soft heart',       color: 0x26272F },
+  { level: 3,  xp: 250,  title: 'rising aura',      color: 0x26272F },
+  { level: 4,  xp: 500,  title: 'glowing',          color: 0x26272F },
+  { level: 5,  xp: 1000, title: 'ethereal',         color: 0x26272F },
+  { level: 6,  xp: 2000, title: 'magnetic',         color: 0x26272F },
+  { level: 7,  xp: 4000, title: 'iconic',           color: 0x26272F },
+  { level: 8,  xp: 7500, title: 'legendary lover',  color: 0x26272F },
 ];
 
 export function getLevelData(xp) {
