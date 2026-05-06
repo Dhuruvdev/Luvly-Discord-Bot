@@ -86,7 +86,7 @@ export default {
           label:       i.name,
           description: `${i.price}  — ${i.desc.replace(/\*\*/g, '').slice(0, 50)}`,
           value:       i.id,
-          emoji:       i.emoji,
+          ...(i.emoji ? { emoji: i.emoji } : {}),
         }))
       );
 

@@ -457,19 +457,245 @@ export function buildHandlers(client) {
       },
 
       eco_work: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(`${EMOJIS.sparkle} use **u work** to do a shift and earn luv ✦`)] });
+        const { addToWallet, getWallet, getEconomy, fmt, tickMarket, yieldMult, getEcoUser } = await import('../utils/economy.js');
+        const { getTable, markDirty } = await import('../utils/store.js');
+        const userId = i.user.id;
+        const u      = getEcoUser(userId);
+        const now    = Date.now();
+        const COOLDOWN_MS = 30 * 60 * 1_000;
+        const waited = now - (u.lastWork ?? 0);
+        const R = '<:right:1501255316350959858>';
+
+        if (waited < COOLDOWN_MS) {
+          const leftM = Math.ceil((COOLDOWN_MS - waited) / 60_000);
+          return i.reply({ flags: EPH, components: [luvContainer(`>  you're still on cooldown. back in **${leftM} min** ✦`)] });
+        }
+
+        const JOBS = [
+          { title: 'barista', flavor: 'made 47 lattes and smiled through it all' },
+          { title: 'graphic designer', flavor: 'delivered a 300-slide deck at 3am' },
+          { title: 'streamer', flavor: 'went live for 4 hours, peaked at 3 viewers' },
+          { title: 'poet', flavor: 'sold one poem for exactly enough' },
+          { title: 'photographer', flavor: 'captured golden hour and nearly cried' },
+          { title: 'DJ', flavor: 'dropped a set at a rooftop party' },
+          { title: 'cat sitter', flavor: 'watched 4 cats judge you silently' },
+          { title: 'florist', flavor: 'arranged 30 bouquets while thinking of someone' },
+        ];
+
+        tickMarket();
+        const eco    = getEconomy();
+        const job    = JOBS[Math.floor(Math.random() * JOBS.length)];
+        const mult   = yieldMult();
+        const base   = 20 + Math.floor(Math.random() * 40);
+        const earned = Math.max(10, Math.floor(base * mult * eco.inflation));
+        addToWallet(userId, earned);
+        const t = getTable('economy');
+        if (t[userId]) { t[userId].lastWork = now; markDirty('economy'); }
+        addXP(userId, 3);
+
+        const text =
+          `**﹕ⵌ┆ Shift Complete ꩜ .**\n\n` +
+          `you worked as a **${job.title}**\n> *${job.flavor}*\n\n` +
+          `${R} **Earnings:**\n` +
+          `> ⤿   Earned: **${fmt(earned)}**\n` +
+          `> ⤿   Wallet: **${fmt(getWallet(userId))}**\n` +
+          `> ⤿   Market: ${eco.marketTrend} (×${mult.toFixed(2)})`;
+
+        const row = buildButtons(
+          { id: 'eco_deposit', label: 'bank it',  emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_hunt',    label: 'hunt',     emoji: '', style: ButtonStyle.Secondary },
+          { id: 'eco_bal',     label: 'balance',  emoji: '', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: CV2, components: [luvContainer(text, row)] });
       },
 
       eco_fish: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(` use **u fish** to go fishing and earn luv ✦`)] });
+        const { addToWallet, getWallet, getEconomy, fmt, tickMarket, yieldMult, getEcoUser } = await import('../utils/economy.js');
+        const { getTable, markDirty } = await import('../utils/store.js');
+        const userId = i.user.id;
+        const u      = getEcoUser(userId);
+        const now    = Date.now();
+        const COOLDOWN_MS = 45 * 60 * 1_000;
+        const waited = now - (u.lastFish ?? 0);
+        const R = '<:right:1501255316350959858>';
+
+        if (waited < COOLDOWN_MS) {
+          const leftM = Math.ceil((COOLDOWN_MS - waited) / 60_000);
+          return i.reply({ flags: EPH, components: [luvContainer(`>  the fish aren't biting yet. try again in **${leftM} min** ✦`)] });
+        }
+
+        const FISH_TABLE = [
+          { w: 35, name: 'a soggy boot',         min: 0,   max: 2   },
+          { w: 25, name: 'a tiny goldfish',       min: 8,   max: 20  },
+          { w: 18, name: 'a plump bass',          min: 25,  max: 50  },
+          { w: 10, name: 'a glowing jellyfish',   min: 55,  max: 100 },
+          { w:  6, name: 'a moonlit swordfish',   min: 100, max: 180 },
+          { w:  4, name: 'a midnight kraken arm', min: 200, max: 400 },
+          { w:  2, name: 'THE LOVE WHALE',        min: 500, max: 999 },
+        ];
+        const totalW = FISH_TABLE.reduce((s, f) => s + f.w, 0);
+        let roll = Math.random() * totalW;
+        let fish = FISH_TABLE[0];
+        for (const f of FISH_TABLE) { roll -= f.w; if (roll <= 0) { fish = f; break; } }
+
+        tickMarket();
+        const eco    = getEconomy();
+        const mult   = yieldMult();
+        const base   = fish.min + Math.floor(Math.random() * Math.max(1, fish.max - fish.min));
+        const earned = Math.max(0, Math.floor(base * mult));
+        if (earned > 0) addToWallet(userId, earned);
+        const t = getTable('economy');
+        if (t[userId]) { t[userId].lastFish = now; markDirty('economy'); }
+        addXP(userId, 4);
+
+        const isBoot = fish.name.includes('boot');
+        const isBig  = fish.w <= 4;
+        const catchLine = isBoot
+          ? '> *a wet boot. classic.*'
+          : isBig ? '>  *legendary catch!*'
+          : `> *the water was calm ✦*`;
+
+        const text =
+          `**﹕ⵌ┆ You Caught ${fish.name}${isBig ? ' ' : ''} ꩜ .**\n\n` +
+          `${catchLine}\n\n` +
+          `${R} **Result:**\n` +
+          `> ⤿   Earned: ${earned > 0 ? `**${fmt(earned)}**` : '*nothing*'}\n` +
+          `> ⤿   Wallet: **${fmt(getWallet(userId))}**\n` +
+          `> ⤿   Market: ${eco.marketTrend}`;
+
+        const row = buildButtons(
+          { id: 'eco_fish',    label: 'fish again', emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_deposit', label: 'bank it',    emoji: '', style: ButtonStyle.Secondary },
+          { id: 'eco_bal',     label: 'balance',    emoji: '', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: CV2, components: [luvContainer(text, row)] });
       },
 
       eco_hunt: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(` use **u hunt** to go hunting and earn luv ✦`)] });
+        const { addToWallet, getWallet, getEconomy, fmt, tickMarket, yieldMult, getEcoUser } = await import('../utils/economy.js');
+        const { getTable, markDirty } = await import('../utils/store.js');
+        const userId = i.user.id;
+        const u      = getEcoUser(userId);
+        const now    = Date.now();
+        const COOLDOWN_MS = 60 * 60 * 1_000;
+        const waited = now - (u.lastHunt ?? 0);
+        const R = '<:right:1501255316350959858>';
+
+        if (waited < COOLDOWN_MS) {
+          const leftM = Math.ceil((COOLDOWN_MS - waited) / 60_000);
+          return i.reply({ flags: EPH, components: [luvContainer(`>  your arrows are recharging. ready in **${leftM} min** ✦`)] });
+        }
+
+        const LOOT_TABLE = [
+          { w: 30, label: 'a stray kitten',               min: 5,   max: 15  },
+          { w: 25, label: 'a wild rabbit',                min: 15,  max: 35  },
+          { w: 20, label: 'a rare fox',                   min: 40,  max: 80  },
+          { w: 12, label: 'a majestic deer',              min: 70,  max: 130 },
+          { w:  7, label: 'a golden eagle',               min: 120, max: 200 },
+          { w:  4, label: 'a legendary dragon butterfly', min: 200, max: 350 },
+          { w:  2, label: 'THE VOID RABBIT',              min: 400, max: 800 },
+        ];
+        const totalW = LOOT_TABLE.reduce((s, l) => s + l.w, 0);
+        let roll = Math.random() * totalW;
+        let loot = LOOT_TABLE[0];
+        for (const l of LOOT_TABLE) { roll -= l.w; if (roll <= 0) { loot = l; break; } }
+
+        tickMarket();
+        const eco    = getEconomy();
+        const mult   = yieldMult();
+        const base   = loot.min + Math.floor(Math.random() * (loot.max - loot.min));
+        const earned = Math.max(1, Math.floor(base * mult));
+        addToWallet(userId, earned);
+        const t = getTable('economy');
+        if (t[userId]) { t[userId].lastHunt = now; markDirty('economy'); }
+        addXP(userId, 5);
+
+        const isRare = loot.w <= 4;
+        const text =
+          `**﹕ⵌ┆ Hunt Complete ꩜ .**${isRare ? '  RARE FIND!' : ''}\n\n` +
+          `you found **${loot.label}**${isRare ? '\n>  *what a catch!*' : ''}\n\n` +
+          `${R} **Loot:**\n` +
+          `> ⤿   Earned: **${fmt(earned)}**\n` +
+          `> ⤿   Wallet: **${fmt(getWallet(userId))}**\n` +
+          `> ⤿   Market: ${eco.marketTrend}`;
+
+        const row = buildButtons(
+          { id: 'eco_hunt',    label: 'hunt again', emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_deposit', label: 'bank it',    emoji: '', style: ButtonStyle.Secondary },
+          { id: 'eco_bal',     label: 'balance',    emoji: '', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: CV2, components: [luvContainer(text, row)] });
       },
 
       eco_gamble: async (i) => {
-        await i.reply({ flags: EPH, components: [luvContainer(` use **u gamble <amount>** to spin the slots ✦`)] });
+        const { getWallet, removeFromWallet, addToWallet, fmt, getEconomy } = await import('../utils/economy.js');
+        const userId = i.user.id;
+        const wallet = getWallet(userId);
+        const R = '<:right:1501255316350959858>';
+
+        if (wallet < 10) {
+          return i.reply({ flags: EPH, components: [luvContainer('>  not enough luv to gamble. earn some first ✦')] });
+        }
+
+        const amount = Math.min(100_000, Math.max(10, Math.floor(wallet * 0.10)));
+        const eco    = getEconomy();
+        const houseEdge = Math.min(0.20, 0.08 + (eco.inflation - 1) * 0.15);
+        removeFromWallet(userId, amount);
+
+        const SYMBOLS = [
+          { s: '', w: 30, mult: 1.5 },
+          { s: '', w: 25, mult: 2.0 },
+          { s: '', w: 20, mult: 2.5 },
+          { s: '', w: 12, mult: 4.0 },
+          { s: '', w:  8, mult: 8.0 },
+          { s: '', w:  4, mult: 15.0 },
+          { s: '', w:  1, mult: 50.0 },
+        ];
+        const totalW = SYMBOLS.reduce((s, x) => s + x.w, 0);
+        const pick = () => {
+          let r = Math.random() * totalW;
+          for (const sym of SYMBOLS) { r -= sym.w; if (r <= 0) return sym; }
+          return SYMBOLS[0];
+        };
+        const [r0, r1, r2] = [pick(), pick(), pick()];
+        const [s1, s2, s3] = [r0.s, r1.s, r2.s];
+
+        let winMult = 0;
+        let resultLine = '';
+        if (s1 === s2 && s2 === s3) {
+          winMult = r0.mult * 3;
+          resultLine = ` **JACKPOT!** triple ${s1}!`;
+        } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+          const matched = s1 === s2 ? r0 : s2 === s3 ? r1 : r0;
+          winMult = matched.mult * 0.8;
+          resultLine = ` **pair!** two ${matched.s}s`;
+        } else {
+          resultLine = ' **no match** — better luck next time';
+        }
+
+        const grossWin = Math.floor(amount * winMult);
+        const netWin   = Math.floor(grossWin * (1 - houseEdge));
+        if (netWin > 0) { addToWallet(userId, netWin); addXP(userId, 5); }
+
+        const won    = netWin > 0;
+        const profit = netWin - amount;
+
+        const text =
+          `**﹕ⵌ┆  Luvly Slots ꩜ .**\n\n` +
+          `**[ ${s1}  ${s2}  ${s3} ]**\n\n` +
+          `${resultLine}\n\n` +
+          `${R} **Result:**\n` +
+          `> ⤿   Bet: **${fmt(amount)}** *(10% of wallet)*\n` +
+          `> ⤿  ${won ? ' Won' : ' Lost'}: **${fmt(won ? netWin : amount)}**\n` +
+          `> ⤿  ${won ? ' Profit' : ' Loss'}: **${fmt(Math.abs(profit))}**\n` +
+          `> ⤿   Wallet: **${fmt(getWallet(userId))}**`;
+
+        const row = buildButtons(
+          { id: 'eco_gamble',  label: 'spin again',    emoji: '', style: ButtonStyle.Primary },
+          { id: 'eco_deposit', label: 'bank winnings', emoji: '', style: ButtonStyle.Success },
+          { id: 'eco_bal',     label: 'balance',       emoji: '', style: ButtonStyle.Secondary },
+        );
+        await i.reply({ flags: CV2, components: [luvContainer(text, row)] });
       },
 
       eco_deposit: async (i) => {

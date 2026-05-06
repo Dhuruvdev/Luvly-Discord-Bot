@@ -5,7 +5,14 @@ import { isButtonDebounced } from '../utils/cooldown.js';
 
 let _handlers = null;
 function getHandlers(client) {
-  if (!_handlers) _handlers = buildHandlers(client);
+  if (!_handlers) {
+    try {
+      _handlers = buildHandlers(client);
+    } catch (err) {
+      console.error('[HANDLER BUILD ERROR]', err);
+      return null;
+    }
+  }
   return _handlers;
 }
 
@@ -55,11 +62,25 @@ async function handleButton(interaction, handlers, client) {
 async function handleSelect(interaction, handlers, client) {
   const [action, ...parts] = interaction.customId.split(':');
   const handler = handlers.selects[action];
-  if (handler) await handler(interaction, parts, client);
+  if (handler) {
+    await handler(interaction, parts, client);
+  } else {
+    await interaction.reply({
+      flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+      components: [luvContainer('>  this menu is no longer active ✦')],
+    }).catch(() => {});
+  }
 }
 
 async function handleModal(interaction, handlers, client) {
   const [action, ...parts] = interaction.customId.split(':');
   const handler = handlers.modals[action];
-  if (handler) await handler(interaction, parts, client);
+  if (handler) {
+    await handler(interaction, parts, client);
+  } else {
+    await interaction.reply({
+      flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+      components: [luvContainer('>  this form is no longer active ✦')],
+    }).catch(() => {});
+  }
 }

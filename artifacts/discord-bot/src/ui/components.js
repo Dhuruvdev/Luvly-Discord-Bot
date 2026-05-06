@@ -198,7 +198,7 @@ export function helpCategorySelect(categories) {
         label:       c.label,
         description: c.desc,
         value:       key,
-        emoji:       c.emoji,
+        ...(c.emoji ? { emoji: c.emoji } : {}),
       }))
     );
   return new ActionRowBuilder().addComponents(select);
@@ -215,7 +215,7 @@ export function shopPreviewSelect(items) {
         label:       i.name,
         description: `${i.price}  — ${i.desc.replace(/\*\*/g, '').slice(0, 50)}`,
         value:       i.id,
-        emoji:       i.emoji,
+        ...(i.emoji ? { emoji: i.emoji } : {}),
       }))
     );
   return new ActionRowBuilder().addComponents(select);
