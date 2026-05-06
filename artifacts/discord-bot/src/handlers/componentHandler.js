@@ -12,7 +12,7 @@ import {
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
   ModalBuilder, TextInputBuilder, TextInputStyle,
   ContainerBuilder, TextDisplayBuilder, StringSelectMenuBuilder, MessageFlags,
-  SeparatorBuilder, SeparatorSpacingSize,
+  SeparatorBuilder, SeparatorSpacingSize, ChannelType,
 } from 'discord.js';
 import { COLORS, EMOJIS, RIZZ_LINES, COMFORT_MESSAGES, getLevelData, getXpBar } from '../config.js';
 import {
@@ -1078,7 +1078,19 @@ export function buildHandlers(client) {
               (screenshot ? `\n${R} **Screenshot:** ${screenshot}\n` : '') +
               `\n> *submitted <t:${Math.floor(Date.now() / 1000)}:R>*`;
 
-            await bugChannel.send({ flags: CV2, components: [luvContainer(reportText)] });
+            const msgPayload = { flags: CV2, components: [luvContainer(reportText)] };
+
+            if (bugChannel.type === ChannelType.GuildForum || bugChannel.type === ChannelType.GuildMedia) {
+              // Forum/media channel — create a new post (thread)
+              const threadName = `🐛 ${command} — ${i.user.username}`.slice(0, 100);
+              await bugChannel.threads.create({
+                name: threadName,
+                message: msgPayload,
+              });
+            } else {
+              // Text channel or thread — send directly
+              await bugChannel.send(msgPayload);
+            }
           }
         } catch (err) {
           console.error('[BUG REPORT] send to channel failed:', err.message);

@@ -1,24 +1,28 @@
 {
   "1354287041772392478": {
     "id": "1354287041772392478",
-    "bio": null,
-    "pronouns": null,
-    "interests": [],
+    "bio": "Unbothered Dev",
+    "pronouns": "he/him",
+    "interests": [
+      "Music"
+    ],
     "theme": "lavender",
     "ownedThemes": [
       "lavender"
     ],
     "badges": [],
-    "xp": 0,
-    "hearts": 0,
-    "streak": 0,
-    "lastDaily": null,
-    "lastSeen": 1778080385163,
-    "aura": "soft",
+    "xp": 205,
+    "hearts": 12,
+    "streak": 1,
+    "lastDaily": 1778082494959,
+    "lastSeen": 1778082587556,
+    "aura": "ethereal",
     "profileViews": 0,
     "rizzCount": 0,
     "ghostCalls": 0,
-    "createdAt": 1778075059021
+    "createdAt": 1778075059021,
+    "gender": "male",
+    "setupComplete": true
   },
   "1488514301907046431": {
     "id": "1488514301907046431",
@@ -103,5 +107,26 @@
     "rizzCount": 0,
     "ghostCalls": 0,
     "createdAt": 1778080632773
+  },
+  "872782037877162014": {
+    "id": "872782037877162014",
+    "bio": null,
+    "pronouns": null,
+    "interests": [],
+    "theme": "lavender",
+    "ownedThemes": [
+      "lavender"
+    ],
+    "badges": [],
+    "xp": 0,
+    "hearts": 0,
+    "streak": 0,
+    "lastDaily": null,
+    "lastSeen": 1778082459332,
+    "aura": "soft",
+    "profileViews": 0,
+    "rizzCount": 0,
+    "ghostCalls": 0,
+    "createdAt": 1778082350881
   }
 }
