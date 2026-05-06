@@ -61,8 +61,3 @@ externalPort = 3002
 
 [nix]
 channel = "stable-25_05"
-
-[userenv]
-
-[userenv.shared]
-PORT = "8080"

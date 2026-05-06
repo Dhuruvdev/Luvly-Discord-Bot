@@ -53,7 +53,7 @@ export default {
                 '━━━━━━━━━━━━━━━━━━\n' +
                 '** 𝜗ৎ. Let\'s make your server more luvly.ᐟ**'
               )
-              .setImage(client.user.displayAvatarURL({ size: 512 }))
+              .setImage('https://cdn.discordapp.com/attachments/1423748506111447162/1501479831974445076/file_00000000d22c720886c3789676976bce.png?ex=69fc3990&is=69fae810&hm=1034bcbf81211a804ec3d40bbaafb243cf279a82586a8122f0fbe4583229e216&')
               .setFooter({
                 text: ' Luvly • Made with love',
                 iconURL: client.user.displayAvatarURL(),

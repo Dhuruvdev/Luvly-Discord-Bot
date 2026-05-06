@@ -1,8 +1,12 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder } from 'discord.js';
 import { COLORS, EMOJIS } from '../config.js';
 
 export function luvEmbed(color = COLORS.primary) {
   return new EmbedBuilder().setColor(color);
+}
+
+export function luvContainer() {
+  return new ContainerBuilder().setAccentColor(COLORS.primary);
 }
 
 export function errorEmbed(msg) {
