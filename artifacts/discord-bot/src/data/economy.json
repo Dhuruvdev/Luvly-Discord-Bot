@@ -6,11 +6,11 @@
     "baseInterestRate": 0.05,
     "savingsRate": 0.005,
     "marketTrend": "bear",
-    "marketMood": 0.849,
+    "marketMood": 0.801,
     "taxPool": 0,
     "totalTransactions": 0,
     "lastInflationTick": 1778074827924,
-    "lastMarketShift": 1778074827924,
+    "lastMarketShift": 1778144978530,
     "lastSupplySnapshot": 1778074827924
   }
 }
